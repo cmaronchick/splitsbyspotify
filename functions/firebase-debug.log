@@ -1,395 +1,127 @@
-[debug] [2020-01-27T23:44:50.963Z] ----------------------------------------------------------------------
-[debug] [2020-01-27T23:44:50.971Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\v-chraro\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js serve
-[debug] [2020-01-27T23:44:50.972Z] CLI Version:   7.12.1
-[debug] [2020-01-27T23:44:50.972Z] Platform:      win32
-[debug] [2020-01-27T23:44:50.972Z] Node Version:  v10.13.0
-[debug] [2020-01-27T23:44:50.974Z] Time:          Mon Jan 27 2020 15:44:50 GMT-0800 (Pacific Standard Time)
-[debug] [2020-01-27T23:44:50.974Z] ----------------------------------------------------------------------
-[debug] [2020-01-27T23:44:50.974Z] 
-[debug] [2020-01-27T23:44:50.997Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
-[debug] [2020-01-27T23:44:50.999Z] > authorizing via signed-in user
-[debug] [2020-01-27T23:44:50.999Z] [iam] checking project splitsbyspotify for permissions ["firebase.projects.get"]
-[debug] [2020-01-27T23:44:51.003Z] >>> HTTP REQUEST POST https://cloudresourcemanager.googleapis.com/v1/projects/splitsbyspotify:testIamPermissions  
+[debug] [2020-01-29T21:06:32.686Z] ----------------------------------------------------------------------
+[debug] [2020-01-29T21:06:32.691Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\v-chraro\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js serve
+[debug] [2020-01-29T21:06:32.691Z] CLI Version:   7.12.1
+[debug] [2020-01-29T21:06:32.691Z] Platform:      win32
+[debug] [2020-01-29T21:06:32.691Z] Node Version:  v10.13.0
+[debug] [2020-01-29T21:06:32.693Z] Time:          Wed Jan 29 2020 13:06:32 GMT-0800 (Pacific Standard Time)
+[debug] [2020-01-29T21:06:32.694Z] ----------------------------------------------------------------------
+[debug] [2020-01-29T21:06:32.694Z] 
+[debug] [2020-01-29T21:06:32.720Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2020-01-29T21:06:32.721Z] > authorizing via signed-in user
+[debug] [2020-01-29T21:06:32.722Z] [iam] checking project splitsbyspotify for permissions ["firebase.projects.get"]
+[debug] [2020-01-29T21:06:32.724Z] >>> HTTP REQUEST POST https://cloudresourcemanager.googleapis.com/v1/projects/splitsbyspotify:testIamPermissions  
 
-[debug] [2020-01-27T23:44:51.152Z] <<< HTTP RESPONSE 200
-[debug] [2020-01-27T23:44:51.156Z] >>> HTTP REQUEST GET https://firebase.googleapis.com/v1beta1/projects/splitsbyspotify  
+[debug] [2020-01-29T21:06:32.914Z] <<< HTTP RESPONSE 200
+[debug] [2020-01-29T21:06:32.916Z] >>> HTTP REQUEST GET https://firebase.googleapis.com/v1beta1/projects/splitsbyspotify  
  
-[debug] [2020-01-27T23:44:51.273Z] <<< HTTP RESPONSE 200
+[debug] [2020-01-29T21:06:33.094Z] <<< HTTP RESPONSE 200
 [info] 
 [info] === Serving from 'C:\Users\v-chraro\Desktop\Github\splitsbyspotify'...
 [info] 
 [warn] !  Your requested "node" version "8" doesn't match your global version "10"
 [info] +  functions: Emulator started at http://localhost:5000
 [info] i  functions: Watching "C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions" for Cloud Functions...
-[debug] [2020-01-27T23:44:53.183Z] [worker-pool] addWorker(~diagnostic~)
-[debug] [2020-01-27T23:44:53.184Z] [worker-pool] Adding worker with key ~diagnostic~, total=1
-[debug] [2020-01-27T23:44:53.184Z] [worker-pool] submitWork(triggerId=)
-[debug] [2020-01-27T23:44:53.184Z] [worker-~diagnostic~-0968e0f4-9988-43bc-ac46-2b2b4d876b51]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\85216
-[debug] [2020-01-27T23:44:53.185Z] [worker-~diagnostic~-0968e0f4-9988-43bc-ac46-2b2b4d876b51]: BUSY
-[debug] [2020-01-27T23:44:54.132Z] [runtime-status] [85216] Functions runtime initialized. {"cwd":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions","node_version":"10.13.0"}
-[debug] [2020-01-27T23:44:54.135Z] [runtime-status] [85216] Disabled runtime features: {"functions_config_helper":true,"network_filtering":true,"timeout":true,"memory_limiting":true,"admin_stubs":true,"pubsub_emulator":true}
-[debug] [2020-01-27T23:44:54.141Z] [runtime-status] [85216] Resolved module firebase-admin {"declared":true,"installed":true,"version":"8.9.2","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-admin\\lib\\index.js"}
-[debug] [2020-01-27T23:44:54.144Z] [runtime-status] [85216] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:44:54.146Z] [runtime-status] [85216] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
+[debug] [2020-01-29T21:06:34.656Z] [worker-pool] addWorker(~diagnostic~)
+[debug] [2020-01-29T21:06:34.656Z] [worker-pool] Adding worker with key ~diagnostic~, total=1
+[debug] [2020-01-29T21:06:34.657Z] [worker-pool] submitWork(triggerId=)
+[debug] [2020-01-29T21:06:34.657Z] [worker-~diagnostic~-15894344-78ae-4dbd-8971-88642299323a]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\89860
+[debug] [2020-01-29T21:06:34.658Z] [worker-~diagnostic~-15894344-78ae-4dbd-8971-88642299323a]: BUSY
+[debug] [2020-01-29T21:06:36.119Z] [runtime-status] [89860] Functions runtime initialized. {"cwd":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions","node_version":"10.13.0"}
+[debug] [2020-01-29T21:06:36.123Z] [runtime-status] [89860] Disabled runtime features: {"functions_config_helper":true,"network_filtering":true,"timeout":true,"memory_limiting":true,"admin_stubs":true,"pubsub_emulator":true}
+[debug] [2020-01-29T21:06:36.133Z] [runtime-status] [89860] Resolved module firebase-admin {"declared":true,"installed":true,"version":"8.9.2","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-admin\\lib\\index.js"}
+[debug] [2020-01-29T21:06:36.138Z] [runtime-status] [89860] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
+[debug] [2020-01-29T21:06:36.141Z] [runtime-status] [89860] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
 [info] +  functions[api]: http function initialized (http://localhost:5000/splitsbyspotify/us-central1/api).
-[debug] [2020-01-27T23:44:55.131Z] [worker-~diagnostic~-0968e0f4-9988-43bc-ac46-2b2b4d876b51]: IDLE
-[debug] [2020-01-27T23:46:46.378Z] [work-queue] {"queueLength":1,"workRunningCount":0}
-[debug] [2020-01-27T23:46:46.378Z] [work-queue] {"queueLength":0,"workRunningCount":1}
-[debug] [2020-01-27T23:46:46.379Z] Accepted request POST /splitsbyspotify/us-central1/api/signup --> api
-[debug] [2020-01-27T23:46:46.388Z] [worker-pool] addWorker(api)
-[debug] [2020-01-27T23:46:46.388Z] [worker-pool] Adding worker with key api, total=1
-[debug] [2020-01-27T23:46:46.388Z] [worker-pool] submitWork(triggerId=api)
-[debug] [2020-01-27T23:46:46.388Z] [worker-api-56211b98-aeef-42c5-9197-3df30fc00d94]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\19000
-[debug] [2020-01-27T23:46:46.388Z] [worker-api-56211b98-aeef-42c5-9197-3df30fc00d94]: BUSY
-[debug] [2020-01-27T23:46:47.254Z] [runtime-status] [19000] Functions runtime initialized. {"cwd":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions","node_version":"10.13.0"}
-[debug] [2020-01-27T23:46:47.259Z] [runtime-status] [19000] Disabled runtime features: {"functions_config_helper":true,"network_filtering":true,"timeout":true,"memory_limiting":true,"admin_stubs":true,"pubsub_emulator":true}
-[debug] [2020-01-27T23:46:47.270Z] [runtime-status] [19000] Resolved module firebase-admin {"declared":true,"installed":true,"version":"8.9.2","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-admin\\lib\\index.js"}
-[debug] [2020-01-27T23:46:47.274Z] [runtime-status] [19000] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:46:47.277Z] [runtime-status] [19000] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:46:48.277Z] [runtime-status] [19000] Trigger "api" has been found, beginning invocation!
+[debug] [2020-01-29T21:06:38.166Z] [worker-~diagnostic~-15894344-78ae-4dbd-8971-88642299323a]: IDLE
+[debug] [2020-01-29T21:06:41.352Z] [work-queue] {"queueLength":1,"workRunningCount":0}
+[debug] [2020-01-29T21:06:41.352Z] [work-queue] {"queueLength":0,"workRunningCount":1}
+[debug] [2020-01-29T21:06:41.353Z] Accepted request POST /splitsbyspotify/us-central1/api/signup --> api
+[debug] [2020-01-29T21:06:41.361Z] [worker-pool] addWorker(api)
+[debug] [2020-01-29T21:06:41.361Z] [worker-pool] Adding worker with key api, total=1
+[debug] [2020-01-29T21:06:41.361Z] [worker-pool] submitWork(triggerId=api)
+[debug] [2020-01-29T21:06:41.361Z] [worker-api-78fbdec3-035b-4e2c-b510-10569bcffadf]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\37436
+[debug] [2020-01-29T21:06:41.361Z] [worker-api-78fbdec3-035b-4e2c-b510-10569bcffadf]: BUSY
+[debug] [2020-01-29T21:06:42.350Z] [runtime-status] [37436] Functions runtime initialized. {"cwd":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions","node_version":"10.13.0"}
+[debug] [2020-01-29T21:06:42.357Z] [runtime-status] [37436] Disabled runtime features: {"functions_config_helper":true,"network_filtering":true,"timeout":true,"memory_limiting":true,"admin_stubs":true,"pubsub_emulator":true}
+[debug] [2020-01-29T21:06:42.364Z] [runtime-status] [37436] Resolved module firebase-admin {"declared":true,"installed":true,"version":"8.9.2","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-admin\\lib\\index.js"}
+[debug] [2020-01-29T21:06:42.370Z] [runtime-status] [37436] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
+[debug] [2020-01-29T21:06:42.373Z] [runtime-status] [37436] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
+[debug] [2020-01-29T21:06:44.187Z] [runtime-status] [37436] Trigger "api" has been found, beginning invocation!
 [info] i  functions: Beginning execution of "api"
-[debug] [2020-01-27T23:46:48.279Z] [runtime-status] [19000] triggerDefinition {"httpsTrigger":{},"name":"api","entryPoint":"api"}
-[debug] [2020-01-27T23:46:48.279Z] [runtime-status] [19000] Running api in mode HTTPS
-[debug] [2020-01-27T23:46:48.286Z] [runtime-status] [19000] Attempting to listen to socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\19000
-[debug] [2020-01-27T23:46:48.294Z] [functions] Runtime ready! Sending request!
-[debug] [2020-01-27T23:46:48.339Z] [runtime-status] [19000] Ephemeral server handling POST request
-[debug] [2020-01-27T23:46:48.361Z] [runtime-status] [19000] Ephemeral server survived.
-[info] >  TypeError: firebase.auth(...).createWithEmailAndPassword is not a function
-[info] >      at app.post (C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\index.js:78:21)
-[info] >      at Layer.handle [as handle_request] (C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\node_modules\express\lib\router\layer.js:95:5)
-[info] >      at next (C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\node_modules\express\lib\router\route.js:137:13)
-[info] >      at Route.dispatch (C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\node_modules\express\lib\router\route.js:112:3)
-[info] >      at Layer.handle [as handle_request] (C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\node_modules\express\lib\router\layer.js:95:5)
-[info] >      at C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\node_modules\express\lib\router\index.js:281:22
-[info] >      at Function.process_params (C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\node_modules\express\lib\router\index.js:335:12)
-[info] >      at next (C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\node_modules\express\lib\router\index.js:275:10)
-[info] >      at expressInit (C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\node_modules\express\lib\middleware\init.js:40:5)
-[info] >      at Layer.handle [as handle_request] (C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\node_modules\express\lib\router\layer.js:95:5)
+[debug] [2020-01-29T21:06:44.188Z] [runtime-status] [37436] triggerDefinition {"httpsTrigger":{},"name":"api","entryPoint":"api"}
+[debug] [2020-01-29T21:06:44.189Z] [runtime-status] [37436] Running api in mode HTTPS
+[debug] [2020-01-29T21:06:44.196Z] [runtime-status] [37436] Attempting to listen to socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\37436
+[debug] [2020-01-29T21:06:44.204Z] [functions] Runtime ready! Sending request!
+[debug] [2020-01-29T21:06:44.251Z] [runtime-status] [37436] Ephemeral server handling POST request
+[debug] [2020-01-29T21:06:44.259Z] [runtime-status] [37436] Ephemeral server survived.
+[info] >  ReferenceError: data is not defined
+[info] >      at db.doc.get.then.then.then.then (C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\index.js:110:60)
+[info] i  functions: Finished "api" in ~2s
+[debug] [2020-01-29T21:06:46.512Z] [worker-api-78fbdec3-035b-4e2c-b510-10569bcffadf]: IDLE
+[debug] [2020-01-29T21:06:46.512Z] [work-queue] {"queueLength":0,"workRunningCount":0}
+[debug] [2020-01-29T21:07:04.773Z] File C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\index.js changed, reloading triggers
+[debug] [2020-01-29T21:07:05.775Z] [worker-pool] Shutting down IDLE worker (~diagnostic~)
+[debug] [2020-01-29T21:07:05.775Z] [worker-~diagnostic~-15894344-78ae-4dbd-8971-88642299323a]: FINISHING
+[debug] [2020-01-29T21:07:05.776Z] [worker-pool] Shutting down IDLE worker (api)
+[debug] [2020-01-29T21:07:05.776Z] [worker-api-78fbdec3-035b-4e2c-b510-10569bcffadf]: FINISHING
+[debug] [2020-01-29T21:07:05.785Z] [worker-pool] addWorker(~diagnostic~)
+[debug] [2020-01-29T21:07:05.786Z] [worker-pool] Adding worker with key ~diagnostic~, total=2
+[debug] [2020-01-29T21:07:05.786Z] [worker-pool] submitWork(triggerId=)
+[debug] [2020-01-29T21:07:05.786Z] [worker-~diagnostic~-224f6de3-97dc-4089-9600-39631cf609e0]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\11848
+[debug] [2020-01-29T21:07:05.786Z] [worker-~diagnostic~-224f6de3-97dc-4089-9600-39631cf609e0]: BUSY
+[debug] [2020-01-29T21:07:05.824Z] [worker-~diagnostic~-15894344-78ae-4dbd-8971-88642299323a]: exited
+[debug] [2020-01-29T21:07:05.824Z] [worker-~diagnostic~-15894344-78ae-4dbd-8971-88642299323a]: FINISHED
+[debug] [2020-01-29T21:07:05.833Z] [worker-api-78fbdec3-035b-4e2c-b510-10569bcffadf]: exited
+[debug] [2020-01-29T21:07:05.833Z] [worker-api-78fbdec3-035b-4e2c-b510-10569bcffadf]: FINISHED
+[debug] [2020-01-29T21:07:07.035Z] [runtime-status] [11848] Functions runtime initialized. {"cwd":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions","node_version":"10.13.0"}
+[debug] [2020-01-29T21:07:07.042Z] [runtime-status] [11848] Disabled runtime features: {"functions_config_helper":true,"network_filtering":true,"timeout":true,"memory_limiting":true,"admin_stubs":true,"pubsub_emulator":true}
+[debug] [2020-01-29T21:07:07.050Z] [runtime-status] [11848] Resolved module firebase-admin {"declared":true,"installed":true,"version":"8.9.2","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-admin\\lib\\index.js"}
+[debug] [2020-01-29T21:07:07.056Z] [runtime-status] [11848] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
+[debug] [2020-01-29T21:07:07.059Z] [runtime-status] [11848] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
+[debug] [2020-01-29T21:07:08.939Z] [worker-~diagnostic~-224f6de3-97dc-4089-9600-39631cf609e0]: IDLE
+[debug] [2020-01-29T21:07:43.543Z] [work-queue] {"queueLength":1,"workRunningCount":0}
+[debug] [2020-01-29T21:07:43.544Z] [work-queue] {"queueLength":0,"workRunningCount":1}
+[debug] [2020-01-29T21:07:43.544Z] Accepted request POST /splitsbyspotify/us-central1/api/signup --> api
+[debug] [2020-01-29T21:07:43.544Z] [worker-pool] Cleaned up workers for ~diagnostic~: 2 --> 1
+[debug] [2020-01-29T21:07:43.544Z] [worker-pool] Cleaned up workers for api: 1 --> 0
+[debug] [2020-01-29T21:07:43.553Z] [worker-pool] addWorker(api)
+[debug] [2020-01-29T21:07:43.553Z] [worker-pool] Adding worker with key api, total=1
+[debug] [2020-01-29T21:07:43.553Z] [worker-pool] submitWork(triggerId=api)
+[debug] [2020-01-29T21:07:43.553Z] [worker-api-6fb0f879-3688-4357-acac-a01aa2312e97]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\70560
+[debug] [2020-01-29T21:07:43.553Z] [worker-api-6fb0f879-3688-4357-acac-a01aa2312e97]: BUSY
+[debug] [2020-01-29T21:07:44.529Z] [runtime-status] [70560] Functions runtime initialized. {"cwd":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions","node_version":"10.13.0"}
+[debug] [2020-01-29T21:07:44.533Z] [runtime-status] [70560] Disabled runtime features: {"functions_config_helper":true,"network_filtering":true,"timeout":true,"memory_limiting":true,"admin_stubs":true,"pubsub_emulator":true}
+[debug] [2020-01-29T21:07:44.543Z] [runtime-status] [70560] Resolved module firebase-admin {"declared":true,"installed":true,"version":"8.9.2","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-admin\\lib\\index.js"}
+[debug] [2020-01-29T21:07:44.546Z] [runtime-status] [70560] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
+[debug] [2020-01-29T21:07:44.548Z] [runtime-status] [70560] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
+[debug] [2020-01-29T21:07:46.167Z] [runtime-status] [70560] Trigger "api" has been found, beginning invocation!
+[info] i  functions: Beginning execution of "api"
+[debug] [2020-01-29T21:07:46.169Z] [runtime-status] [70560] triggerDefinition {"httpsTrigger":{},"name":"api","entryPoint":"api"}
+[debug] [2020-01-29T21:07:46.169Z] [runtime-status] [70560] Running api in mode HTTPS
+[debug] [2020-01-29T21:07:46.176Z] [runtime-status] [70560] Attempting to listen to socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\70560
+[debug] [2020-01-29T21:07:46.181Z] [functions] Runtime ready! Sending request!
+[debug] [2020-01-29T21:07:46.219Z] [runtime-status] [70560] Ephemeral server handling POST request
+[debug] [2020-01-29T21:07:46.226Z] [runtime-status] [70560] Ephemeral server survived.
+[info] >  { [Error: The email address is already in use by another account.]
+[info] >    code: 'auth/email-already-in-use',
+[info] >    message: 'The email address is already in use by another account.' }
 [info] i  functions: Finished "api" in ~1s
-[debug] [2020-01-27T23:46:48.390Z] [worker-api-56211b98-aeef-42c5-9197-3df30fc00d94]: IDLE
-[debug] [2020-01-27T23:46:48.391Z] [work-queue] {"queueLength":0,"workRunningCount":0}
-[debug] [2020-01-27T23:47:18.775Z] File C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\index.js changed, reloading triggers
-[debug] [2020-01-27T23:47:19.777Z] [worker-pool] Shutting down IDLE worker (~diagnostic~)
-[debug] [2020-01-27T23:47:19.778Z] [worker-~diagnostic~-0968e0f4-9988-43bc-ac46-2b2b4d876b51]: FINISHING
-[debug] [2020-01-27T23:47:19.778Z] [worker-pool] Shutting down IDLE worker (api)
-[debug] [2020-01-27T23:47:19.778Z] [worker-api-56211b98-aeef-42c5-9197-3df30fc00d94]: FINISHING
-[debug] [2020-01-27T23:47:19.792Z] [worker-pool] addWorker(~diagnostic~)
-[debug] [2020-01-27T23:47:19.792Z] [worker-pool] Adding worker with key ~diagnostic~, total=2
-[debug] [2020-01-27T23:47:19.792Z] [worker-pool] submitWork(triggerId=)
-[debug] [2020-01-27T23:47:19.792Z] [worker-~diagnostic~-bdf66a73-ee28-43f8-aee8-a7d6dcaedf02]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\16428
-[debug] [2020-01-27T23:47:19.792Z] [worker-~diagnostic~-bdf66a73-ee28-43f8-aee8-a7d6dcaedf02]: BUSY
-[debug] [2020-01-27T23:47:19.825Z] [worker-api-56211b98-aeef-42c5-9197-3df30fc00d94]: exited
-[debug] [2020-01-27T23:47:19.825Z] [worker-api-56211b98-aeef-42c5-9197-3df30fc00d94]: FINISHED
-[debug] [2020-01-27T23:47:19.829Z] [worker-~diagnostic~-0968e0f4-9988-43bc-ac46-2b2b4d876b51]: exited
-[debug] [2020-01-27T23:47:19.829Z] [worker-~diagnostic~-0968e0f4-9988-43bc-ac46-2b2b4d876b51]: FINISHED
-[debug] [2020-01-27T23:47:21.399Z] [runtime-status] [16428] Functions runtime initialized. {"cwd":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions","node_version":"10.13.0"}
-[debug] [2020-01-27T23:47:21.403Z] [runtime-status] [16428] Disabled runtime features: {"functions_config_helper":true,"network_filtering":true,"timeout":true,"memory_limiting":true,"admin_stubs":true,"pubsub_emulator":true}
-[debug] [2020-01-27T23:47:21.410Z] [runtime-status] [16428] Resolved module firebase-admin {"declared":true,"installed":true,"version":"8.9.2","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-admin\\lib\\index.js"}
-[debug] [2020-01-27T23:47:21.413Z] [runtime-status] [16428] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:47:21.416Z] [runtime-status] [16428] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:47:22.602Z] [worker-~diagnostic~-bdf66a73-ee28-43f8-aee8-a7d6dcaedf02]: IDLE
-[debug] [2020-01-27T23:47:24.268Z] [work-queue] {"queueLength":1,"workRunningCount":0}
-[debug] [2020-01-27T23:47:24.269Z] [work-queue] {"queueLength":0,"workRunningCount":1}
-[debug] [2020-01-27T23:47:24.269Z] Accepted request POST /splitsbyspotify/us-central1/api/signup --> api
-[debug] [2020-01-27T23:47:24.269Z] [worker-pool] Cleaned up workers for ~diagnostic~: 2 --> 1
-[debug] [2020-01-27T23:47:24.269Z] [worker-pool] Cleaned up workers for api: 1 --> 0
-[debug] [2020-01-27T23:47:24.276Z] [worker-pool] addWorker(api)
-[debug] [2020-01-27T23:47:24.276Z] [worker-pool] Adding worker with key api, total=1
-[debug] [2020-01-27T23:47:24.277Z] [worker-pool] submitWork(triggerId=api)
-[debug] [2020-01-27T23:47:24.277Z] [worker-api-42820b5d-f64c-4b86-aa43-5a146e19d571]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\90908
-[debug] [2020-01-27T23:47:24.277Z] [worker-api-42820b5d-f64c-4b86-aa43-5a146e19d571]: BUSY
-[debug] [2020-01-27T23:47:25.477Z] [runtime-status] [90908] Functions runtime initialized. {"cwd":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions","node_version":"10.13.0"}
-[debug] [2020-01-27T23:47:25.482Z] [runtime-status] [90908] Disabled runtime features: {"functions_config_helper":true,"network_filtering":true,"timeout":true,"memory_limiting":true,"admin_stubs":true,"pubsub_emulator":true}
-[debug] [2020-01-27T23:47:25.489Z] [runtime-status] [90908] Resolved module firebase-admin {"declared":true,"installed":true,"version":"8.9.2","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-admin\\lib\\index.js"}
-[debug] [2020-01-27T23:47:25.492Z] [runtime-status] [90908] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:47:25.495Z] [runtime-status] [90908] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:47:26.755Z] [runtime-status] [90908] Trigger "api" has been found, beginning invocation!
+[debug] [2020-01-29T21:07:47.168Z] [worker-api-6fb0f879-3688-4357-acac-a01aa2312e97]: IDLE
+[debug] [2020-01-29T21:07:47.169Z] [work-queue] {"queueLength":0,"workRunningCount":0}
+[debug] [2020-01-29T21:07:54.366Z] [work-queue] {"queueLength":1,"workRunningCount":0}
+[debug] [2020-01-29T21:07:54.366Z] [work-queue] {"queueLength":0,"workRunningCount":1}
+[debug] [2020-01-29T21:07:54.366Z] Accepted request POST /splitsbyspotify/us-central1/api/signup --> api
+[debug] [2020-01-29T21:07:54.366Z] [worker-pool] submitWork(triggerId=api)
+[debug] [2020-01-29T21:07:54.366Z] [worker-api-6fb0f879-3688-4357-acac-a01aa2312e97]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\70560
+[debug] [2020-01-29T21:07:54.367Z] [worker-api-6fb0f879-3688-4357-acac-a01aa2312e97]: BUSY
+[debug] [2020-01-29T21:07:54.367Z] [runtime-status] [70560] Trigger "api" has been found, beginning invocation!
 [info] i  functions: Beginning execution of "api"
-[debug] [2020-01-27T23:47:26.759Z] [runtime-status] [90908] triggerDefinition {"httpsTrigger":{},"name":"api","entryPoint":"api"}
-[debug] [2020-01-27T23:47:26.760Z] [runtime-status] [90908] Running api in mode HTTPS
-[debug] [2020-01-27T23:47:26.767Z] [runtime-status] [90908] Attempting to listen to socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\90908
-[debug] [2020-01-27T23:47:26.775Z] [functions] Runtime ready! Sending request!
-[debug] [2020-01-27T23:47:26.824Z] [runtime-status] [90908] Ephemeral server handling POST request
-[debug] [2020-01-27T23:47:26.838Z] [runtime-status] [90908] Ephemeral server survived.
-[info] >  Error: createUserWithEmailAndPassword failed: First argument "email" must be a valid string.
+[debug] [2020-01-29T21:07:54.368Z] [runtime-status] [70560] triggerDefinition {"httpsTrigger":{},"name":"api","entryPoint":"api"}
+[debug] [2020-01-29T21:07:54.368Z] [runtime-status] [70560] Running api in mode HTTPS
+[debug] [2020-01-29T21:07:54.369Z] [runtime-status] [70560] Attempting to listen to socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\70560
+[debug] [2020-01-29T21:07:54.370Z] [functions] Runtime ready! Sending request!
+[debug] [2020-01-29T21:07:54.374Z] [runtime-status] [70560] Ephemeral server handling POST request
+[debug] [2020-01-29T21:07:54.374Z] [runtime-status] [70560] Ephemeral server survived.
 [info] i  functions: Finished "api" in ~1s
-[debug] [2020-01-27T23:47:26.850Z] [worker-api-42820b5d-f64c-4b86-aa43-5a146e19d571]: IDLE
-[debug] [2020-01-27T23:47:26.850Z] [work-queue] {"queueLength":0,"workRunningCount":0}
-[debug] [2020-01-27T23:48:09.676Z] File C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\index.js changed, reloading triggers
-[debug] [2020-01-27T23:48:10.678Z] [worker-pool] Shutting down IDLE worker (~diagnostic~)
-[debug] [2020-01-27T23:48:10.678Z] [worker-~diagnostic~-bdf66a73-ee28-43f8-aee8-a7d6dcaedf02]: FINISHING
-[debug] [2020-01-27T23:48:10.678Z] [worker-pool] Shutting down IDLE worker (api)
-[debug] [2020-01-27T23:48:10.679Z] [worker-api-42820b5d-f64c-4b86-aa43-5a146e19d571]: FINISHING
-[debug] [2020-01-27T23:48:10.691Z] [worker-pool] addWorker(~diagnostic~)
-[debug] [2020-01-27T23:48:10.691Z] [worker-pool] Adding worker with key ~diagnostic~, total=2
-[debug] [2020-01-27T23:48:10.691Z] [worker-pool] submitWork(triggerId=)
-[debug] [2020-01-27T23:48:10.692Z] [worker-~diagnostic~-00b834fd-3eec-4d1c-8da0-512e2813915d]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\27228
-[debug] [2020-01-27T23:48:10.692Z] [worker-~diagnostic~-00b834fd-3eec-4d1c-8da0-512e2813915d]: BUSY
-[debug] [2020-01-27T23:48:10.727Z] [worker-api-42820b5d-f64c-4b86-aa43-5a146e19d571]: exited
-[debug] [2020-01-27T23:48:10.727Z] [worker-api-42820b5d-f64c-4b86-aa43-5a146e19d571]: FINISHED
-[debug] [2020-01-27T23:48:10.730Z] [worker-~diagnostic~-bdf66a73-ee28-43f8-aee8-a7d6dcaedf02]: exited
-[debug] [2020-01-27T23:48:10.731Z] [worker-~diagnostic~-bdf66a73-ee28-43f8-aee8-a7d6dcaedf02]: FINISHED
-[debug] [2020-01-27T23:48:12.167Z] [runtime-status] [27228] Functions runtime initialized. {"cwd":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions","node_version":"10.13.0"}
-[debug] [2020-01-27T23:48:12.171Z] [runtime-status] [27228] Disabled runtime features: {"functions_config_helper":true,"network_filtering":true,"timeout":true,"memory_limiting":true,"admin_stubs":true,"pubsub_emulator":true}
-[debug] [2020-01-27T23:48:12.178Z] [runtime-status] [27228] Resolved module firebase-admin {"declared":true,"installed":true,"version":"8.9.2","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-admin\\lib\\index.js"}
-[debug] [2020-01-27T23:48:12.181Z] [runtime-status] [27228] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:48:12.183Z] [runtime-status] [27228] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:48:13.378Z] [worker-~diagnostic~-00b834fd-3eec-4d1c-8da0-512e2813915d]: IDLE
-[debug] [2020-01-27T23:48:13.606Z] [work-queue] {"queueLength":1,"workRunningCount":0}
-[debug] [2020-01-27T23:48:13.606Z] [work-queue] {"queueLength":0,"workRunningCount":1}
-[debug] [2020-01-27T23:48:13.607Z] Accepted request POST /splitsbyspotify/us-central1/api/signup --> api
-[debug] [2020-01-27T23:48:13.607Z] [worker-pool] Cleaned up workers for ~diagnostic~: 2 --> 1
-[debug] [2020-01-27T23:48:13.607Z] [worker-pool] Cleaned up workers for api: 1 --> 0
-[debug] [2020-01-27T23:48:13.616Z] [worker-pool] addWorker(api)
-[debug] [2020-01-27T23:48:13.616Z] [worker-pool] Adding worker with key api, total=1
-[debug] [2020-01-27T23:48:13.616Z] [worker-pool] submitWork(triggerId=api)
-[debug] [2020-01-27T23:48:13.616Z] [worker-api-bd56f9c3-c0b7-45e1-9d11-e0ad003d9941]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\73060
-[debug] [2020-01-27T23:48:13.616Z] [worker-api-bd56f9c3-c0b7-45e1-9d11-e0ad003d9941]: BUSY
-[debug] [2020-01-27T23:48:14.831Z] [runtime-status] [73060] Functions runtime initialized. {"cwd":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions","node_version":"10.13.0"}
-[debug] [2020-01-27T23:48:14.835Z] [runtime-status] [73060] Disabled runtime features: {"functions_config_helper":true,"network_filtering":true,"timeout":true,"memory_limiting":true,"admin_stubs":true,"pubsub_emulator":true}
-[debug] [2020-01-27T23:48:14.841Z] [runtime-status] [73060] Resolved module firebase-admin {"declared":true,"installed":true,"version":"8.9.2","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-admin\\lib\\index.js"}
-[debug] [2020-01-27T23:48:14.844Z] [runtime-status] [73060] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:48:14.845Z] [runtime-status] [73060] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:48:16.090Z] [runtime-status] [73060] Trigger "api" has been found, beginning invocation!
-[info] i  functions: Beginning execution of "api"
-[debug] [2020-01-27T23:48:16.114Z] [runtime-status] [73060] triggerDefinition {"httpsTrigger":{},"name":"api","entryPoint":"api"}
-[debug] [2020-01-27T23:48:16.114Z] [runtime-status] [73060] Running api in mode HTTPS
-[debug] [2020-01-27T23:48:16.114Z] [runtime-status] [73060] Attempting to listen to socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\73060
-[debug] [2020-01-27T23:48:16.117Z] [functions] Runtime ready! Sending request!
-[debug] [2020-01-27T23:48:16.194Z] [runtime-status] [73060] Ephemeral server handling POST request
-[info] >  req.body.email undefined
-[debug] [2020-01-27T23:48:16.228Z] [runtime-status] [73060] Ephemeral server survived.
-[info] >  Error: createUserWithEmailAndPassword failed: First argument "email" must be a valid string.
-[info] i  functions: Finished "api" in ~1s
-[debug] [2020-01-27T23:48:16.264Z] [worker-api-bd56f9c3-c0b7-45e1-9d11-e0ad003d9941]: IDLE
-[debug] [2020-01-27T23:48:16.265Z] [work-queue] {"queueLength":0,"workRunningCount":0}
-[debug] [2020-01-27T23:48:27.817Z] File C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\index.js changed, reloading triggers
-[debug] [2020-01-27T23:48:28.819Z] [worker-pool] Shutting down IDLE worker (~diagnostic~)
-[debug] [2020-01-27T23:48:28.819Z] [worker-~diagnostic~-00b834fd-3eec-4d1c-8da0-512e2813915d]: FINISHING
-[debug] [2020-01-27T23:48:28.819Z] [worker-pool] Shutting down IDLE worker (api)
-[debug] [2020-01-27T23:48:28.820Z] [worker-api-bd56f9c3-c0b7-45e1-9d11-e0ad003d9941]: FINISHING
-[debug] [2020-01-27T23:48:28.828Z] [worker-pool] addWorker(~diagnostic~)
-[debug] [2020-01-27T23:48:28.828Z] [worker-pool] Adding worker with key ~diagnostic~, total=2
-[debug] [2020-01-27T23:48:28.828Z] [worker-pool] submitWork(triggerId=)
-[debug] [2020-01-27T23:48:28.829Z] [worker-~diagnostic~-dd979c26-c69b-434d-aaa7-a2450f2b9270]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\62488
-[debug] [2020-01-27T23:48:28.829Z] [worker-~diagnostic~-dd979c26-c69b-434d-aaa7-a2450f2b9270]: BUSY
-[debug] [2020-01-27T23:48:28.855Z] [worker-~diagnostic~-00b834fd-3eec-4d1c-8da0-512e2813915d]: exited
-[debug] [2020-01-27T23:48:28.855Z] [worker-~diagnostic~-00b834fd-3eec-4d1c-8da0-512e2813915d]: FINISHED
-[debug] [2020-01-27T23:48:28.857Z] [worker-api-bd56f9c3-c0b7-45e1-9d11-e0ad003d9941]: exited
-[debug] [2020-01-27T23:48:28.857Z] [worker-api-bd56f9c3-c0b7-45e1-9d11-e0ad003d9941]: FINISHED
-[debug] [2020-01-27T23:48:29.973Z] [runtime-status] [62488] Functions runtime initialized. {"cwd":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions","node_version":"10.13.0"}
-[debug] [2020-01-27T23:48:29.977Z] [runtime-status] [62488] Disabled runtime features: {"functions_config_helper":true,"network_filtering":true,"timeout":true,"memory_limiting":true,"admin_stubs":true,"pubsub_emulator":true}
-[debug] [2020-01-27T23:48:29.983Z] [runtime-status] [62488] Resolved module firebase-admin {"declared":true,"installed":true,"version":"8.9.2","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-admin\\lib\\index.js"}
-[debug] [2020-01-27T23:48:29.987Z] [runtime-status] [62488] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:48:29.989Z] [runtime-status] [62488] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:48:31.233Z] [worker-~diagnostic~-dd979c26-c69b-434d-aaa7-a2450f2b9270]: IDLE
-[debug] [2020-01-27T23:48:33.082Z] [work-queue] {"queueLength":1,"workRunningCount":0}
-[debug] [2020-01-27T23:48:33.082Z] [work-queue] {"queueLength":0,"workRunningCount":1}
-[debug] [2020-01-27T23:48:33.082Z] Accepted request POST /splitsbyspotify/us-central1/api/signup --> api
-[debug] [2020-01-27T23:48:33.082Z] [worker-pool] Cleaned up workers for ~diagnostic~: 2 --> 1
-[debug] [2020-01-27T23:48:33.082Z] [worker-pool] Cleaned up workers for api: 1 --> 0
-[debug] [2020-01-27T23:48:33.090Z] [worker-pool] addWorker(api)
-[debug] [2020-01-27T23:48:33.090Z] [worker-pool] Adding worker with key api, total=1
-[debug] [2020-01-27T23:48:33.091Z] [worker-pool] submitWork(triggerId=api)
-[debug] [2020-01-27T23:48:33.091Z] [worker-api-6e096b56-d5fd-4515-9191-4b94e4810db2]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\55428
-[debug] [2020-01-27T23:48:33.091Z] [worker-api-6e096b56-d5fd-4515-9191-4b94e4810db2]: BUSY
-[debug] [2020-01-27T23:48:34.182Z] [runtime-status] [55428] Functions runtime initialized. {"cwd":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions","node_version":"10.13.0"}
-[debug] [2020-01-27T23:48:34.188Z] [runtime-status] [55428] Disabled runtime features: {"functions_config_helper":true,"network_filtering":true,"timeout":true,"memory_limiting":true,"admin_stubs":true,"pubsub_emulator":true}
-[debug] [2020-01-27T23:48:34.194Z] [runtime-status] [55428] Resolved module firebase-admin {"declared":true,"installed":true,"version":"8.9.2","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-admin\\lib\\index.js"}
-[debug] [2020-01-27T23:48:34.200Z] [runtime-status] [55428] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:48:34.202Z] [runtime-status] [55428] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:48:35.283Z] [runtime-status] [55428] Trigger "api" has been found, beginning invocation!
-[info] i  functions: Beginning execution of "api"
-[debug] [2020-01-27T23:48:35.285Z] [runtime-status] [55428] triggerDefinition {"httpsTrigger":{},"name":"api","entryPoint":"api"}
-[debug] [2020-01-27T23:48:35.285Z] [runtime-status] [55428] Running api in mode HTTPS
-[debug] [2020-01-27T23:48:35.298Z] [runtime-status] [55428] Attempting to listen to socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\55428
-[debug] [2020-01-27T23:48:35.306Z] [functions] Runtime ready! Sending request!
-[debug] [2020-01-27T23:48:35.358Z] [runtime-status] [55428] Ephemeral server handling POST request
-[info] >  req.body.email {
-[info] >  	"email": "user@email.com",
-[info] >  	"password": "supersecret",
-[info] >  	"confirmPassword": "supersecret",
-[info] >  	"handle": "user"
-[info] >  }
-[debug] [2020-01-27T23:48:35.389Z] [runtime-status] [55428] Ephemeral server survived.
-[info] >  Error: createUserWithEmailAndPassword failed: First argument "email" must be a valid string.
-[info] i  functions: Finished "api" in ~1s
-[debug] [2020-01-27T23:48:35.404Z] [worker-api-6e096b56-d5fd-4515-9191-4b94e4810db2]: IDLE
-[debug] [2020-01-27T23:48:35.404Z] [work-queue] {"queueLength":0,"workRunningCount":0}
-[debug] [2020-01-27T23:48:56.277Z] [work-queue] {"queueLength":1,"workRunningCount":0}
-[debug] [2020-01-27T23:48:56.277Z] [work-queue] {"queueLength":0,"workRunningCount":1}
-[debug] [2020-01-27T23:48:56.277Z] Accepted request POST /splitsbyspotify/us-central1/api/signup --> api
-[debug] [2020-01-27T23:48:56.278Z] [worker-pool] submitWork(triggerId=api)
-[debug] [2020-01-27T23:48:56.278Z] [worker-api-6e096b56-d5fd-4515-9191-4b94e4810db2]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\55428
-[debug] [2020-01-27T23:48:56.278Z] [worker-api-6e096b56-d5fd-4515-9191-4b94e4810db2]: BUSY
-[debug] [2020-01-27T23:48:56.279Z] [runtime-status] [55428] Trigger "api" has been found, beginning invocation!
-[info] i  functions: Beginning execution of "api"
-[debug] [2020-01-27T23:48:56.281Z] [runtime-status] [55428] triggerDefinition {"httpsTrigger":{},"name":"api","entryPoint":"api"}
-[debug] [2020-01-27T23:48:56.281Z] [runtime-status] [55428] Running api in mode HTTPS
-[debug] [2020-01-27T23:48:56.282Z] [runtime-status] [55428] Attempting to listen to socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\55428
-[debug] [2020-01-27T23:48:56.287Z] [functions] Runtime ready! Sending request!
-[debug] [2020-01-27T23:48:56.292Z] [runtime-status] [55428] Ephemeral server handling POST request
-[info] >  req.body.email {
-[info] >  	email: "user@email.com",
-[info] >  	"password": "supersecret",
-[info] >  	"confirmPassword": "supersecret",
-[info] >  	"handle": "user"
-[info] >  }
-[debug] [2020-01-27T23:48:56.303Z] [runtime-status] [55428] Ephemeral server survived.
-[info] >  Error: createUserWithEmailAndPassword failed: First argument "email" must be a valid string.
-[info] i  functions: Finished "api" in ~1s
-[debug] [2020-01-27T23:48:56.308Z] [worker-api-6e096b56-d5fd-4515-9191-4b94e4810db2]: IDLE
-[debug] [2020-01-27T23:48:56.309Z] [work-queue] {"queueLength":0,"workRunningCount":0}
-[debug] [2020-01-27T23:50:19.382Z] File C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\index.js changed, reloading triggers
-[debug] [2020-01-27T23:50:20.384Z] [worker-pool] Shutting down IDLE worker (~diagnostic~)
-[debug] [2020-01-27T23:50:20.384Z] [worker-~diagnostic~-dd979c26-c69b-434d-aaa7-a2450f2b9270]: FINISHING
-[debug] [2020-01-27T23:50:20.384Z] [worker-pool] Shutting down IDLE worker (api)
-[debug] [2020-01-27T23:50:20.384Z] [worker-api-6e096b56-d5fd-4515-9191-4b94e4810db2]: FINISHING
-[debug] [2020-01-27T23:50:20.394Z] [worker-pool] addWorker(~diagnostic~)
-[debug] [2020-01-27T23:50:20.394Z] [worker-pool] Adding worker with key ~diagnostic~, total=2
-[debug] [2020-01-27T23:50:20.394Z] [worker-pool] submitWork(triggerId=)
-[debug] [2020-01-27T23:50:20.394Z] [worker-~diagnostic~-f60dd20d-ec19-4c22-8d27-13b9e4b9b604]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\61600
-[debug] [2020-01-27T23:50:20.394Z] [worker-~diagnostic~-f60dd20d-ec19-4c22-8d27-13b9e4b9b604]: BUSY
-[debug] [2020-01-27T23:50:20.418Z] [worker-~diagnostic~-dd979c26-c69b-434d-aaa7-a2450f2b9270]: exited
-[debug] [2020-01-27T23:50:20.419Z] [worker-~diagnostic~-dd979c26-c69b-434d-aaa7-a2450f2b9270]: FINISHED
-[debug] [2020-01-27T23:50:20.424Z] [worker-api-6e096b56-d5fd-4515-9191-4b94e4810db2]: exited
-[debug] [2020-01-27T23:50:20.424Z] [worker-api-6e096b56-d5fd-4515-9191-4b94e4810db2]: FINISHED
-[debug] [2020-01-27T23:50:21.777Z] [runtime-status] [61600] Functions runtime initialized. {"cwd":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions","node_version":"10.13.0"}
-[debug] [2020-01-27T23:50:21.780Z] [runtime-status] [61600] Disabled runtime features: {"functions_config_helper":true,"network_filtering":true,"timeout":true,"memory_limiting":true,"admin_stubs":true,"pubsub_emulator":true}
-[debug] [2020-01-27T23:50:21.786Z] [runtime-status] [61600] Resolved module firebase-admin {"declared":true,"installed":true,"version":"8.9.2","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-admin\\lib\\index.js"}
-[debug] [2020-01-27T23:50:21.791Z] [runtime-status] [61600] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:50:21.793Z] [runtime-status] [61600] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:50:22.912Z] [worker-~diagnostic~-f60dd20d-ec19-4c22-8d27-13b9e4b9b604]: IDLE
-[debug] [2020-01-27T23:51:56.204Z] File C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\index.js changed, reloading triggers
-[debug] [2020-01-27T23:51:57.205Z] [worker-pool] Shutting down IDLE worker (~diagnostic~)
-[debug] [2020-01-27T23:51:57.205Z] [worker-~diagnostic~-f60dd20d-ec19-4c22-8d27-13b9e4b9b604]: FINISHING
-[debug] [2020-01-27T23:51:57.206Z] [worker-pool] Cleaned up workers for ~diagnostic~: 2 --> 1
-[debug] [2020-01-27T23:51:57.206Z] [worker-pool] Cleaned up workers for api: 1 --> 0
-[debug] [2020-01-27T23:51:57.227Z] [worker-pool] addWorker(~diagnostic~)
-[debug] [2020-01-27T23:51:57.228Z] [worker-pool] Adding worker with key ~diagnostic~, total=2
-[debug] [2020-01-27T23:51:57.228Z] [worker-pool] submitWork(triggerId=)
-[debug] [2020-01-27T23:51:57.228Z] [worker-~diagnostic~-5876a812-a8ef-4cef-a100-20087a5b8911]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\65020
-[debug] [2020-01-27T23:51:57.228Z] [worker-~diagnostic~-5876a812-a8ef-4cef-a100-20087a5b8911]: BUSY
-[debug] [2020-01-27T23:51:57.229Z] [worker-~diagnostic~-f60dd20d-ec19-4c22-8d27-13b9e4b9b604]: exited
-[debug] [2020-01-27T23:51:57.229Z] [worker-~diagnostic~-f60dd20d-ec19-4c22-8d27-13b9e4b9b604]: FINISHED
-[debug] [2020-01-27T23:51:58.463Z] [runtime-status] [65020] Functions runtime initialized. {"cwd":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions","node_version":"10.13.0"}
-[debug] [2020-01-27T23:51:58.467Z] [runtime-status] [65020] Disabled runtime features: {"functions_config_helper":true,"network_filtering":true,"timeout":true,"memory_limiting":true,"admin_stubs":true,"pubsub_emulator":true}
-[debug] [2020-01-27T23:51:58.473Z] [runtime-status] [65020] Resolved module firebase-admin {"declared":true,"installed":true,"version":"8.9.2","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-admin\\lib\\index.js"}
-[debug] [2020-01-27T23:51:58.477Z] [runtime-status] [65020] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:51:58.479Z] [runtime-status] [65020] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:51:59.636Z] [worker-~diagnostic~-5876a812-a8ef-4cef-a100-20087a5b8911]: IDLE
-[debug] [2020-01-27T23:52:12.567Z] [work-queue] {"queueLength":1,"workRunningCount":0}
-[debug] [2020-01-27T23:52:12.567Z] [work-queue] {"queueLength":0,"workRunningCount":1}
-[debug] [2020-01-27T23:52:12.567Z] Accepted request POST /splitsbyspotify/us-central1/api/signup --> api
-[debug] [2020-01-27T23:52:12.567Z] [worker-pool] Cleaned up workers for ~diagnostic~: 2 --> 1
-[debug] [2020-01-27T23:52:12.574Z] [worker-pool] addWorker(api)
-[debug] [2020-01-27T23:52:12.574Z] [worker-pool] Adding worker with key api, total=1
-[debug] [2020-01-27T23:52:12.574Z] [worker-pool] submitWork(triggerId=api)
-[debug] [2020-01-27T23:52:12.574Z] [worker-api-379ce16a-76b5-4526-a4f4-e6f5e4cb1562]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\78832
-[debug] [2020-01-27T23:52:12.574Z] [worker-api-379ce16a-76b5-4526-a4f4-e6f5e4cb1562]: BUSY
-[debug] [2020-01-27T23:52:13.613Z] [runtime-status] [78832] Functions runtime initialized. {"cwd":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions","node_version":"10.13.0"}
-[debug] [2020-01-27T23:52:13.617Z] [runtime-status] [78832] Disabled runtime features: {"functions_config_helper":true,"network_filtering":true,"timeout":true,"memory_limiting":true,"admin_stubs":true,"pubsub_emulator":true}
-[debug] [2020-01-27T23:52:13.623Z] [runtime-status] [78832] Resolved module firebase-admin {"declared":true,"installed":true,"version":"8.9.2","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-admin\\lib\\index.js"}
-[debug] [2020-01-27T23:52:13.627Z] [runtime-status] [78832] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:52:13.629Z] [runtime-status] [78832] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-27T23:52:14.674Z] [runtime-status] [78832] Trigger "api" has been found, beginning invocation!
-[info] i  functions: Beginning execution of "api"
-[debug] [2020-01-27T23:52:14.676Z] [runtime-status] [78832] triggerDefinition {"httpsTrigger":{},"name":"api","entryPoint":"api"}
-[debug] [2020-01-27T23:52:14.676Z] [runtime-status] [78832] Running api in mode HTTPS
-[debug] [2020-01-27T23:52:14.684Z] [runtime-status] [78832] Attempting to listen to socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\78832
-[debug] [2020-01-27T23:52:14.700Z] [functions] Runtime ready! Sending request!
-[debug] [2020-01-27T23:52:14.757Z] [runtime-status] [78832] Ephemeral server handling POST request
-[info] >  newUser { email: 'user@email.com',
-[info] >    password: 'supersecret',
-[info] >    confirmPassword: 'supersecret',
-[info] >    spotifyUser: 'user' }
-[debug] [2020-01-27T23:52:14.843Z] [runtime-status] [78832] Ephemeral server survived.
-[info] i  functions: Finished "api" in ~1s
-[debug] [2020-01-27T23:52:15.505Z] [worker-api-379ce16a-76b5-4526-a4f4-e6f5e4cb1562]: IDLE
-[debug] [2020-01-27T23:52:15.505Z] [work-queue] {"queueLength":0,"workRunningCount":0}
-[debug] [2020-01-28T00:01:42.863Z] File C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\index.js changed, reloading triggers
-[debug] [2020-01-28T00:01:43.865Z] [worker-pool] Shutting down IDLE worker (~diagnostic~)
-[debug] [2020-01-28T00:01:43.865Z] [worker-~diagnostic~-5876a812-a8ef-4cef-a100-20087a5b8911]: FINISHING
-[debug] [2020-01-28T00:01:43.866Z] [worker-pool] Shutting down IDLE worker (api)
-[debug] [2020-01-28T00:01:43.866Z] [worker-api-379ce16a-76b5-4526-a4f4-e6f5e4cb1562]: FINISHING
-[debug] [2020-01-28T00:01:43.877Z] [worker-pool] addWorker(~diagnostic~)
-[debug] [2020-01-28T00:01:43.877Z] [worker-pool] Adding worker with key ~diagnostic~, total=2
-[debug] [2020-01-28T00:01:43.877Z] [worker-pool] submitWork(triggerId=)
-[debug] [2020-01-28T00:01:43.878Z] [worker-~diagnostic~-86b752d3-5a3b-4874-b487-ffd499859c76]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\87760
-[debug] [2020-01-28T00:01:43.878Z] [worker-~diagnostic~-86b752d3-5a3b-4874-b487-ffd499859c76]: BUSY
-[debug] [2020-01-28T00:01:43.905Z] [worker-~diagnostic~-5876a812-a8ef-4cef-a100-20087a5b8911]: exited
-[debug] [2020-01-28T00:01:43.905Z] [worker-~diagnostic~-5876a812-a8ef-4cef-a100-20087a5b8911]: FINISHED
-[debug] [2020-01-28T00:01:43.911Z] [worker-api-379ce16a-76b5-4526-a4f4-e6f5e4cb1562]: exited
-[debug] [2020-01-28T00:01:43.912Z] [worker-api-379ce16a-76b5-4526-a4f4-e6f5e4cb1562]: FINISHED
-[debug] [2020-01-28T00:01:45.032Z] [runtime-status] [87760] Functions runtime initialized. {"cwd":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions","node_version":"10.13.0"}
-[debug] [2020-01-28T00:01:45.035Z] [runtime-status] [87760] Disabled runtime features: {"functions_config_helper":true,"network_filtering":true,"timeout":true,"memory_limiting":true,"admin_stubs":true,"pubsub_emulator":true}
-[debug] [2020-01-28T00:01:45.042Z] [runtime-status] [87760] Resolved module firebase-admin {"declared":true,"installed":true,"version":"8.9.2","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-admin\\lib\\index.js"}
-[debug] [2020-01-28T00:01:45.048Z] [runtime-status] [87760] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-28T00:01:45.049Z] [runtime-status] [87760] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-28T00:01:46.670Z] [worker-~diagnostic~-86b752d3-5a3b-4874-b487-ffd499859c76]: IDLE
-[debug] [2020-01-28T00:01:51.204Z] File C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\index.js changed, reloading triggers
-[debug] [2020-01-28T00:01:52.206Z] [worker-pool] Shutting down IDLE worker (~diagnostic~)
-[debug] [2020-01-28T00:01:52.206Z] [worker-~diagnostic~-86b752d3-5a3b-4874-b487-ffd499859c76]: FINISHING
-[debug] [2020-01-28T00:01:52.207Z] [worker-pool] Cleaned up workers for ~diagnostic~: 2 --> 1
-[debug] [2020-01-28T00:01:52.207Z] [worker-pool] Cleaned up workers for api: 1 --> 0
-[debug] [2020-01-28T00:01:52.222Z] [worker-pool] addWorker(~diagnostic~)
-[debug] [2020-01-28T00:01:52.222Z] [worker-pool] Adding worker with key ~diagnostic~, total=2
-[debug] [2020-01-28T00:01:52.222Z] [worker-pool] submitWork(triggerId=)
-[debug] [2020-01-28T00:01:52.223Z] [worker-~diagnostic~-1ca2ec1e-1378-42e9-b948-9d5142a73e73]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\47136
-[debug] [2020-01-28T00:01:52.223Z] [worker-~diagnostic~-1ca2ec1e-1378-42e9-b948-9d5142a73e73]: BUSY
-[debug] [2020-01-28T00:01:52.237Z] [worker-~diagnostic~-86b752d3-5a3b-4874-b487-ffd499859c76]: exited
-[debug] [2020-01-28T00:01:52.237Z] [worker-~diagnostic~-86b752d3-5a3b-4874-b487-ffd499859c76]: FINISHED
-[debug] [2020-01-28T00:01:53.236Z] [runtime-status] [47136] Functions runtime initialized. {"cwd":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions","node_version":"10.13.0"}
-[debug] [2020-01-28T00:01:53.240Z] [runtime-status] [47136] Disabled runtime features: {"functions_config_helper":true,"network_filtering":true,"timeout":true,"memory_limiting":true,"admin_stubs":true,"pubsub_emulator":true}
-[debug] [2020-01-28T00:01:53.247Z] [runtime-status] [47136] Resolved module firebase-admin {"declared":true,"installed":true,"version":"8.9.2","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-admin\\lib\\index.js"}
-[debug] [2020-01-28T00:01:53.252Z] [runtime-status] [47136] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-28T00:01:53.254Z] [runtime-status] [47136] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-28T00:01:55.045Z] [worker-~diagnostic~-1ca2ec1e-1378-42e9-b948-9d5142a73e73]: IDLE
-[debug] [2020-01-28T00:02:03.047Z] [work-queue] {"queueLength":1,"workRunningCount":0}
-[debug] [2020-01-28T00:02:03.048Z] [work-queue] {"queueLength":0,"workRunningCount":1}
-[debug] [2020-01-28T00:02:03.048Z] Accepted request POST /splitsbyspotify/us-central1/api/signup --> api
-[debug] [2020-01-28T00:02:03.048Z] [worker-pool] Cleaned up workers for ~diagnostic~: 2 --> 1
-[debug] [2020-01-28T00:02:03.056Z] [worker-pool] addWorker(api)
-[debug] [2020-01-28T00:02:03.056Z] [worker-pool] Adding worker with key api, total=1
-[debug] [2020-01-28T00:02:03.056Z] [worker-pool] submitWork(triggerId=api)
-[debug] [2020-01-28T00:02:03.056Z] [worker-api-a313f1e0-5996-4c83-a507-e7ced63e17fe]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\83000
-[debug] [2020-01-28T00:02:03.056Z] [worker-api-a313f1e0-5996-4c83-a507-e7ced63e17fe]: BUSY
-[debug] [2020-01-28T00:02:04.121Z] [runtime-status] [83000] Functions runtime initialized. {"cwd":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions","node_version":"10.13.0"}
-[debug] [2020-01-28T00:02:04.130Z] [runtime-status] [83000] Disabled runtime features: {"functions_config_helper":true,"network_filtering":true,"timeout":true,"memory_limiting":true,"admin_stubs":true,"pubsub_emulator":true}
-[debug] [2020-01-28T00:02:04.139Z] [runtime-status] [83000] Resolved module firebase-admin {"declared":true,"installed":true,"version":"8.9.2","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-admin\\lib\\index.js"}
-[debug] [2020-01-28T00:02:04.146Z] [runtime-status] [83000] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-28T00:02:04.148Z] [runtime-status] [83000] Resolved module firebase-functions {"declared":true,"installed":true,"version":"3.3.0","resolution":"C:\\Users\\v-chraro\\Desktop\\Github\\splitsbyspotify\\functions\\node_modules\\firebase-functions\\lib\\index.js"}
-[debug] [2020-01-28T00:02:06.078Z] [runtime-status] [83000] Trigger "api" has been found, beginning invocation!
-[info] i  functions: Beginning execution of "api"
-[debug] [2020-01-28T00:02:06.080Z] [runtime-status] [83000] triggerDefinition {"httpsTrigger":{},"name":"api","entryPoint":"api"}
-[debug] [2020-01-28T00:02:06.080Z] [runtime-status] [83000] Running api in mode HTTPS
-[debug] [2020-01-28T00:02:06.087Z] [runtime-status] [83000] Attempting to listen to socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\83000
-[debug] [2020-01-28T00:02:06.092Z] [functions] Runtime ready! Sending request!
-[debug] [2020-01-28T00:02:06.138Z] [runtime-status] [83000] Ephemeral server handling POST request
-[debug] [2020-01-28T00:02:06.148Z] [runtime-status] [83000] Ephemeral server survived.
-[info] >  Error: Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/getting-started for more information.
-[info] >      at GoogleAuth.getApplicationDefaultAsync (C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\node_modules\google-auth-library\build\src\auth\googleauth.js:160:19)
-[info] >      at process._tickCallback (internal/process/next_tick.js:68:7)
-[info] i  functions: Finished "api" in ~9s
-[debug] [2020-01-28T00:02:15.123Z] [worker-api-a313f1e0-5996-4c83-a507-e7ced63e17fe]: IDLE
-[debug] [2020-01-28T00:02:15.124Z] [work-queue] {"queueLength":0,"workRunningCount":0}
-[debug] [2020-01-28T00:02:54.908Z] [work-queue] {"queueLength":1,"workRunningCount":0}
-[debug] [2020-01-28T00:02:54.908Z] [work-queue] {"queueLength":0,"workRunningCount":1}
-[debug] [2020-01-28T00:02:54.908Z] Accepted request POST /splitsbyspotify/us-central1/api/signup --> api
-[debug] [2020-01-28T00:02:54.909Z] [worker-pool] submitWork(triggerId=api)
-[debug] [2020-01-28T00:02:54.909Z] [worker-api-a313f1e0-5996-4c83-a507-e7ced63e17fe]: Assigning socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\83000
-[debug] [2020-01-28T00:02:54.909Z] [worker-api-a313f1e0-5996-4c83-a507-e7ced63e17fe]: BUSY
-[debug] [2020-01-28T00:02:54.910Z] [runtime-status] [83000] Trigger "api" has been found, beginning invocation!
-[info] i  functions: Beginning execution of "api"
-[debug] [2020-01-28T00:02:54.912Z] [runtime-status] [83000] triggerDefinition {"httpsTrigger":{},"name":"api","entryPoint":"api"}
-[debug] [2020-01-28T00:02:54.913Z] [runtime-status] [83000] Running api in mode HTTPS
-[debug] [2020-01-28T00:02:54.913Z] [runtime-status] [83000] Attempting to listen to socketPath: \\?\pipe\C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\83000
-[debug] [2020-01-28T00:02:54.915Z] [functions] Runtime ready! Sending request!
-[debug] [2020-01-28T00:02:54.921Z] [runtime-status] [83000] Ephemeral server handling POST request
-[debug] [2020-01-28T00:02:54.922Z] [runtime-status] [83000] Ephemeral server survived.
-[info] >  Error: Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/getting-started for more information.
-[info] >      at GoogleAuth.getApplicationDefaultAsync (C:\Users\v-chraro\Desktop\Github\splitsbyspotify\functions\node_modules\google-auth-library\build\src\auth\googleauth.js:160:19)
-[info] >      at process._tickCallback (internal/process/next_tick.js:68:7)
-[info] i  functions: Finished "api" in ~10s
-[debug] [2020-01-28T00:03:05.055Z] [worker-api-a313f1e0-5996-4c83-a507-e7ced63e17fe]: IDLE
-[debug] [2020-01-28T00:03:05.055Z] [work-queue] {"queueLength":0,"workRunningCount":0}
+[debug] [2020-01-29T21:07:55.603Z] [worker-api-6fb0f879-3688-4357-acac-a01aa2312e97]: IDLE
+[debug] [2020-01-29T21:07:55.603Z] [work-queue] {"queueLength":0,"workRunningCount":0}

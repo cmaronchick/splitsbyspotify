@@ -8,7 +8,6 @@ const {signUp, login, uploadImage, spotifyLogin } = require('./handlers/users')
 const { getSpotifyClientToken } = require('./handlers/spotify')
 const {FBAuth} = require('./util/FBAuth')
 
-const ky = require('ky/umd')
 
 
 // Playlist Routes

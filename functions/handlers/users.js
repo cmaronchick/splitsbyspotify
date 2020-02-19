@@ -1,3 +1,5 @@
+const rp = require('request-promise')
+
 const { admin, db } = require('../util/admin')
 
 const { config } = require('../util/config');
@@ -110,23 +112,19 @@ const spotifyLogin = (req, res) => {
 
   
     // use the access token to access the Spotify Web API
-    console.log('req', req)
+    console.log('req', req.spotifyToken)
     var token = req.spotifyToken //body.access_token;
     var options = {
-        url: 'https://api.spotify.com/v1/users/jmperezperez',
+        uri: 'https://api.spotify.com/v1/users/jmperezperez',
         headers: {
         'Authorization': 'Bearer ' + token
         },
         json: true
     };
-    ky.get(options.url, {
-        headers: options.headers
-    })
+    rp.get(options)
     .then(spotifyResponse => {
-        return spotifyResponse.json()
-    })
-    .then(data => {
-        return res.status(200).json({ message: 'user retrieved successfully', data})
+        //const data = JSON.parse(spotifyResponse)
+        return res.status(200).json({ message: 'user retrieved successfully', data: spotifyResponse})
     })
     .catch(getUserError => {
         return res.status(500).json({ getUserError})

@@ -11,8 +11,6 @@ const FBAuth = (req, res, next) => {
     admin.auth().verifyIdToken(idToken)
         .then(DecodedIdToken => {
             req.user = DecodedIdToken;
-            
-            console.log({reqUser: req.user.uid})
             return db.collection('users')
                 .where('userId', '==', req.user.uid)
                 .limit(1)

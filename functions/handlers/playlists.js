@@ -21,6 +21,10 @@ const getPlaylists = (req, res) => {
         })
 }
 
+const getPlaylist = (req, res) => {
+    // TODO 
+}
+
 const addPlaylist = (req, res) => {
     const newPlaylist = {
         playListName: req.body.playListName,
@@ -40,4 +44,8 @@ const addPlaylist = (req, res) => {
         })
 }
 
-module.exports = { getPlaylists, addPlaylist }
+const deletePlaylist = (req, res) => {
+    // TODO
+}
+
+module.exports = { getPlaylists, getPlaylist, addPlaylist, deletePlaylist }

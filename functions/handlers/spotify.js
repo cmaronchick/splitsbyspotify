@@ -1,4 +1,5 @@
-const rp = require('request-promise')
+//const rp = require('request-promise')
+const ky = require('ky/umd')
 const {spotifyConfig} = require('../util/config')
 
 
@@ -15,7 +16,6 @@ const {spotifyConfig} = require('../util/config')
     };
 
 getSpotifyClientToken = (req, res, next) => {
-    console.log('authOptions.headers', authOptions.headers, 'authOptions.url: ', authOptions.url)
     // request.post(authOptions, (error, res, body) => {
     //     if (!error && res.statusCode === 200) {
     //         console.log('spotifyResponse', res.body)
@@ -26,17 +26,34 @@ getSpotifyClientToken = (req, res, next) => {
     //     }
         
     // })
-    rp(authOptions)
-    .then(spotifyResponse => {
-        const spotifyJson = JSON.parse(spotifyResponse)
-        console.log('spotifyJson:', spotifyJson)
-        req.spotifyToken = spotifyJson.access_token;
-        return next()
+    const searchParams = new URLSearchParams();
+    searchParams.set('grant_type', 'client_credentials')
+    ky.post(authOptions.uri, {
+        headers: authOptions.headers,
+        body: searchParams
     })
-    .catch(getSpotifyTokenError => {
-        console.log('getSpotifyTokenError', getSpotifyTokenError)
-        res.status(500).json({ getSpotifyTokenError})
+    .then(kyResponse => {
+        return kyResponse.json()
     })
+    .then(kyJson => {
+        console.log({kyJson})
+        req.spotifyToken = kyJson.access_token;
+        return next();
+    })
+    .catch(kyError => {
+        console.error({kyError});
+    })
+    // rp(authOptions)
+    // .then(spotifyResponse => {
+    //     const spotifyJson = JSON.parse(spotifyResponse)
+    //     console.log('spotifyJson:', spotifyJson)
+    //     req.spotifyToken = spotifyJson.access_token;
+    //     return next()
+    // })
+    // .catch(getSpotifyTokenError => {
+    //     console.log('getSpotifyTokenError', getSpotifyTokenError)
+    //     res.status(500).json({ getSpotifyTokenError})
+    // })
 }
 
 module.exports = { getSpotifyClientToken }

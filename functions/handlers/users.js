@@ -1,4 +1,4 @@
-const rp = require('request-promise')
+const ky = require('ky/umd')
 
 const { admin, db } = require('../util/admin')
 
@@ -9,7 +9,7 @@ firebase.initializeApp(config);
 const { generateRandomString } = require('../util/spotify')
 const querystring = require('querystring')
 
-const { validateSignUpData, validateLoginData } = require('../util/validators')
+const { validateSignUpData, validateLoginData, reduceUserDetails } = require('../util/validators')
 
 
  const signUp = (req, res) => {
@@ -121,16 +121,61 @@ const spotifyLogin = (req, res) => {
         },
         json: true
     };
-    rp.get(options)
+    ky.get(options.uri, {
+        headers: options.headers,
+        json: true
+    })
     .then(spotifyResponse => {
         //const data = JSON.parse(spotifyResponse)
-        return res.status(200).json({ message: 'user retrieved successfully', data: spotifyResponse})
+        return spotifyResponse.json()
+    })
+    .then(spotifyJson => {
+        return res.status(200).json({ message: 'user retrieved successfully', data: spotifyJson})
     })
     .catch(getUserError => {
         return res.status(500).json({ getUserError})
     })
 }
 
+// Get Own User Details
+const getAuthenticatedUser = (req, res) => {
+    let userData = {};
+    db.doc(`/users/${req.user.spotifyUser}`).get()
+        .then(doc => {
+            if(doc.exists) {
+                userData.credentials = doc.data();
+                return db.collection('userPlaylists')
+                    .where('spotifyUser', '==', req.user.spotifyUser)
+                    .get()
+            }
+        })
+        .then(data => {
+            userData.userPlaylists = [];
+            data.forEach(doc => {
+                userData.userPlaylists.push(doc.data())
+            })
+            return res.status(200).json(userData)
+        })
+        .catch(getUserDetailsError => {
+            console.error(getUserDetailsError)
+            return res.status(500).json({ error: getUserDetailsError })
+        })
+}
+
+// Add user details
+const addUserDetails = (req, res) => {
+    let userDetails = reduceUserDetails(req.body);
+    db.doc(`/users/${req.user.spotifyUser}`).update(userDetails)
+        .then(() => {
+            return res.json({message: 'Details added successfully'})
+        })
+        .catch(updateUserDetailsError => {
+            console.error({ updateUserDetailsError })
+            return res.json({ error: updateUserDetailsError })
+        })
+}
+
+// Upload a profile image for users
 const uploadImage = (req, res) => {
     const BusBoy = require('busboy')
     const path = require('path')
@@ -142,7 +187,9 @@ const uploadImage = (req, res) => {
     let imageToBeUploaded = {};
 
     busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
-        console.log({fieldname, filename, mimetype})
+        if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
+            return res.status(400).json({ error: 'Please submit JPG or PNG files only.'})
+        }
         const imageExtension = filename.split('.')[filename.split('.').length-1];
         imageFilename = `${Math.round(Math.random()*100000000000)}.${imageExtension}`;
         const filepath = path.join(os.tmpdir(), imageFilename);
@@ -150,7 +197,6 @@ const uploadImage = (req, res) => {
         file.pipe(fs.createWriteStream(filepath))
     });
     busboy.on('finish', () => {
-        console.log('imageToBeUploaded.filepath', imageToBeUploaded.filepath)
         admin
             .storage()
             .bucket('splitsbyspotify.appspot.com')
@@ -181,4 +227,4 @@ const uploadImage = (req, res) => {
 }
 
 
-module.exports = { signUp, login, uploadImage, spotifyLogin }
+module.exports = { signUp, login, uploadImage, getAuthenticatedUser, addUserDetails, spotifyLogin }

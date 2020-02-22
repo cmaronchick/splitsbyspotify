@@ -18,6 +18,7 @@ const FBAuth = (req, res, next) => {
         })
         .then(data => {
             req.user.spotifyUser = data.docs[0].data().spotifyUser
+            req.user.imageUrl = data.docs[0].data().imageUrl
             return next();
         })
         .catch(DecodedIdTokenError => {

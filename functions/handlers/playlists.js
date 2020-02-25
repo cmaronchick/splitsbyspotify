@@ -93,7 +93,7 @@ const commentOnPlaylist = (req, res) => {
         playlistId,
         body,
         spotifyUser: spotifyUser,
-        userImage: imageUrl,
+        userImage: imageUrl ? imageUrl : `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/blank-profile-picture.png?alt=media`,
         createdAt: new Date().toISOString()
     }
 
@@ -120,18 +120,88 @@ const commentOnPlaylist = (req, res) => {
         })
 }
 
+const likeAPlaylist = (req, res) => {
+    const { playlistId } = req.params
+    const { spotifyUser, imageUrl } = req.user
+    let playlistData;
+    if (!playlistId || !spotifyUser) return res.status(400).json({ error: `${playlistId} || ${spotifyUser} Must not be empty`})
+
+    const likeDocument = db.collection(`/likes`)
+        .where('playlistId','==', playlistId)
+        .where('spotifyUser','==',spotifyUser)
+        .limit(1);
+    const playlistDocument = db.doc(`playlists/${playlistId}`)
+
+    playlistDocument.get()
+        .then(doc => {
+            if (doc.exists) {
+                playlistData = doc.data()
+                playlistData.playlistId = doc.id;
+                return likeDocument.get()
+            } else {
+                return res.status(404).json({ error: `Playlist not found`})
+            }
+        })
+        .then(data => {
+            if (data.empty) {
+                const like = {
+                    playlistId,
+                    spotifyUser,
+                    likedAt: new Date().toISOString()
+                }
+                return db.collection(`likes`)
+                    .add(like)
+                    .then(doc => {
+                        playlistData.likeCount++;
+                        return res.status(200).json({ message: `Playlist liked successfully`})
+                    })
+                    .catch(likedPlaylistError => {
+                        console.error(JSON.stringify(likedPlaylistError))
+                    })
+
+            }
+                    return res.status(404).json({ error: `There is no playlist with that ID`})
+                })
+                .catch(addCommentError => {
+                    console.error({addCommentError})
+                    res.status(500).json({ error: addCommentError })
+                })
+            })
+            .catch(getPlaylistError => {
+                console.error(getPlaylistError)
+                return res.status(500).json({ error: `Error getting playlist ${getPlaylistError}`})
+            })
+        })
+        .catch(getLikeError => {
+            console.error({error: getLikeError})
+            res.status(500).json({ error: `Something went wrong.`})
+        })
+
+    
+}
+
+const unlikeAPlaylist = (req, res) => {
+
+}
+
 const addPlaylist = (req, res) => {
     const newPlaylist = {
         playlistName: req.body.playlistName,
         playlistId: req.body.playlistId,
         spotifyUser: req.body.spotifyUser,
-        createdAt: new Date().toISOString()
+        userImage: req.user.imageUrl,
+        createdAt: new Date().toISOString(),
+        likeCount: 0,
+        commentCount: 0
+
     }
     db
         .collection('userPlaylists')
         .add(newPlaylist)
         .then(document => {
-            return res.json( { message: `document ${document.id} created successfully`})
+            const resPlaylist = newPlaylist;
+            resPlaylist.playlistId = doc.id
+            return res.json( { message: `document ${document.id} created successfully`, playlist: resPlaylist})
         })
         .catch(addPlaylistError => {
             console.error(addPlaylistError)
@@ -139,4 +209,4 @@ const addPlaylist = (req, res) => {
         })
 }
 
-module.exports = { getPlaylists, getPlaylist, addPlaylist, deletePlaylist, commentOnPlaylist }
+module.exports = { getPlaylists, getPlaylist, addPlaylist, deletePlaylist, commentOnPlaylist, likeAPlaylist, unlikeAPlaylist }

@@ -15,8 +15,8 @@ app.get('/playlists', getPlaylists)
 app.post('/playlists', FBAuth, addPlaylist)
 app.get('/playlists/:playlistId', getPlaylist)
 app.delete('/playlists/:playlistId', deletePlaylist)
-app.post('/playlists/:playlistId/comment', FBAuth, commentOnPlaylist)
-// TODO: like a playlist
+app.post('/playlists/:playlistId/like', FBAuth, likeAPlaylist)
+app.post('/playlists/:playlistId/unlike', FBAuth, unlikeAPlaylist)
 // TODO: Unlike a playlist
 
 // User Route

@@ -1,5 +1,5 @@
 const admin = require('firebase-admin')
-const serviceAccount = require('../../../splitsbyspotify-firebase-adminsdk-xkg5z-2a806dd006.json')
+const serviceAccount = require('../../splitsbyspotify-firebase-adminsdk-xkg5z.json')
 
 
 admin.initializeApp({

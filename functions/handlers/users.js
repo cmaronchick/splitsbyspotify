@@ -6,6 +6,7 @@ firebase.initializeApp(config);
 
 const { generateRandomString } = require('../util/spotify')
 const querystring = require('querystring')
+const ky = require('ky/umd')
 
 const { validateSignUpData, validateLoginData } = require('../util/validators')
 
@@ -111,7 +112,7 @@ const spotifyLogin = (req, res) => {
   
     // use the access token to access the Spotify Web API
     console.log('req', req)
-    var token = req.spotifyToken //body.access_token;
+    var token = 'BQAXWV6wOcW1WCztscLLipOBiw095_K_SlNpDyYTLMEDygY8Doil7xh8I1gXnG_e1FlMBYxTrLt7zJHoHwk' //req.spotifyToken //body.access_token;
     var options = {
         url: 'https://api.spotify.com/v1/users/jmperezperez',
         headers: {

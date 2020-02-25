@@ -126,23 +126,28 @@ const likeAPlaylist = (req, res) => {
     let playlistData;
     if (!playlistId || !spotifyUser) return res.status(400).json({ error: `${playlistId} || ${spotifyUser} Must not be empty`})
 
-    const likeDocument = db.collection(`/likes`)
+    console.log('spotifyUser', spotifyUser);
+    console.log('playlistId', playlistId);
+    const likeDocument = db.collection(`likes`)
         .where('playlistId','==', playlistId)
         .where('spotifyUser','==',spotifyUser)
         .limit(1);
-    const playlistDocument = db.doc(`playlists/${playlistId}`)
+    const playlistDocument = db.doc(`/userPlaylists/${playlistId}`)
 
+    // Get Playlist
     playlistDocument.get()
         .then(doc => {
             if (doc.exists) {
                 playlistData = doc.data()
                 playlistData.playlistId = doc.id;
+                // Get the like by user for the playlist
                 return likeDocument.get()
-            } else {
-                return res.status(404).json({ error: `Playlist not found`})
             }
+            //Return 404 if Playlist does not exist
+            return res.status(404).json({ error: `Playlist not found`})
         })
         .then(data => {
+            // If the user has not liked the playlist continue
             if (data.empty) {
                 const like = {
                     playlistId,
@@ -151,36 +156,80 @@ const likeAPlaylist = (req, res) => {
                 }
                 return db.collection(`likes`)
                     .add(like)
-                    .then(doc => {
+                    .then(() => {
                         playlistData.likeCount++;
-                        return res.status(200).json({ message: `Playlist liked successfully`})
+                        return playlistDocument.update({ likeCount: playlistData.likeCount })
+                    })
+                    .then(() => {
+                        return res.status(200).json({ message: 'Like added successfully'})
                     })
                     .catch(likedPlaylistError => {
                         console.error(JSON.stringify(likedPlaylistError))
                     })
 
             }
-                    return res.status(404).json({ error: `There is no playlist with that ID`})
-                })
-                .catch(addCommentError => {
-                    console.error({addCommentError})
-                    res.status(500).json({ error: addCommentError })
-                })
-            })
-            .catch(getPlaylistError => {
-                console.error(getPlaylistError)
-                return res.status(500).json({ error: `Error getting playlist ${getPlaylistError}`})
-            })
+            // Return error message that they playlist is already liked
+            return res.status(400).json({ error: `You have already liked that playlist.`})
         })
-        .catch(getLikeError => {
-            console.error({error: getLikeError})
-            res.status(500).json({ error: `Something went wrong.`})
+        .catch(getPlaylistError => {
+            console.error(getPlaylistError)
+            return res.status(500).json({ error: `Error getting playlist ${getPlaylistError}`})
         })
-
-    
 }
 
 const unlikeAPlaylist = (req, res) => {
+    const { playlistId } = req.params
+    const { spotifyUser, imageUrl } = req.user
+    let playlistData;
+    if (!playlistId || !spotifyUser) return res.status(400).json({ error: `${playlistId} || ${spotifyUser} Must not be empty`})
+
+    
+    console.log('spotifyUser', spotifyUser);
+    console.log('playlistId', playlistId);
+
+    const unlikeDocument = db.collection('likes')
+        .where('playlistId','==', playlistId)
+        .where('spotifyUser','==',spotifyUser)
+        .limit(1);
+    const playlistDocument = db.doc(`/userPlaylists/${playlistId}`)
+
+    // Get Playlist
+    playlistDocument.get()
+        .then(doc => {
+            if (doc.exists) {
+                playlistData = doc.data()
+                playlistData.playlistId = doc.id;
+                // Get the like by user for the playlist
+                return unlikeDocument.get()
+            }
+            //Return 404 if Playlist does not exist
+            return res.status(404).json({ error: `Playlist not found`})
+        })
+        .then(data => {
+            console.log('data', data.docs)
+            // If the user has not liked the playlist continue
+            if (data.empty) {
+                // Return error message that they playlist is not liked
+                return res.status(400).json({ error: `You have not liked that playlist.`})
+            }
+            console.log('${data.docs[0].data().id}', data.docs[0].id)
+            return db.doc(`/likes/${data.docs[0].id}`)
+                .delete()
+                .then(() => {
+                    playlistData.likeCount--;
+                    return playlistDocument.update({ likeCount: playlistData.likeCount })
+                })
+                .then(() => {
+                    return res.status(200).json({ message: 'Like removed successfully'})
+                })
+                .catch(likedPlaylistError => {
+                    console.error(JSON.stringify(likedPlaylistError))
+                })
+        })
+        .catch(getPlaylistError => {
+            console.error(getPlaylistError)
+            return res.status(500).json({ error: `Error getting playlist ${getPlaylistError}`})
+        })
 
 }
 

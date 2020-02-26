@@ -144,15 +144,15 @@ const getAuthenticatedUser = (req, res) => {
         .then(doc => {
             if(doc.exists) {
                 userData.credentials = doc.data();
-                return db.collection('userPlaylists')
+                return db.collection('playlists')
                     .where('spotifyUser', '==', req.user.spotifyUser)
                     .get()
             }
         })
         .then(data => {
-            userData.userPlaylists = [];
+            userData.playlists = [];
             data.forEach(doc => {
-                userData.userPlaylists.push(doc.data())
+                userData.playlists.push(doc.data())
             })
             return res.status(200).json(userData)
         })

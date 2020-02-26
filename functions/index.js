@@ -3,7 +3,7 @@ const { config, spotifyConfig } = require('./util/config')
 
 const app = require('express')();
 
-const {getPlaylists, getPlaylist, deletePlaylist, addPlaylist, commentOnPlaylist, likeAPlaylist, unlikeAPlaylist} = require('./handlers/playlists')
+const {getPlaylists, getPlaylist, deletePlaylist, addPlaylist, commentOnPlaylist, deleteCommentOnPlaylist, likeAPlaylist, unlikeAPlaylist} = require('./handlers/playlists')
 const {signUp, login, uploadImage, getAuthenticatedUser, addUserDetails, spotifyLogin } = require('./handlers/users')
 const { getSpotifyClientToken } = require('./handlers/spotify')
 const {FBAuth} = require('./util/FBAuth')
@@ -17,7 +17,8 @@ app.get('/playlists/:playlistId', getPlaylist)
 app.delete('/playlists/:playlistId', deletePlaylist)
 app.post('/playlists/:playlistId/like', FBAuth, likeAPlaylist)
 app.delete('/playlists/:playlistId/like', FBAuth, unlikeAPlaylist)
-// TODO: Unlike a playlist
+app.post('/playlists/:playlistId/comment', FBAuth, commentOnPlaylist)
+app.delete('/playlists/:playlistId/comment/:commentId', FBAuth, deleteCommentOnPlaylist)
 
 // User Route
 app.post('/signup', signUp)

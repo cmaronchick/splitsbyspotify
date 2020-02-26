@@ -58,3 +58,20 @@ exports.validateLoginData = (data) => {
         valid: Object.keys(errors).length === 0 ? true : false
     }
 }
+
+exports.reduceUserDetails = (data) => {
+    console.log({data: data.bio})
+    let userDetails = {};
+    if (data.bio && !isEmpty(data.bio.trim())) userDetails.bio = data.bio;
+    if (!isEmpty(data.website.trim())) {
+        // https://website.com
+        if (data.website.trim().substring(0,4) !== 'http') {
+            userDetails.website = `http://${data.website.trim()}`;
+        } else {
+            userDetails.website = data.website
+        }
+    }
+    if (!isEmpty(data.location.trim())) userDetails.location = data.location;
+
+    return userDetails
+}

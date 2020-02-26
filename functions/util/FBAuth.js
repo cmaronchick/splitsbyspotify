@@ -11,8 +11,6 @@ const FBAuth = (req, res, next) => {
     admin.auth().verifyIdToken(idToken)
         .then(DecodedIdToken => {
             req.user = DecodedIdToken;
-            
-            console.log({reqUser: req.user.uid})
             return db.collection('users')
                 .where('userId', '==', req.user.uid)
                 .limit(1)
@@ -20,6 +18,7 @@ const FBAuth = (req, res, next) => {
         })
         .then(data => {
             req.user.spotifyUser = data.docs[0].data().spotifyUser
+            req.user.imageUrl = data.docs[0].data().imageUrl
             return next();
         })
         .catch(DecodedIdTokenError => {

@@ -1,3 +1,4 @@
+//const rp = require('request-promise')
 const ky = require('ky/umd')
 const {spotifyConfig} = require('../util/config')
 
@@ -6,36 +7,54 @@ const {spotifyConfig} = require('../util/config')
 
     console.log(`new Buffer.from(client_id + ':' + client_secret).toString('base64'): ${new Buffer.from(client_id + ':' + client_secret).toString('base64')}`);
     var authOptions = {
-        url: `https://accounts.spotify.com/api/token`,
-        headers: {
-        'Authorization': 'Basic ' + (new Buffer.from(client_id + ':' + client_secret).toString('base64')),
-        'Content-Type': 'application/x-www-form-urlencoded'
-        }
-    };
-
-getSpotifyClientToken = (req, res, next) => {
-    console.log('authOptions.url: ', authOptions.url, 'authOptions.headers', authOptions.headers, 'authOptions.url: ', authOptions.url)
-    ky.post(authOptions.url, {
+        method: 'POST',
+        uri: 'https://accounts.spotify.com/api/token',
         headers: {
         'Authorization': 'Basic ' + (new Buffer.from(client_id + ':' + client_secret).toString('base64')),
         'Content-Type': 'application/x-www-form-urlencoded'
         },
-        json: {
-            grant_type: 'client_credentials'
-        }
+        form: {grant_type: 'client_credentials'}
+    };
+
+getSpotifyClientToken = (req, res, next) => {
+    // request.post(authOptions, (error, res, body) => {
+    //     if (!error && res.statusCode === 200) {
+    //         console.log('spotifyResponse', res.body)
+    //         //return res.json()
+            
+    //         req.spotifyToken = body.access_token
+    //         return next()
+    //     }
+        
+    // })
+    const searchParams = new URLSearchParams();
+    searchParams.set('grant_type', 'client_credentials')
+    ky.post(authOptions.uri, {
+        headers: authOptions.headers,
+        body: searchParams
     })
-    .then(res => {
-        console.log('spotifyResponse', res.status)
-        return res.json()
+    .then(kyResponse => {
+        return kyResponse.json()
     })
-    .then(token => {
-        req.spotifyToken = token
-        return next()
+    .then(kyJson => {
+        console.log({kyJson})
+        req.spotifyToken = kyJson.access_token;
+        return next();
     })
-    .catch(getSpotifyTokenError => {
-        console.log('getSpotifyTokenError', getSpotifyTokenError)
-        res.status(500).json({ getSpotifyTokenError})
+    .catch(kyError => {
+        console.error({kyError});
     })
+    // rp(authOptions)
+    // .then(spotifyResponse => {
+    //     const spotifyJson = JSON.parse(spotifyResponse)
+    //     console.log('spotifyJson:', spotifyJson)
+    //     req.spotifyToken = spotifyJson.access_token;
+    //     return next()
+    // })
+    // .catch(getSpotifyTokenError => {
+    //     console.log('getSpotifyTokenError', getSpotifyTokenError)
+    //     res.status(500).json({ getSpotifyTokenError})
+    // })
 }
 
 module.exports = { getSpotifyClientToken }

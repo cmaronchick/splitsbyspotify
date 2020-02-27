@@ -170,7 +170,7 @@ const getAuthenticatedUser = (req, res) => {
             userData.notifications = []
             if (notifications && notifications.docs && notifications.docs.length > 0) {
                 notifications.docs.forEach(notification => {
-                    userData.notifications.push({...notification, notificationId: notification.id})
+                    userData.notifications.push({...notification._fieldsProto, notificationId: notification.id})
                 })
             }
             return res.status(200).json(userData)

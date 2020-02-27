@@ -8,7 +8,7 @@ const FBAuth = (req, res, next) => {
         console.error('No Token found')
         return res.status(403).json({ error: 'Unauthorized'})
     }
-    admin.auth().verifyIdToken(idToken)
+    return admin.auth().verifyIdToken(idToken)
         .then(DecodedIdToken => {
             req.user = DecodedIdToken;
             return db.collection('users')

@@ -31,7 +31,7 @@ const { validateSignUpData, validateLoginData, reduceUserDetails } = require('..
     // TODO Validate data
     
     let token, user;
-    db.doc(`/users/${newUser.spotifyUser}`).get()
+    return db.doc(`/users/${newUser.spotifyUser}`).get()
         .then(doc => {
             if (doc.exists) {
                 return res.status(400).json({ spotifyUser: 'this spotify user is already taken'})
@@ -43,7 +43,7 @@ const { validateSignUpData, validateLoginData, reduceUserDetails } = require('..
         })
         .then(data => {
             user = data.user
-            console.log('data', data.user ?+ data.user : data.statusCode)
+            console.log('data', data.user ? data.user : data.statusCode)
             return data.user ? data.user.getIdToken() : null
         })
         .then (IdToken => {
@@ -66,7 +66,7 @@ const { validateSignUpData, validateLoginData, reduceUserDetails } = require('..
             if (user) {
                 return res.status(201).json({ message: `user ${user.uid} signed up successfully`, token })
             }
-            return 
+            throw new Error('User not found')
         })
         .catch((signupError) => {
             console.error(signupError)
@@ -92,7 +92,7 @@ const login = (req, res) => {
 
     const { email, password } = user
 
-    firebase.auth().signInWithEmailAndPassword(email, password)
+    return firebase.auth().signInWithEmailAndPassword(email, password)
     .then(data => {
         return data.user.getIdToken()
     })
@@ -140,7 +140,7 @@ const spotifyLogin = (req, res) => {
 // Get Own User Details
 const getAuthenticatedUser = (req, res) => {
     let userData = {};
-    db.doc(`/users/${req.user.spotifyUser}`).get()
+    return db.doc(`/users/${req.user.spotifyUser}`).get()
         .then(doc => {
             if(doc.exists) {
                 userData.credentials = doc.data();
@@ -148,30 +148,49 @@ const getAuthenticatedUser = (req, res) => {
                     .where('spotifyUser', '==', req.user.spotifyUser)
                     .get()
             }
-        })
-        .then(data => {
-            userData.playlists = [];
-            data.forEach(doc => {
-                userData.playlists.push(doc.data())
-            })
-            return res.status(200).json(userData)
+            return new Error('User not found')
         })
         .catch(getUserDetailsError => {
             console.error(getUserDetailsError)
             return res.status(500).json({ error: getUserDetailsError })
+        })
+        .then(data => {
+            userData.playlists = [];
+            if (data && data.docs && data.docs.length > 0) {
+                data.forEach(doc => {
+                    userData.playlists.push(doc.data())
+                })
+            }
+            return db.collection('notifications')
+                .where('recipient','==',req.user.spotifyUser)
+                .orderBy('createdAt', 'desc').limit(10)
+                .get()
+        })
+        .then(notifications => {
+            userData.notifications = []
+            if (notifications && notifications.docs && notifications.docs.length > 0) {
+                notifications.docs.forEach(notification => {
+                    userData.notifications.push({...notification, notificationId: notification.id})
+                })
+            }
+            return res.status(200).json(userData)
+        })
+        .catch(addPlaylistsError => {
+            console.error(addPlaylistsError)
+            return res.status(200).json(userData)
         })
 }
 
 // Add user details
 const addUserDetails = (req, res) => {
     let userDetails = reduceUserDetails(req.body);
-    db.doc(`/users/${req.user.spotifyUser}`).update(userDetails)
+    return db.doc(`/users/${req.user.spotifyUser}`).update(userDetails)
         .then(() => {
-            return res.json({message: 'Details added successfully'})
+            return res.status(200).json({message: 'Details added successfully'})
         })
         .catch(updateUserDetailsError => {
             console.error({ updateUserDetailsError })
-            return res.json({ error: updateUserDetailsError })
+            return res.status(500).json({ error: updateUserDetailsError })
         })
 }
 
@@ -194,7 +213,7 @@ const uploadImage = (req, res) => {
         imageFilename = `${Math.round(Math.random()*100000000000)}.${imageExtension}`;
         const filepath = path.join(os.tmpdir(), imageFilename);
         imageToBeUploaded = { filepath, mimetype }
-        file.pipe(fs.createWriteStream(filepath))
+        return file.pipe(fs.createWriteStream(filepath))
     });
     busboy.on('finish', () => {
         admin
@@ -209,18 +228,18 @@ const uploadImage = (req, res) => {
         .then(() => {
             const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFilename}?alt=media`
             return db.doc(`/users/${req.user.spotifyUser}`).update({ imageUrl })
-            .then(() => {
-                return res.json({ message: 'Image uploaded successfully'})
-            })
-            .catch(udpdateUserError => {
-                console.error(udpdateUserError)
-                res.status(500).json({udpdateUserError})
-            })
         })
         .catch((uploadImageError) => {
             console.error(uploadImageError)
-            res.status(500).json({uploadImageError})
+            return res.status(500).json({uploadImageError})
 
+        })
+        .then(() => {
+            return res.json({ message: 'Image uploaded successfully'})
+        })
+        .catch(udpdateUserError => {
+            console.error(udpdateUserError)
+            return res.status(500).json({udpdateUserError})
         })
     })
     busboy.end(req.rawBody);

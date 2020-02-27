@@ -29,12 +29,13 @@ const getPlaylist = (req, res) => {
         return res.status(500).json({ error: 'No playlist id provided'})
     }
 
-    db
+    return db
         .doc(`/playlists/${playlistId}`)
         .get()
         .then(doc => {
+            console.log(doc.exists)
             if (!doc.exists) {
-                return res.status(404).json({error: 'No playlist with that ID was found'})
+                throw new Error(JSON.stringify({ code: 404, message: 'No playlist found' }))
             }
             playlistData = doc.data()
             playlistData.playlistId = doc.id;
@@ -42,47 +43,63 @@ const getPlaylist = (req, res) => {
             .where('playlistId', '==', playlistId)
             .orderBy('createdAt', 'asc')
             .get()
-            .then(data => {
-                playlistData.comments = []
+        })
+        .then(data => {
+            playlistData.comments = []
+            if (data.docs && data.docs.length > 0) {
                 data.forEach(doc => {
                     const commentData = doc.data()
                     commentData.id = doc.id
                     playlistData.comments.push(commentData)
                 })
-                res.status(200).json({message: 'Playlist retrieved successfully', playlistData})
-            })
+            }
+            return res.status(200).json({message: 'Playlist retrieved successfully', playlistData})
         })
-        .catch(getPlaylistError => {
-            console.error(`${getPlaylistError}`)
-            return res.status(500).json({ error: getPlaylistError})
+        .catch(getPlaylistErrorObject => {
+            const getPlaylistError = JSON.parse(getPlaylistErrorObject.message)
+            console.error('getPlaylistError: ', getPlaylistError.message)
+            return res.status(getPlaylistError.code ? getPlaylistError.code : 500).json({ error: getPlaylistError.message ? getPlaylistError.message : 'Something went wrong getting that playlist'})
         })
 }
 
 const deletePlaylist = (req, res) => {
     console.log('req.body', req.params)
     const { playlistId } = req.params;
+    const playlistDoc = db.doc(`/playlists/${playlistId}`)
 
     if (!playlistId) {
-        return res.status(500).json({ error: 'No playlist id provided'})
+        throw new Error(JSON.stringify({ code: 500, message: 'No playlist id provided' }))
     }
 
-    db
-        .collection('playlists')
-        .doc(playlistId)
-        .delete()
+    playlistDoc
+    .get()
+        .then(doc => {
+            if (!doc.exists) {
+                throw new Error(JSON.stringify({ code: 404, error: 'That playlist was not found.'}))
+            }
+            if (doc.data().spotifyUser !== req.user.spotifyUser) {
+                throw new Error(JSON.stringify({ code: 403, error: 'User not authorized to delete that playlist.' }))
+            }
+            return playlistDoc.delete()
+        })
         .then(doc => {
             console.log({doc})
             if (doc) {
                 return res.status(200).json({message: 'Playlist deleted successfully'})
             } else {
-                return res.status(400).json({error: 'No playlist with that ID was found'})
+                throw new Error(JSON.stringify({ code: 400, error: 'No playlist with that ID was found' }))
             }
 
         })
-        .catch(deletePlaylistError => {
-            console.error(`${deletePlaylistError}`)
+        .catch(deletePlaylistErrorObject => {
+            const deletePlaylistError = JSON.parse(deletePlaylistErrorObject.message)
+            console.error(`${deletePlaylistError.message}`)
             return res.status(500).json({ error: deletePlaylistError})
         })
+        .catch(getPlaylistError => {
+            console.error({ getPlaylistError })
+            return res.status(500).json({ error: 'Something went wrong getting that playlist.'})
+        })    
 }
 
 const commentOnPlaylist = (req, res) => {
@@ -99,27 +116,31 @@ const commentOnPlaylist = (req, res) => {
         createdAt: new Date().toISOString()
     }
 
-    db.doc(`/playlists/${playlistId}`).get()
+    return db.doc(`/playlists/${playlistId}`).get()
         .then(doc => {
             if (!doc.exists) {
-                return res.status(404).json({ error: `Playlist not found`})
+                throw new Error(JSON.stringify({code: 404, message: `Playlist not found`}))
             }
             return doc.ref.update({ commentCount: doc.data().commentCount ? doc.data().commentCount++ : 1})
+        })
+        .catch(getPlaylistError => {
+            console.error({getPlaylistError})
+            return res.status(500).json({ error: `Error getting playlist ${getPlaylistError}`})
         })
         .then(() => {
             return db.collection('comments')
             .add(comment)
-            .then(doc => {
-                res.status(200).json({ message: `Comment ${doc.id} added successfully`, comment: doc})
-            })
-            .catch(addCommentError => {
-                console.error({addCommentError})
-                res.status(500).json({ error: addCommentError })
-            })
         })
-        .catch(getPlaylistError => {
-            console.error(getPlaylistError)
-            return res.status(500).json({ error: `Error getting playlist ${getPlaylistError}`})
+        .catch(addCommentError => {
+            console.error({addCommentError})
+            return res.status(500).json({ error: addCommentError })
+        })
+        .then(doc => {
+            return res.status(200).json({ message: `Comment ${doc.id} added successfully`, comment: doc})
+        })
+        .catch(err => {
+            console.error({err})
+            return res.status(500).json({ error: 'Something went wrong'})
         })
 }
 
@@ -128,27 +149,31 @@ const deleteCommentOnPlaylist = (req, res) => {
     const { spotifyUser } = req.user
     if (!playlistId || !spotifyUser) return res.status(400).json({ error: `${playlistId} || ${body} || ${spotifyUser} Must not be empty`})
 
-    db.doc(`/playlists/${playlistId}`).get()
+    return db.doc(`/playlists/${playlistId}`).get()
         .then(doc => {
             if (!doc.exists) {
-                return res.status(404).json({ error: `Playlist not found`})
+                throw new Error(JSON.stringify({ code: 404, message: `Playlist not found`}))
             }
             return doc.ref.update({ commentCount: doc.data().commentCount > 0 ? doc.data().commentCount-- : 0})
+        })
+        .catch(getPlaylistError => {
+            console.error(getPlaylistError)
+            return res.status(getPlaylistError && getPlaylistError.code ? getPlaylistError.code : 500).json({ error: `Error getting playlist ${getPlaylistError ? getPlaylistError.message : ''}`})
         })
         .then(() => {
             return db.doc(`/comments/${commentId}`)
             .delete()
-            .then(() => {
-                res.status(200).json({ message: `Comment deleted successfully`})
-            })
-            .catch(deleteCommentError => {
-                console.error({deleteCommentError})
-                res.status(500).json({ error: deleteCommentError })
-            })
         })
-        .catch(getPlaylistError => {
-            console.error(getPlaylistError)
-            return res.status(500).json({ error: `Error getting playlist ${getPlaylistError}`})
+        .catch(deleteCommentError => {
+            console.error({deleteCommentError})
+            return res.status(500).json({ error: deleteCommentError })
+        })
+        .then(() => {
+            return res.status(200).json({ message: `Comment deleted successfully`})
+        })
+        .catch(err => {
+            console.error(err)
+            return res.status(500).json({ message: 'Something went wrong'})
         })
 }
 
@@ -165,7 +190,7 @@ const likeAPlaylist = (req, res) => {
     const playlistDocument = db.doc(`/playlists/${playlistId}`)
 
     // Get Playlist
-    playlistDocument.get()
+    return playlistDocument.get()
         .then(doc => {
             if (doc.exists) {
                 playlistData = doc.data()
@@ -174,13 +199,15 @@ const likeAPlaylist = (req, res) => {
                 return likeDocument.get()
             } else {
                 //Return 404 if Playlist does not exist
-                return res.status(404).json({ error: `Playlist not found`})
+                throw new Error(JSON.stringify({code: 404, message: `Playlist not found`}))
             }
         })
+        // .catch(getPlaylistErrorObject => {
+        //     const getPlaylistError = JSON.parse(getPlaylistErrorObject.message)
+        //     console.error(getPlaylistError)
+        //     return res.status(getPlaylistError && getPlaylistError.code ? getPlaylistError.code : 500).json({ error: `something went wrong ${getPlaylistError ? getPlaylistError.message : ''}`})
+        // })
         .then(data => {
-            if (!data || res.statusCode === 404) {
-                return
-            }
             // If the user has not liked the playlist continue
             if (data.empty) {
                 const like = {
@@ -188,29 +215,25 @@ const likeAPlaylist = (req, res) => {
                     spotifyUser,
                     likedAt: new Date().toISOString()
                 }
-                return db.collection(`likes`)
-                    .add(like)
-                    .then(() => {
-                        playlistData.likeCount++;
-                        return playlistDocument.update({ likeCount: playlistData.likeCount })
-                    })
-                    .then(() => {
-                        return res.status(200).json({ message: 'Like added successfully'})
-                    })
-                    .catch(likedPlaylistError => {
-                        console.error(JSON.stringify(likedPlaylistError))
-                    })
+                return db.collection(`likes`).add(like)
 
             }
             // Return error message that they playlist is already liked
-            return res.status(400).json({ error: `You have already liked that playlist.`})
+            console.log({data})
+            throw new Error(JSON.stringify({ code: 400, message: `You have already liked that playlist.`}))
         })
-        .catch(getPlaylistError => {
-            console.log('res.status', res.statusCode)
-            console.error('getPlaylistError174: ', getPlaylistError)
-            if (!res.statusCode) {
-                return res.status(500).json({ error: `something went wrong`})
-            }
+        .then(() => {
+            playlistData.likeCount++;
+            return playlistDocument.update({ likeCount: playlistData.likeCount })
+        })
+        .then(() => {
+            return res.status(200).json({ message: 'Like added successfully'})
+        })
+        .catch(errObject => {
+            const err = errObject && errObject.message ? JSON.parse(errObject.message) : { code: 500, message: 'Something went wrong'}
+            console.error(err)
+            const { code, message } = err
+            return res.status(code).json({ message: message})
         })
 }
 
@@ -231,7 +254,7 @@ const unlikeAPlaylist = (req, res) => {
     const playlistDocument = db.doc(`/playlists/${playlistId}`)
 
     // Get Playlist
-    playlistDocument.get()
+    return playlistDocument.get()
         .then(doc => {
             if (doc.exists) {
                 playlistData = doc.data()
@@ -240,34 +263,37 @@ const unlikeAPlaylist = (req, res) => {
                 return unlikeDocument.get()
             }
             //Return 404 if Playlist does not exist
-            return res.status(404).json({ error: `Playlist not found`})
+            throw new Error(JSON.stringify({ code: 404, message: `Playlist not found`}))
+        })
+        .catch(getPlaylistError => {
+            console.error('getPlaylistError229: ', getPlaylistError)
+            return res.status(getPlaylistError && getPlaylistError.code ? getPlaylistError.code : 500).json({ error: `Error getting playlist ${getPlaylistError ? getPlaylistError.message : ''}`})
         })
         .then(data => {
             // If the user has not liked the playlist continue
             if (!data || !data.docs || data.docs.length === 0) {
-                if (res.statusCode === 404) {
-                    return
-                }
                 // Return error message that they playlist is not liked
-                return res.status(400).json({ error: `You have not liked that playlist.`})
+                throw new Error(JSON.stringify({code: 400, message: `You have not liked that playlist.`}))
             }
-            console.log('${data.docs[0].data().id}', data.docs[0].id)
-            return db.doc(`/likes/${data.docs[0].id}`)
-                .delete()
-                .then(() => {
-                    playlistData.likeCount--;
-                    return playlistDocument.update({ likeCount: playlistData.likeCount })
-                })
-                .then(() => {
-                    res.status(200).json({ message: 'Like removed successfully'})
-                })
-                .catch(likedPlaylistError => {
-                    console.error(JSON.stringify(likedPlaylistError))
-                })
+            return db.doc(`/likes/${data.docs[0].id}`).delete()
         })
-        .catch(getPlaylistError => {
-            console.error('getPlaylistError229: ', getPlaylistError)
-            res.status(500).json({ error: `Error getting playlist ${getPlaylistError}`})
+        .catch(likedPlaylistError => {
+            console.error(JSON.stringify(likedPlaylistError))
+            return res.status(likedPlaylistError && likedPlaylistError.code ? likedPlaylistError.code : 500).json({ error: likedPlaylistError ? likedPlaylistError.message : `Error getting playlist ${getPlaylistError}`})
+        })
+        .then(() => {
+            playlistData.likeCount--;
+            return playlistDocument.update({ likeCount: playlistData.likeCount })
+        })
+        .catch(playlistIncrementCount => {
+            console.error({ playlistIncrementCount})
+        })
+        .then(() => {
+            return res.status(200).json({ message: 'Like removed successfully'})
+        })
+        .catch(err => {
+            console.error(err)
+            return res.status(500).json({ message: 'Something went wrong'})
         })
 
 }

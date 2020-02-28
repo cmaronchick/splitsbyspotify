@@ -11,6 +11,9 @@ const getPlaylists = (req, res) => {
                 playlists.push({
                     playlistId: document.id,
                     spotifyUser: document.data().spotifyUser,
+                    userImage: doc.data().userImage,
+                    likeCount: doc.data().likeCount,
+                    commentCount: doc.data().commentCount,
                     createdAt: document.data().createdAt
                 })
             })
@@ -21,7 +24,7 @@ const getPlaylists = (req, res) => {
         })
 }
 
-const getPlaylist = (req, res) => {
+const getPlaylist = (req, res, next) => {
     let playlistData = {};
     const { playlistId } = req.params;
 
@@ -55,10 +58,10 @@ const getPlaylist = (req, res) => {
             }
             return res.status(200).json({message: 'Playlist retrieved successfully', playlistData})
         })
-        .catch(getPlaylistErrorObject => {
-            const getPlaylistError = JSON.parse(getPlaylistErrorObject.message)
+        .catch(getPlaylistError => {
             console.error('getPlaylistError: ', getPlaylistError.message)
-            return res.status(getPlaylistError.code ? getPlaylistError.code : 500).json({ error: getPlaylistError.message ? getPlaylistError.message : 'Something went wrong getting that playlist'})
+            req.error = getPlaylistError;
+            return next()
         })
 }
 

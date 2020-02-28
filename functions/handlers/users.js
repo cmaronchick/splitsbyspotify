@@ -169,8 +169,9 @@ const getAuthenticatedUser = (req, res) => {
         .then(notifications => {
             userData.notifications = []
             if (notifications && notifications.docs && notifications.docs.length > 0) {
-                notifications.docs.forEach(notification => {
-                    userData.notifications.push({...notification._fieldsProto, notificationId: notification.id})
+                notifications.docs.forEach(notificationObj => {
+                    const notification = notificationObj.data()
+                    userData.notifications.push({notificationId: notification.id, ...notification})
                 })
             }
             return res.status(200).json(userData)
@@ -192,6 +193,47 @@ const addUserDetails = (req, res) => {
             console.error({ updateUserDetailsError })
             return res.status(500).json({ error: updateUserDetailsError })
         })
+}
+
+// Get Any User's Details
+const getUserDetails = (req, res, next) => {
+    let userDetails = {}
+    const {spotifyUser} = req.params
+    return db.doc(`/users/${spotifyUser}`).get()
+        .then(doc => {
+            if (!doc.exists) {
+                throw new Error(JSON.stringify({ code: 404, message: 'User not found'}))
+            }
+            userDetails = doc.data()
+            return db.collection('playlists')
+                .where('spotifyUser', '==', spotifyUser)
+                .orderBy('createdAt', 'desc')
+                .get()
+
+        })
+        .then(playlistDocs => {
+            let playlists = []
+            if (playlistDocs && playlistDocs.docs && playlistDocs.docs.length > 0) {
+                playlistDocs.docs.forEach(playlistObj => {
+                    const playlist = playlistObj.data()
+                    console.log({playlist})
+                    playlists.push({
+                        playlistId: playlistObj.id,
+                        ...playlist
+                    })
+                })
+            }
+            userDetails.playlists = playlists
+            return res.status(200).json({ message: 'User details retrieved successfully', userDetails})
+
+
+        })
+        .catch(getUserDetailsError => {
+            console.error({getUserDetailsError})
+            req.error = getUserDetailsError
+            return next()
+        })
+
 }
 
 // Upload a profile image for users
@@ -245,5 +287,22 @@ const uploadImage = (req, res) => {
     busboy.end(req.rawBody);
 }
 
+const markNotificationsAsRead = (req, res, next) => {
+    let batch = db.batch()
+    req.body.forEach(notificationId => {
+        const notification = db.doc(`/notifications/${notificationId}`)
+        batch.update(notification, { read: true });
+    });
+    batch.commit()
+        .then(() => {
+            return res.status(200).json({ message: 'Notifications marked read'});
+        })
+        .catch(batchError => {
+            console.error(batchError)
+            req.error = batchError
+            return next()
+        })
 
-module.exports = { signUp, login, uploadImage, getAuthenticatedUser, addUserDetails, spotifyLogin }
+}
+
+module.exports = { signUp, login, uploadImage, getAuthenticatedUser, addUserDetails, getUserDetails, spotifyLogin, markNotificationsAsRead }

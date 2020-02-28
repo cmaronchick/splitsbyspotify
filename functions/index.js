@@ -5,16 +5,25 @@ const db = require('./util/admin')
 const app = require('express')();
 
 const {getPlaylists, getPlaylist, deletePlaylist, addPlaylist, commentOnPlaylist, deleteCommentOnPlaylist, likeAPlaylist, unlikeAPlaylist} = require('./handlers/playlists')
-const {signUp, login, uploadImage, getAuthenticatedUser, addUserDetails, spotifyLogin } = require('./handlers/users')
+const {
+    signUp,
+    login,
+    uploadImage,
+    getAuthenticatedUser,
+    addUserDetails,
+    getUserDetails,
+    spotifyLogin,
+    markNotificationsAsRead } = require('./handlers/users')
 const { getSpotifyClientToken } = require('./handlers/spotify')
 const {FBAuth} = require('./util/FBAuth')
+const {errors} = require('./handlers/errors')
 
 
 
 // Playlist Routes
 app.get('/playlists', getPlaylists)
 app.post('/playlists', FBAuth, addPlaylist)
-app.get('/playlists/:playlistId', getPlaylist)
+app.get('/playlists/:playlistId', getPlaylist, errors)
 app.delete('/playlists/:playlistId', deletePlaylist)
 app.post('/playlists/:playlistId/like', FBAuth, likeAPlaylist)
 app.delete('/playlists/:playlistId/like', FBAuth, unlikeAPlaylist)
@@ -27,6 +36,8 @@ app.post('/login', login)
 app.post('/user/image', FBAuth, uploadImage)
 app.get('/user', FBAuth, getAuthenticatedUser)
 app.post('/user', FBAuth, addUserDetails)
+app.get('/user/:spotifyUser', getUserDetails, errors)
+app.post('/notifications', FBAuth, markNotificationsAsRead)
 
 // Spotify
 app.post('/spotifyLogin', getSpotifyClientToken, spotifyLogin)
@@ -38,20 +49,14 @@ exports.deleteNotificationOnUnlike = functions.region('us-central1').firestore.d
     .onDelete((snapshot) => {
         return db.doc(`/notifications/${snapshot.id}`)
             .delete()
-            .then(() => {
-                return;
-            })
-            .catch((deleteNotificationError) => {
-                console.error({deleteNotificationError})
-                return;
-            })
+            .catch(error => console.error({error}))
     })
 exports.createNotificationOnLike = functions.region('us-central1').firestore.document('likes/{id}')
     .onCreate((snapshot) => {
         return db.doc(`/playlists/${snapshot.data().playlistId}`)
         .get()
         .then(doc => {
-            if(doc.exists) {
+            if(doc.exists && doc.data().spotifyUser !== snapshot.data().spotifyUser) {
                 return db.doc(`/notifications/${snapshot.id}`).set({
                     createdAt: new Date().toISOString(),
                     recipient: doc.data().spotifyUser,
@@ -63,17 +68,7 @@ exports.createNotificationOnLike = functions.region('us-central1').firestore.doc
             }
             throw new Error('Document does not exist');
         })
-        .catch(getSnapshotError => {
-            console.error({getSnapshotError})
-            return;
-        })
-        .then(() => {
-            return
-        })
-        .catch(setNotificationError => {
-            console.error({setNotificationError})
-            return;
-        })
+        .catch(error => console.error({error}))
     })
 
 exports.createNotificationsOnComment = functions.region('us-central1').firestore.document('comment/{id}')
@@ -81,7 +76,7 @@ exports.createNotificationsOnComment = functions.region('us-central1').firestore
         return db.doc(`/playlists/${snapshot.data().playlistId}`)
         .get()
         .then(doc => {
-            if(doc.exists) {
+            if(doc.exists && doc.data().spotifyUser !== snapshot.data().spotifyUser) {
                 return db.doc(`/notifications/${snapshot.id}`).set({
                     createdAt: new Date().toISOString(),
                     recipient: doc.data().spotifyUser,
@@ -93,15 +88,69 @@ exports.createNotificationsOnComment = functions.region('us-central1').firestore
             }
             throw new Error('No snapshot found');
         })
-        .catch(getSnapshotError => {
-            console.error({getSnapshotError})
-            return;
-        })
-        .then(() => {
-            return;
-        })
-        .catch(setNotificationError => {
-            console.error({setNotificationError})
-            return;
-        })
+        .catch(error => console.error({error}))
     })
+
+exports.onUserImageChange = functions.region('us-central1').firestore.document(`/users/{userId}`)
+    .onUpdate((change) => {
+        console.log(change.before.data())
+        console.log(change.after.data())
+        if (change.before.data().imageUrl !== change.after.data().imageUrl) {
+        console.log('image has changed')
+        const batch = db.batch();
+        return db.collection('playlists')
+            .where('spotifyUser', '==', change.before.data().spotifyUser)
+            .get()
+            .then(data => {
+                if (data && data.docs && data.docs.length > 0) {
+                    data.docs.forEach(doc => {
+                        const playlist = db.doc(`/playlists/${doc.id}`)
+                        batch.update(playlist, {
+                            userImage: change.after.data().imageUrl
+                        })
+                    })
+                }
+                return batch.commit();
+            })
+            .catch(error => console.error(error))
+        }
+        return false;
+    })
+
+exports.onPlaylistDelete = functions.region('us-central1').firestore.document(`/playlists/{playlistId}`)
+    .onDelete((snapshot, context) => {
+        const playlistId = context.params.playlistId
+        const batch = db.batch();
+        return db.collection('comments')
+            .where('playlistId', '==', playlistId)
+            .get()
+            .then(data => {
+                if (data && data.docs && data.docs.length > 0) {
+                    data.docs.forEach(doc => {
+                        batch.delete(`/comments/${doc.id}`)
+                    })
+                }
+                return db.collection('likes')
+                    .where('playlistId','==', playlistId)
+                    .get()
+            })
+            .then(data => {
+                if (data && data.docs && data.docs.length > 0) {
+                    data.docs.forEach(doc => {
+                        batch.delete(`/likes/${doc.id}`)
+                    })
+                }
+                return db.collection('notifications')
+                    .where('playlistId','==', playlistId)
+                    .get()
+            })
+            .then(data => {
+                if (data && data.docs && data.docs.length > 0) {
+                    data.docs.forEach(doc => {
+                        batch.delete(`/notifications/${doc.id}`)
+                    })
+                }                
+                return batch.commit()
+            })
+            .catch(error => console.error(error))
+        })

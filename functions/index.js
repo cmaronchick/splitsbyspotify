@@ -1,6 +1,6 @@
 const functions = require('firebase-functions');
 const { config, spotifyConfig } = require('./util/config')
-const db = require('./util/admin')
+const { db } = require('./util/admin')
 
 const app = require('express')();
 
@@ -22,12 +22,12 @@ const {errors} = require('./handlers/errors')
 
 // Playlist Routes
 app.get('/playlists', getPlaylists)
-app.post('/playlists', FBAuth, addPlaylist)
+app.post('/playlists', FBAuth, addPlaylist, errors)
 app.get('/playlists/:playlistId', getPlaylist, errors)
-app.delete('/playlists/:playlistId', deletePlaylist)
+app.delete('/playlists/:playlistId', FBAuth, deletePlaylist, errors)
 app.post('/playlists/:playlistId/like', FBAuth, likeAPlaylist)
 app.delete('/playlists/:playlistId/like', FBAuth, unlikeAPlaylist)
-app.post('/playlists/:playlistId/comment', FBAuth, commentOnPlaylist)
+app.post('/playlists/:playlistId/comment', FBAuth, commentOnPlaylist, errors)
 app.delete('/playlists/:playlistId/comment/:commentId', FBAuth, deleteCommentOnPlaylist)
 
 // User Route
@@ -63,7 +63,7 @@ exports.createNotificationOnLike = functions.region('us-central1').firestore.doc
                     sender: snapshot.data().spotifyUser,
                     playlistId: doc.id,
                     type: 'like',
-                    read: 'false'
+                    read: false
                 })
             }
             throw new Error('Document does not exist');
@@ -71,7 +71,7 @@ exports.createNotificationOnLike = functions.region('us-central1').firestore.doc
         .catch(error => console.error({error}))
     })
 
-exports.createNotificationsOnComment = functions.region('us-central1').firestore.document('comment/{id}')
+exports.createNotificationsOnComment = functions.region('us-central1').firestore.document('comments/{id}')
     .onCreate((snapshot) => {
         return db.doc(`/playlists/${snapshot.data().playlistId}`)
         .get()
@@ -83,7 +83,7 @@ exports.createNotificationsOnComment = functions.region('us-central1').firestore
                     sender: snapshot.data().spotifyUser,
                     playlistId: doc.id,
                     type: 'comment',
-                    read: 'false'
+                    read: false
                 })
             }
             throw new Error('No snapshot found');

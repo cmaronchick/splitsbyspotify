@@ -65,7 +65,7 @@ const getPlaylist = (req, res, next) => {
         })
 }
 
-const deletePlaylist = (req, res) => {
+const deletePlaylist = (req, res, next) => {
     console.log('req.body', req.params)
     const { playlistId } = req.params;
     const playlistDoc = db.doc(`/playlists/${playlistId}`)
@@ -94,14 +94,10 @@ const deletePlaylist = (req, res) => {
             }
 
         })
-        .catch(deletePlaylistErrorObject => {
-            const deletePlaylistError = JSON.parse(deletePlaylistErrorObject.message)
-            console.error(`${deletePlaylistError.message}`)
-            return res.status(500).json({ error: deletePlaylistError})
-        })
         .catch(getPlaylistError => {
             console.error({ getPlaylistError })
-            return res.status(500).json({ error: 'Something went wrong getting that playlist.'})
+            req.error = getPlaylistError
+            return next()
         })    
 }
 
@@ -126,24 +122,17 @@ const commentOnPlaylist = (req, res) => {
             }
             return doc.ref.update({ commentCount: doc.data().commentCount ? doc.data().commentCount++ : 1})
         })
-        .catch(getPlaylistError => {
-            console.error({getPlaylistError})
-            return res.status(500).json({ error: `Error getting playlist ${getPlaylistError}`})
-        })
         .then(() => {
             return db.collection('comments')
             .add(comment)
         })
-        .catch(addCommentError => {
-            console.error({addCommentError})
-            return res.status(500).json({ error: addCommentError })
-        })
         .then(doc => {
-            return res.status(200).json({ message: `Comment ${doc.id} added successfully`, comment: doc})
+            return res.status(200).json({ message: `Comment ${doc.id} added successfully`, comment})
         })
         .catch(err => {
             console.error({err})
-            return res.status(500).json({ error: 'Something went wrong'})
+            req.error = err
+            return next()
         })
 }
 
@@ -305,20 +294,20 @@ const addPlaylist = (req, res) => {
     const newPlaylist = {
         playlistName: req.body.playlistName,
         playlistId: req.body.playlistId,
-        spotifyUser: req.body.spotifyUser,
+        spotifyUser: req.user.spotifyUser,
         userImage: req.user.imageUrl,
         createdAt: new Date().toISOString(),
         likeCount: 0,
         commentCount: 0
 
     }
-    db
+    return db
         .collection('playlists')
         .add(newPlaylist)
-        .then(document => {
+        .then(doc => {
             const resPlaylist = newPlaylist;
             resPlaylist.playlistId = doc.id
-            return res.json( { message: `document ${document.id} created successfully`, playlist: resPlaylist})
+            return res.json( { message: `document ${doc.id} created successfully`, playlist: resPlaylist})
         })
         .catch(addPlaylistError => {
             console.error(addPlaylistError)

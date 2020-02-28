@@ -1,5 +1,3 @@
-const ky = require('ky/umd')
-
 const { admin, db } = require('../util/admin')
 
 const { config } = require('../util/config');
@@ -8,6 +6,7 @@ firebase.initializeApp(config);
 
 const { generateRandomString } = require('../util/spotify')
 const querystring = require('querystring')
+const ky = require('ky/umd')
 
 const { validateSignUpData, validateLoginData, reduceUserDetails } = require('../util/validators')
 

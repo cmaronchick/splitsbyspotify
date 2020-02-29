@@ -7,14 +7,14 @@ const getPlaylists = (req, res) => {
         .get()
         .then(data => {
             let playlists = []
-            data.forEach(document => {
+            data.docs.forEach(doc => {
                 playlists.push({
-                    playlistId: document.id,
-                    spotifyUser: document.data().spotifyUser,
+                    playlistId: doc.id,
+                    spotifyUser: doc.data().spotifyUser,
                     userImage: doc.data().userImage,
                     likeCount: doc.data().likeCount,
                     commentCount: doc.data().commentCount,
-                    createdAt: document.data().createdAt
+                    createdAt: doc.data().createdAt
                 })
             })
             return res.json(playlists)

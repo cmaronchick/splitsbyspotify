@@ -8,19 +8,18 @@ const getPlaylists = (req, res) => {
         .then(data => {
             let playlists = []
             data.docs.forEach(doc => {
+                let playlist = doc.data()
                 playlists.push({
                     playlistId: doc.id,
-                    spotifyUser: doc.data().spotifyUser,
-                    userImage: doc.data().userImage,
-                    likeCount: doc.data().likeCount,
-                    commentCount: doc.data().commentCount,
-                    createdAt: doc.data().createdAt
+                    ...playlist
                 })
             })
-            return res.json(playlists)
+            return res.status(200).json(playlists)
         })
         .catch(getPlaylistsError => {
             console.error(getPlaylistsError)
+            req.error = getPlaylistsError
+            return next()
         })
 }
 

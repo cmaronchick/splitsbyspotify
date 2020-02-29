@@ -24,7 +24,8 @@ class Home extends Component {
         let recentPlaylistsMarkup = this.state.playlists ? (
             this.state.playlists.map(playlist => {
                 return (
-                    <div key={playlist.playlistId}>{playlist.spotifyUser}</div>
+                    <div key={playlist.playlistId}>
+                        {playlist.playlistName} | {playlist.spotifyUser}</div>
                 )
             })
         ) : (

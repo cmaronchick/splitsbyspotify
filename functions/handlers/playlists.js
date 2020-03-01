@@ -10,7 +10,7 @@ const getPlaylists = (req, res) => {
             data.docs.forEach(doc => {
                 let playlist = doc.data()
                 playlists.push({
-                    playlistId: doc.id,
+                    id: doc.id,
                     ...playlist
                 })
             })

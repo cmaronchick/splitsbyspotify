@@ -5,6 +5,11 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: rgb(245, 245, 245);
+}
+
+a{
+  text-decoration: none;
 }
 
 .container {
@@ -13,4 +18,12 @@ body {
 }
 .nav-container {
   margin: 0 auto;
+}
+
+.playlist-container {
+  padding: 5px 20px;
+}
+
+.splits-container {
+  padding: 5px 20px;
 }

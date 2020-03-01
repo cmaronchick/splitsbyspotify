@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 import Grid from '@material-ui/core/Grid'
 import ky from 'ky'
 
+import PlaylistPreview from '../components/PlaylistPreview'
+
 class Home extends Component {
     constructor(props) {
         super(props)
@@ -24,20 +26,21 @@ class Home extends Component {
         let recentPlaylistsMarkup = this.state.playlists ? (
             this.state.playlists.map(playlist => {
                 return (
-                    <div key={playlist.playlistId}>
-                        {playlist.playlistName} | {playlist.spotifyUser}</div>
+                    <PlaylistPreview playlist={playlist} key={playlist.id} />
                 )
             })
         ) : (
             <div>Loading...</div>
         )
         return (
-            <Grid container spacing={8}>
+            <Grid container spacing={2}>
                 <Grid item sm={8} xs={12}>
-                    {recentPlaylistsMarkup}
+                    <div className="playlist-container">
+                        {recentPlaylistsMarkup}
+                    </div>
                 </Grid>
                 <Grid item sm={4} xs={12}>
-                    <div>
+                    <div className="splits-container">
                         Content...
                     </div>
                 </Grid>

@@ -27,19 +27,24 @@ const styles = {
 
 const PlaylistPreview = (props) => {
     dayjs.extend(relativeTime)
-
-    const { classes, playlist : { playlistName, createdAt, userImage, playlistId, likeCount, commentCount, spotifyUser } } = props
+    if (!props.playlist) {
+        return (<div></div>)
+    }
+    const { classes, playlist : { name, images, id, owner } } = props
+    console.log('images', images)
     return (
         <Card className={classes.card}>
+            {images && images.length > 0 ? (
             <CardMedia
-            image={`${userImage}`}
-            title={`${playlistName}`}
+            image={`${images[0].url}`}
+            title={`${name}`}
             className={classes.image}
             />
+            ) : null}
             <CardContent className={classes.content}>
-                <Typography variant="h5" color="primary" value={spotifyUser} component={Link} to={`/playlist/${playlistId}`}>{spotifyUser}</Typography>
-                <Typography variant="body2" value={createdAt}>{dayjs(createdAt).fromNow()}</Typography>
-                <Typography variant="body1" value={playlistName}>{playlistName}</Typography>
+                <Typography variant="h5" color="primary" value={id} component={Link} to={`/playlist/${id}`}>{owner ? owner.id : null}</Typography>
+                {/* <Typography variant="body2" value={createdAt}>{dayjs(createdAt).fromNow()}</Typography> */}
+                <Typography variant="body1" value={name}>{name}</Typography>
             </CardContent>
         </Card>
     )

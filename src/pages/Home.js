@@ -9,17 +9,25 @@ class Home extends Component {
         super(props)
         this.state = {
             user: null,
-            playlists: null
+            playlists: props.playlists
         }
     }
     async componentDidMount() {
+        console.log('this.props.playlists', this.props.playlists)
         try {
-            let playlists = await ky.get('/playlists').json()
+            let playlists = this.props.playlists ? this.props.playlists : await ky.get('/playlists').json()
             this.setState({
                 playlists: playlists
             })  
         } catch(error) {
             console.error(error)   
+        }
+    }
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.playlists !== this.props.playlists) {
+          this.setState({
+            playlists: this.props.playlists
+          })
         }
     }
     render() {

@@ -107,6 +107,42 @@ const login = (req, res) => {
     })
 }
 
+createFirebaseAccount = (req, res) => {
+    const {spotifyID, displayName, photoURL, email, accessToken} = req.body
+    // The UID we'll assign to the user.
+    const uid = `spotify:${spotifyID}`;
+  
+    // Save the access token to the Firebase Realtime Database.
+    const databaseTask = admin.database().ref(`/spotifyAccessToken/${uid}`).set(accessToken);
+  
+    // Create or update the user account.
+    const userCreationTask = admin.auth().updateUser(uid, {
+      displayName: displayName,
+      photoURL: photoURL,
+      email: email,
+      emailVerified: true,
+    }).catch((error) => {
+      // If user does not exists we create it.
+      if (error.code === 'auth/user-not-found') {
+        return admin.auth().createUser({
+          uid: uid,
+          displayName: displayName,
+          photoURL: photoURL,
+          email: email,
+          emailVerified: true,
+        });
+      }
+      throw error;
+    });
+  
+    // Wait for all async tasks to complete, then generate and return a custom auth token.
+    await Promise.all([userCreationTask, databaseTask]);
+    // Create a Firebase custom auth token.
+    const token = await admin.auth().createCustomToken(uid);
+    console.log('Created Custom token for UID "', uid, '" Token:', token);
+    return res.status(200).json({ token });
+  }
+
 const spotifyLogin = (req, res) => {
 
   

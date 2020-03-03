@@ -5,7 +5,7 @@ const {spotifyConfig} = require('../util/config')
     // your application requests authorization
     const { client_id, client_secret } = spotifyConfig
 
-    console.log(`new Buffer.from(client_id + ':' + client_secret).toString('base64'): ${new Buffer.from(client_id + ':' + client_secret).toString('base64')}`);
+    //console.log(`new Buffer.from(client_id + ':' + client_secret).toString('base64'): ${new Buffer.from(client_id + ':' + client_secret).toString('base64')}`);
     var authOptions = {
         method: 'POST',
         uri: 'https://accounts.spotify.com/api/token',

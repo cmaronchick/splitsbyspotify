@@ -25,3 +25,5 @@ firebase-debug.log*
 
 #firebase
 splitsbyspotify-firebase-adminsdk-xkg5z.json
+
+/constants/spotifyConfig.js

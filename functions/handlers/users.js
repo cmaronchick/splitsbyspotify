@@ -58,7 +58,7 @@ const { validateSignUpData, validateLoginData, reduceUserDetails } = require('..
                 }
                 return db.doc(`/users/${newUser.spotifyUser}`).set(userCredentials);
             }
-            return null
+            return new Error('No IdToken returned')
 
         })
         .then(() => {
@@ -122,11 +122,14 @@ createFirebaseAccount = (req, res) => {
       photoURL: photoURL,
       email: email,
       emailVerified: true,
-    }).catch((error) => {
+      spotifyUser: spotifyID
+    })
+    .catch((error) => {
       // If user does not exists we create it.
       if (error.code === 'auth/user-not-found') {
         return admin.auth().createUser({
           uid: uid,
+          spotifyUser: spotifyID,
           displayName: displayName,
           photoURL: photoURL,
           email: email,
@@ -134,8 +137,32 @@ createFirebaseAccount = (req, res) => {
         });
       }
       throw error;
-    });
-  
+    })
+    .then(data => {
+        user = data.user
+        console.log('data', data.user ? data.user : data.statusCode)
+        return data.user ? data.user.getIdToken() : null
+    })
+    .then(IdToken => {
+        if (IdToken) {
+            const userImage = 'blank-profile-picture.png';
+            token = IdToken;
+            const userCredentials = {
+                spotifyUser: newUser.spotifyUser,
+                email: newUser.email,
+                createdAt: new Date().toISOString(),
+                imageUrl: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${userImage}?alt=media`,
+                userId: user.uid
+            }
+            return db.doc(`/users/${newUser.spotifyUser}`).set(userCredentials);
+        }
+        return new Error('No IdToken returned')
+    }) 
+    .catch(err => {
+        console.error(err)
+
+        return res.status(500).json({ err })
+    })
     // Wait for all async tasks to complete, then generate and return a custom auth token.
     Promise.all([userCreationTask, databaseTask])
     .then(res => {

@@ -13,6 +13,7 @@ const {
     addUserDetails,
     getUserDetails,
     spotifyLogin,
+    createFirebaseAccount,
     markNotificationsAsRead } = require('./handlers/users')
 const { getSpotifyClientToken } = require('./handlers/spotify')
 const {FBAuth} = require('./util/FBAuth')
@@ -21,7 +22,7 @@ const {errors} = require('./handlers/errors')
 
 
 // Playlist Routes
-app.get('/playlists', getPlaylists, errors)
+app.get('/playlists', getPlaylists)
 app.post('/playlists', FBAuth, addPlaylist, errors)
 app.get('/playlists/:playlistId', getPlaylist, errors)
 app.delete('/playlists/:playlistId', FBAuth, deletePlaylist, errors)
@@ -40,7 +41,8 @@ app.get('/user/:spotifyUser', getUserDetails, errors)
 app.post('/notifications', FBAuth, markNotificationsAsRead)
 
 // Spotify
-app.post('/spotifyLogin', getSpotifyClientToken, spotifyLogin)
+app.post('/spotifyAnonymous', getSpotifyClientToken, spotifyLogin)
+app.post('/spotifyLogin', createFirebaseAccount, errors)
 
 
 exports.api = functions.https.onRequest(app);

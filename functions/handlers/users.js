@@ -108,9 +108,10 @@ const login = (req, res) => {
 }
 
 createFirebaseAccount = (req, res) => {
-    const {spotifyID, displayName, photoURL, email, accessToken} = req.body
+    const {spotifyID, displayName, photoURL, email, accessToken} = JSON.parse(req.body)
     // The UID we'll assign to the user.
     const uid = `spotify:${spotifyID}`;
+    console.log('spotifyID', spotifyID)
   
     // Save the access token to the Firebase Realtime Database.
     const databaseTask = admin.database().ref(`/spotifyAccessToken/${uid}`).set(accessToken);
@@ -136,16 +137,21 @@ createFirebaseAccount = (req, res) => {
     });
   
     // Wait for all async tasks to complete, then generate and return a custom auth token.
-    await Promise.all([userCreationTask, databaseTask]);
-    // Create a Firebase custom auth token.
-    const token = await admin.auth().createCustomToken(uid);
-    console.log('Created Custom token for UID "', uid, '" Token:', token);
-    return res.status(200).json({ token });
+    Promise.all([userCreationTask, databaseTask])
+    .then(res => {
+        // Create a Firebase custom auth token.
+        return admin.auth().createCustomToken(uid);
+    })
+    .then (token => {
+        console.log('Created Custom token for UID "', uid, '" Token:', token);
+        return res.status(200).json({ token });
+    })
+    .catch(reject => {
+        return res.status(500).json({ reject })
+    })
   }
 
 const spotifyLogin = (req, res) => {
-
-  
     // use the access token to access the Spotify Web API
     console.log('req', req.spotifyToken)
     var token = req.spotifyToken //body.access_token;
@@ -340,4 +346,4 @@ const markNotificationsAsRead = (req, res, next) => {
 
 }
 
-module.exports = { signUp, login, uploadImage, getAuthenticatedUser, addUserDetails, getUserDetails, spotifyLogin, markNotificationsAsRead }
+module.exports = { signUp, login, uploadImage, getAuthenticatedUser, addUserDetails, getUserDetails, spotifyLogin, createFirebaseAccount, markNotificationsAsRead }

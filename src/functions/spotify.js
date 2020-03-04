@@ -42,6 +42,32 @@ export const login = async (location) => {
                   }
               }).json()
               console.log('spotifyResponse :', spotifyResponse);
+              const spotifyID = spotifyResponse.id,
+                display_name = spotifyResponse.display_name,
+                photoURL = spotifyResponse.images && spotifyResponse.images.length > 0 ? spotifyResponse.images[0].url : '',
+                email = spotifyResponse.email,
+                accessToken = spotifyResponse.accessToken;
+              try {
+                let body = new URLSearchParams()
+                body.set('spotifyID', spotifyID)
+                body.set('display_name', display_name)
+                body.set('photoURL', photoURL)
+                body.set('email', email)
+                body.set('accessToken', accessToken)
+                let firebaseResponse = await ky.post('/spotifyLogin', {
+                  body: body
+                }).json()
+                console.log('firebase', firebaseResponse)
+
+              } catch (firebaseResponse) {
+                console.log('firebaseResponseError', firebaseResponse)
+                try {
+                  let firebaseResponseError = firebaseResponse.response.json()
+                  console.log('firebaseResponseError', firebaseResponseError)
+                } catch(err) {
+                  console.log('err', err)
+                }
+              }
               return {
                 spotifyUser: spotifyResponse,
                 spotifyAccessToken: access_token,
@@ -57,6 +83,12 @@ export const login = async (location) => {
     console.log('spotifyTokenError', spotifyTokenError)
     return { error: spotifyTokenErrorResponse }
   }
+}
+
+export const logout = async () => {
+    document.cookie = ('spotifyAccessToken=null;expires=0')
+    document.cookie = ('spotifyRefreshToken=null;expires=0')
+    return true;
 }
 
 export const refreshAccessToken = async (refresh_token) => {

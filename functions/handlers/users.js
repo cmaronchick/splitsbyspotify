@@ -14,6 +14,8 @@ const { validateSignUpData, validateLoginData, reduceUserDetails } = require('..
  const signUp = (req, res) => {
     const body = JSON.parse(req.body)
     const { email, password, confirmPassword, spotifyUser } = body
+    const firstname = body.firstname ? body.firstname : "John"
+    const lastname = body.lastname ? body.lastname : "Doe"
     const newUser = {
         email: email,
         password: password,
@@ -51,9 +53,10 @@ const { validateSignUpData, validateLoginData, reduceUserDetails } = require('..
                 token = IdToken;
                 const userCredentials = {
                     spotifyUser: newUser.spotifyUser,
+                    display_name: `${firstname} ${lastname}`,
                     email: newUser.email,
                     createdAt: new Date().toISOString(),
-                    imageUrl: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${userImage}?alt=media`,
+                    photoURL: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${userImage}?alt=media`,
                     userId: user.uid
                 }
                 return db.doc(`/users/${newUser.spotifyUser}`).set(userCredentials);
@@ -108,21 +111,20 @@ const login = (req, res) => {
 }
 
 createFirebaseAccount = (req, res) => {
-    const {spotifyID, displayName, photoURL, email, accessToken} = JSON.parse(req.body)
+    const {spotifyID, display_name, photoURL, email, accessToken} = req.body
     // The UID we'll assign to the user.
     const uid = `spotify:${spotifyID}`;
-    console.log('spotifyID', spotifyID)
   
     // Save the access token to the Firebase Realtime Database.
     const databaseTask = admin.database().ref(`/spotifyAccessToken/${uid}`).set(accessToken);
   
     // Create or update the user account.
     const userCreationTask = admin.auth().updateUser(uid, {
-      displayName: displayName,
-      photoURL: photoURL,
-      email: email,
-      emailVerified: true,
-      spotifyUser: spotifyID
+        display_name: display_name,
+        photoURL: photoURL,
+        email: email,
+        emailVerified: true,
+        spotifyUser: spotifyID
     })
     .catch((error) => {
       // If user does not exists we create it.
@@ -130,7 +132,7 @@ createFirebaseAccount = (req, res) => {
         return admin.auth().createUser({
           uid: uid,
           spotifyUser: spotifyID,
-          displayName: displayName,
+          display_name: display_name,
           photoURL: photoURL,
           email: email,
           emailVerified: true,
@@ -138,31 +140,8 @@ createFirebaseAccount = (req, res) => {
       }
       throw error;
     })
-    .then(data => {
-        user = data.user
-        console.log('data', data.user ? data.user : data.statusCode)
-        return data.user ? data.user.getIdToken() : null
-    })
-    .then(IdToken => {
-        if (IdToken) {
-            const userImage = 'blank-profile-picture.png';
-            token = IdToken;
-            const userCredentials = {
-                spotifyUser: newUser.spotifyUser,
-                email: newUser.email,
-                createdAt: new Date().toISOString(),
-                imageUrl: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${userImage}?alt=media`,
-                userId: user.uid
-            }
-            return db.doc(`/users/${newUser.spotifyUser}`).set(userCredentials);
-        }
-        return new Error('No IdToken returned')
-    }) 
-    .catch(err => {
-        console.error(err)
-
-        return res.status(500).json({ err })
-    })
+    
+    
     // Wait for all async tasks to complete, then generate and return a custom auth token.
     Promise.all([userCreationTask, databaseTask])
     .then(res => {
@@ -171,9 +150,29 @@ createFirebaseAccount = (req, res) => {
     })
     .then (token => {
         console.log('Created Custom token for UID "', uid, '" Token:', token);
+        if (token) {
+            const userCredentials = {
+                spotifyUser: spotifyID,
+                display_name: display_name,
+                email: email,
+                createdAt: new Date().toISOString(),
+                photoURL: photoURL,
+                userId: uid
+            }
+            return db.doc(`/users/${spotifyID}`).set(userCredentials);
+        }
+        return new Error('No IdToken returned')
+
+    })
+    .then(data => {
+        console.log('data', data)
+        return admin.auth().createCustomToken(uid)
+    })
+    .then(token => {
         return res.status(200).json({ token });
     })
     .catch(reject => {
+        console.log('reject', reject)
         return res.status(500).json({ reject })
     })
   }
@@ -336,8 +335,8 @@ const uploadImage = (req, res) => {
             }
         })
         .then(() => {
-            const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFilename}?alt=media`
-            return db.doc(`/users/${req.user.spotifyUser}`).update({ imageUrl })
+            const photoURL = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFilename}?alt=media`
+            return db.doc(`/users/${req.user.spotifyUser}`).update({ photoURL })
         })
         .catch((uploadImageError) => {
             console.error(uploadImageError)

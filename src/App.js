@@ -4,7 +4,7 @@ import { ThemeProvider as MuiThemeProvider} from '@material-ui/core/styles'
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme'
 import ky from 'ky'
 
-import { login, refreshAccessToken, getUserPlaylists } from './functions/spotify'
+import { login, logout, refreshAccessToken, getUserPlaylists } from './functions/spotify'
 import { getUrlParameters } from './functions/utils'
 import { spotifyConfig } from './constants/spotifyConfig'
 
@@ -57,6 +57,19 @@ class App extends Component {
   handleSpotifyLogin = () => {
     window.location.href = `https://accounts.spotify.com/authorize?response_type=code&client_id=${spotifyConfig.client_id}&scope=${spotifyConfig.scope}&redirect_uri=http://localhost:3000/spotifyCallback&state=${spotifyConfig.state}`
   }
+  handleSpotifyLogout = () => {
+    let logoutResponse = logout();
+    if (logoutResponse) {
+      this.setState({
+        spotifyUser: null,
+        spotifyAccessToken: null,
+        spotifyRefreshToken: null,
+        playlists: null
+      })
+      window.history.pushState({ 'page_id': 1, 'user': 'null'}, '', '/')
+    }
+
+  }
 
   handleSpotifyRefreshToken = async (refresh_token) => {
     let spotifyData = await refreshAccessToken(refresh_token)
@@ -86,7 +99,9 @@ class App extends Component {
     if (refreshToken && refreshToken.length > 0) {
         console.log('The cookie "reader" exists (ES6)')
         let refresh_token = refreshToken[0].split('=')[1]
-        this.handleSpotifyRefreshToken(refresh_token)
+        if (refresh_token !== 'null') {
+          this.handleSpotifyRefreshToken(refresh_token)
+        }
     }
     if (window.location.pathname === '/spotifyCallback') {
       console.log('starting spotify login')
@@ -94,7 +109,7 @@ class App extends Component {
     }
   }
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.spotifyAccessToken !== this.state.spotifyAccessToken) {
+    if (prevState.spotifyAccessToken !== this.state.spotifyAccessToken && this.state.spotifyAccessToken) {
       this.handleGetUserPlaylists(this.state.spotifyAccessToken)
     }
   }
@@ -113,7 +128,7 @@ class App extends Component {
                 <Navbar color="primary.main" />
               </div>
               <div className="container">
-                <SpotifyLogin user={this.state.user} spotifyUser={this.state.spotifyUser} handleSpotifyLogin={this.handleSpotifyLogin} />
+                <SpotifyLogin user={this.state.user} spotifyUser={this.state.spotifyUser} handleSpotifyLogin={this.handleSpotifyLogin} handleSpotifyLogout={this.handleSpotifyLogout} />
                 <Switch>
                   <Route path='/signup' component={Signup} />
                   <Route path='/login' component={Login} />

@@ -289,7 +289,7 @@ const unlikeAPlaylist = (req, res) => {
 
 }
 
-const addPlaylist = (req, res) => {
+const addPlaylist = (req, res, next) => {
     console.log('req.user', req.user)
     const newPlaylist = {
         playlistName: req.body.playlistName,

@@ -23,7 +23,7 @@ const {errors} = require('./handlers/errors')
 
 // Playlist Routes
 app.get('/playlists', getPlaylists)
-app.post('/playlists', FBAuth, addPlaylist, errors)
+app.post('/playlists', FBAuth, addPlaylist)
 app.get('/playlists/:playlistId', getPlaylist, errors)
 app.delete('/playlists/:playlistId', FBAuth, deletePlaylist, errors)
 app.post('/playlists/:playlistId/like', FBAuth, likeAPlaylist)

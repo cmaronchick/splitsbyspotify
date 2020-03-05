@@ -103,14 +103,14 @@ const deletePlaylist = (req, res, next) => {
 const commentOnPlaylist = (req, res) => {
     const { body } = JSON.parse(req.body)
     const { playlistId } = req.params
-    const { spotifyUser, imageUrl } = req.user
+    const { spotifyUser, photoURL } = req.user
     if (!playlistId || !body || !spotifyUser) return res.status(400).json({ error: `${playlistId} || ${body} || ${spotifyUser} Must not be empty`})
     if (body && body.trim() === '') return res.status(400).json({ error: `Comment must not be empty.`})
     const comment = {
         playlistId,
         body,
         spotifyUser: spotifyUser,
-        userImage: imageUrl ? imageUrl : `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/blank-profile-picture.png?alt=media`,
+        userImage: photoURL ? photoURL : `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/blank-profile-picture.png?alt=media`,
         createdAt: new Date().toISOString()
     }
 
@@ -170,7 +170,7 @@ const deleteCommentOnPlaylist = (req, res) => {
 
 const likeAPlaylist = (req, res) => {
     const { playlistId } = req.params
-    const { spotifyUser, imageUrl } = req.user
+    const { spotifyUser, photoURL } = req.user
     let playlistData;
     if (!playlistId || !spotifyUser) return res.status(400).json({ error: `${playlistId} || ${spotifyUser} Must not be empty`})
 
@@ -230,7 +230,7 @@ const likeAPlaylist = (req, res) => {
 
 const unlikeAPlaylist = (req, res) => {
     const { playlistId } = req.params
-    const { spotifyUser, imageUrl } = req.user
+    const { spotifyUser, photoURL } = req.user
     let playlistData;
     if (!playlistId || !spotifyUser) return res.status(400).json({ error: `${playlistId} || ${spotifyUser} Must not be empty`})
 
@@ -290,11 +290,12 @@ const unlikeAPlaylist = (req, res) => {
 }
 
 const addPlaylist = (req, res) => {
+    console.log('req.user', req.user)
     const newPlaylist = {
         playlistName: req.body.playlistName,
         playlistId: req.body.playlistId,
         spotifyUser: req.user.spotifyUser,
-        userImage: req.user.imageUrl,
+        photoURL: req.user.photoURL,
         createdAt: new Date().toISOString(),
         likeCount: 0,
         commentCount: 0

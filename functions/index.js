@@ -97,7 +97,7 @@ exports.onUserImageChange = functions.region('us-central1').firestore.document(`
     .onUpdate((change) => {
         console.log(change.before.data())
         console.log(change.after.data())
-        if (change.before.data().imageUrl !== change.after.data().imageUrl) {
+        if (change.before.data().photoURL !== change.after.data().photoURL) {
         console.log('image has changed')
         const batch = db.batch();
         return db.collection('playlists')
@@ -108,7 +108,7 @@ exports.onUserImageChange = functions.region('us-central1').firestore.document(`
                     data.docs.forEach(doc => {
                         const playlist = db.doc(`/playlists/${doc.id}`)
                         batch.update(playlist, {
-                            userImage: change.after.data().imageUrl
+                            userImage: change.after.data().photoURL
                         })
                     })
                 }

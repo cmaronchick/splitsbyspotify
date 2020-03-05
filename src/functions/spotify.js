@@ -11,6 +11,7 @@ export const login = async (location) => {
     if (!location) {
         return { error: 'No Location Submitted'}
     }
+    let FBIDToken;
     let code = getUrlParameters(location.search, 'code')
 
     let state = location.search.state || null;
@@ -57,12 +58,13 @@ export const login = async (location) => {
                 let firebaseResponse = await ky.post('/spotifyLogin', {
                   body: body
                 }).json()
-                console.log('firebase', firebaseResponse)
+                FBIDToken = firebaseResponse.token
+                console.log('firebase', FBIDToken)
 
               } catch (firebaseResponse) {
                 console.log('firebaseResponseError', firebaseResponse)
                 try {
-                  let firebaseResponseError = firebaseResponse.response.json()
+                  let firebaseResponseError = await firebaseResponse.response.json()
                   console.log('firebaseResponseError', firebaseResponseError)
                 } catch(err) {
                   console.log('err', err)
@@ -71,7 +73,8 @@ export const login = async (location) => {
               return {
                 spotifyUser: spotifyResponse,
                 spotifyAccessToken: access_token,
-                spotifyRefreshToken: refresh_token
+                spotifyRefreshToken: refresh_token,
+                FBIDToken
               }
             } catch (spotifyLoginError) {
                 console.log('spotifyLoginError :', spotifyLoginError);
@@ -86,12 +89,13 @@ export const login = async (location) => {
 }
 
 export const logout = async () => {
-    document.cookie = ('spotifyAccessToken=null;expires=0')
-    document.cookie = ('spotifyRefreshToken=null;expires=0')
+    localStorage.spotifyAccessToken = null;
+    localStorage.spotifyRefreshToken = null;
     return true;
 }
 
 export const refreshAccessToken = async (refresh_token) => {
+  let FBIDToken
     const searchParams = new URLSearchParams();
     searchParams.set('grant_type', 'refresh_token')
     searchParams.set('refresh_token', refresh_token)
@@ -116,10 +120,38 @@ export const refreshAccessToken = async (refresh_token) => {
                   }
               }).json()
               console.log('spotifyResponse :', spotifyResponse);
+              const spotifyID = spotifyResponse.id,
+                display_name = spotifyResponse.display_name,
+                photoURL = spotifyResponse.images && spotifyResponse.images.length > 0 ? spotifyResponse.images[0].url : '',
+                email = spotifyResponse.email,
+                accessToken = spotifyResponse.accessToken;
+              try {
+                let body = new URLSearchParams()
+                body.set('spotifyID', spotifyID)
+                body.set('display_name', display_name)
+                body.set('photoURL', photoURL)
+                body.set('email', email)
+                body.set('accessToken', accessToken)
+                let firebaseResponse = await ky.post('/spotifyLogin', {
+                  body: body
+                }).json()
+                FBIDToken = firebaseResponse.token
+                console.log('firebase', FBIDToken)
+
+              } catch (firebaseResponse) {
+                console.log('firebaseResponseError', firebaseResponse)
+                try {
+                  let firebaseResponseError = await firebaseResponse.response.json()
+                  console.log('firebaseResponseError', firebaseResponseError)
+                } catch(err) {
+                  console.log('err', err)
+                }
+              }
               return {
                 spotifyUser: spotifyResponse,
                 spotifyAccessToken: access_token,
-                spotifyRefreshToken: refresh_token
+                spotifyRefreshToken: refresh_token,
+                FBIDToken
               }
             } catch (spotifyLoginError) {
                 console.log('spotifyLoginError :', spotifyLoginError);
@@ -134,7 +166,7 @@ export const refreshAccessToken = async (refresh_token) => {
     
 }
 
-export const getUserPlaylists = async (access_token) => {
+export const getAllUserPlaylists = async (access_token) => {
     try {
       let spotifyPlaylists = await ky.get('https://api.spotify.com/v1/me/playlists', {
         headers: {
@@ -142,6 +174,22 @@ export const getUserPlaylists = async (access_token) => {
         }
       }).json()
       return { playlists: spotifyPlaylists.items }
+    } catch (getUserPlaylistsErrorResponse) {
+      let getUserPlaylistsError = await getUserPlaylistsErrorResponse.json()
+      console.log({ getUserPlaylistsError })
+      return { error: getUserPlaylistsError }
+    }
+}
+export const getMyUserPlaylists = async (FBIDToken) => {
+  console.log('FBIDToken', FBIDToken)
+    try {
+      let myPlaylists = await ky.get('/playlists', {
+        headers: {
+          Authorization: `Bearer ${FBIDToken}`
+        }
+      }).json()
+      console.log('myPlaylists', myPlaylists)
+      return { myPlaylists }
     } catch (getUserPlaylistsErrorResponse) {
       let getUserPlaylistsError = await getUserPlaylistsErrorResponse.json()
       console.log({ getUserPlaylistsError })

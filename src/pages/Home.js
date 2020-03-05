@@ -3,13 +3,16 @@ import Grid from '@material-ui/core/Grid'
 import ky from 'ky'
 
 import PlaylistPreview from '../components/PlaylistPreview'
+import Typography from '@material-ui/core/Typography'
+
 
 class Home extends Component {
     constructor(props) {
         super(props)
         this.state = {
             user: null,
-            playlists: props.playlists
+            allPlaylists: props.allPlaylists,
+            myPlaylists: props.myPlaylists
         }
     }
     async componentDidMount() {
@@ -24,15 +27,20 @@ class Home extends Component {
         }
     }
     componentDidUpdate(prevProps, prevState) {
-        if (prevProps.playlists !== this.props.playlists) {
+        if (prevProps.allPlaylists !== this.props.allPlaylists) {
           this.setState({
-            playlists: this.props.playlists
+            allPlaylists: this.props.allPlaylists
+          })
+        }
+        if (prevProps.myPlaylists !== this.props.myPlaylists) {
+          this.setState({
+            myPlaylists: this.props.myPlaylists
           })
         }
     }
     render() {
-        let recentPlaylistsMarkup = this.state.playlists ? (
-            this.state.playlists.map(playlist => {
+        let recentPlaylistsMarkup = (playlists) => playlists ? (
+            playlists.map(playlist => {
                 return (
                     <PlaylistPreview playlist={playlist} key={playlist.id} />
                 )
@@ -42,14 +50,16 @@ class Home extends Component {
         )
         return (
             <Grid container spacing={2}>
-                <Grid item sm={8} xs={12}>
+                <Grid item sm={6} xs={12}>
+                    <Typography variant="h3" value="All Playlists">All Playlists</Typography>
                     <div className="playlist-container">
-                        {recentPlaylistsMarkup}
+                        {recentPlaylistsMarkup(this.props.allPlaylists)}
                     </div>
                 </Grid>
-                <Grid item sm={4} xs={12}>
-                    <div className="splits-container">
-                        Content...
+                <Grid item sm={6} xs={12}>
+                    <Typography variant="h3" value="All Playlists">My Running Playlists</Typography>
+                    <div className="playlist-container">
+                        {recentPlaylistsMarkup(this.props.myPlaylists)}
                     </div>
                 </Grid>
             </Grid>

@@ -4,8 +4,6 @@ const { config } = require('../util/config');
 const firebase = require('firebase');
 firebase.initializeApp(config);
 
-const { generateRandomString } = require('../util/spotify')
-const querystring = require('querystring')
 const ky = require('ky/umd')
 
 const { validateSignUpData, validateLoginData, reduceUserDetails } = require('../util/validators')
@@ -205,23 +203,24 @@ const spotifyLogin = (req, res) => {
 }
 
 // Get Own User Details
-const getAuthenticatedUser = (req, res) => {
+const getAuthenticatedUser = (req, res, next) => {
+    console.log('req.user', req.user.spotifyUser)
+    console.log('res.statusCode 208', res.statusCode)
     let userData = {};
     return db.doc(`/users/${req.user.spotifyUser}`).get()
         .then(doc => {
+            console.log('res.statusCode 212', res.statusCode)
             if(doc.exists) {
                 userData.credentials = doc.data();
                 return db.collection('playlists')
                     .where('spotifyUser', '==', req.user.spotifyUser)
                     .get()
+            } else {
+                throw new Error(JSON.stringify({ code: 404, message: 'User not found'}))
             }
-            return new Error('User not found')
-        })
-        .catch(getUserDetailsError => {
-            console.error(getUserDetailsError)
-            return res.status(500).json({ error: getUserDetailsError })
         })
         .then(data => {
+            console.log('res.statusCode 220', res.statusCode, data.docs.length)
             userData.playlists = [];
             if (data && data.docs && data.docs.length > 0) {
                 data.forEach(doc => {
@@ -234,6 +233,7 @@ const getAuthenticatedUser = (req, res) => {
                 .get()
         })
         .then(notifications => {
+            console.log('res.statusCode 233', res.statusCode)
             userData.notifications = []
             if (notifications && notifications.docs && notifications.docs.length > 0) {
                 notifications.docs.forEach(notificationObj => {
@@ -241,11 +241,22 @@ const getAuthenticatedUser = (req, res) => {
                     userData.notifications.push({notificationId: notification.id, ...notification})
                 })
             }
-            return res.status(200).json(userData)
+            console.log('res.statusCode', res.statusCode)
+            if (!res.statusCode) {
+                return res.status(200).json(userData)
+            }
+            return next()
         })
-        .catch(addPlaylistsError => {
-            console.error(addPlaylistsError)
-            return res.status(200).json(userData)
+        .catch(getAuthenticatedUserErrorResponse => {
+            console.error({getAuthenticatedUserErrorResponse})
+            let getAuthenticatedUserError = JSON.parse(getAuthenticatedUserErrorResponse.message)
+            if (getAuthenticatedUserError.code) {
+                console.log('getAuthenticatedUserError.code', getAuthenticatedUserError.code)
+                req.error = getAuthenticatedUserErrorResponse
+                return next()
+            }
+            return
+            //return res.json(userData)
         })
 }
 

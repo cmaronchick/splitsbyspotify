@@ -4,9 +4,10 @@ import { ThemeProvider as MuiThemeProvider} from '@material-ui/core/styles'
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme'
 import ky from 'ky'
 
-import { login, logout, refreshAccessToken, getUserPlaylists } from './functions/spotify'
+import { login, logout, refreshAccessToken, getAllUserPlaylists, getMyUserPlaylists } from './functions/spotify'
 import { getUrlParameters } from './functions/utils'
 import { spotifyConfig } from './constants/spotifyConfig'
+import themeFile from './constants/theme'
 
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
@@ -15,33 +16,10 @@ import Login from './pages/Login'
 import Profile from './pages/Profile'
 import SpotifyLogin from './components/SpotifyLogin'
 import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom'
-import Button from '@material-ui/core/Button'
 
-
-const theme = createMuiTheme({
-  palette: {
-    primary: {
-      // light: will be calculated from palette.primary.main,
-      main: '#50d890',
-      // dark: will be calculated from palette.primary.main,
-      // contrastText: will be calculated to contrast with palette.primary.main
-    },
-    secondary: {
-      light: '#effffb',
-      main: '#50d890',
-      dark: '#4f98ca',
-      // dark: will be calculated from palette.secondary.main,
-      contrastText: '#272727',
-    },
-    // Used by `getContrastText()` to maximize the contrast between
-    // the background and the text.
-    contrastThreshold: 3,
-    // Used by the functions below to shift a color's luminance by approximately
-    // two indexes within its tonal palette.
-    // E.g., shift from Red 500 to Red 300 or Red 700.
-    tonalOffset: 0.2,
-  },
-})
+const theme = createMuiTheme(themeFile)
+let authenticated;
+const token = localStorage.FBIDToken
 
 class App extends Component {
   constructor(props) {
@@ -55,6 +33,7 @@ class App extends Component {
   }
 
   handleSpotifyLogin = () => {
+    localStorage.state = spotifyConfig.state
     window.location.href = `https://accounts.spotify.com/authorize?response_type=code&client_id=${spotifyConfig.client_id}&scope=${spotifyConfig.scope}&redirect_uri=http://localhost:3000/spotifyCallback&state=${spotifyConfig.state}`
   }
   handleSpotifyLogout = () => {
@@ -81,27 +60,28 @@ class App extends Component {
   }
   handleSpotifyCallback = async (location, access_token) => {
     let spotifyData = await login(location);
+    //let FBLoginData = await FBLoginData()
     console.log('spotifyData', spotifyData)
     this.setState({...spotifyData})
-    document.cookie = `spotifyAccessToken=${spotifyData.spotifyAccessToken};max-age=3600`
-    document.cookie = `spotifyRefreshToken=${spotifyData.spotifyRefreshToken};max-age=3600`
+    localStorage.spotifyAccessToken = spotifyData.spotifyAccessToken;
+    localStorage.spotifyRefreshToken = spotifyData.spotifyRefreshToken;
     window.history.pushState({ 'page_id': 1, 'user': 'spotifyUser'}, '', '/')
   }
-  handleGetUserPlaylists = async (access_token) => {
-    let playlists = await getUserPlaylists(access_token)
-    console.log('playlists', playlists)
-    this.setState({ playlists: playlists.playlists })
+  handleGetAllPlaylists = async (access_token) => {
+    let allPlaylistsResponse = await getAllUserPlaylists(access_token)
+    this.setState({ allPlaylists: allPlaylistsResponse.playlists })
+  }
+  handleGetMyPlaylists = async (FBIDToken) => {
+    let myPlaylistsResponse = await getMyUserPlaylists(FBIDToken)
+    this.setState({ myPlaylists: myPlaylistsResponse.playlists })
   }
 
   componentDidMount() {
-    let refreshToken = document.cookie.split(';').filter((item) => item.trim().startsWith('spotifyRefreshToken='))
+    let refreshToken = localStorage.spotifyRefreshToken
     console.log('refreshToken', refreshToken)
-    if (refreshToken && refreshToken.length > 0) {
-        console.log('The cookie "reader" exists (ES6)')
-        let refresh_token = refreshToken[0].split('=')[1]
-        if (refresh_token !== 'null') {
-          this.handleSpotifyRefreshToken(refresh_token)
-        }
+    if (refreshToken) {
+      console.log('The cookie "reader" exists (ES6)')
+      this.handleSpotifyRefreshToken(refreshToken)
     }
     if (window.location.pathname === '/spotifyCallback') {
       console.log('starting spotify login')
@@ -110,8 +90,12 @@ class App extends Component {
   }
   componentDidUpdate(prevProps, prevState) {
     if (prevState.spotifyAccessToken !== this.state.spotifyAccessToken && this.state.spotifyAccessToken) {
-      this.handleGetUserPlaylists(this.state.spotifyAccessToken)
+      this.handleGetAllPlaylists(this.state.spotifyAccessToken)
     }
+    if (prevState.FBIDToken !== this.state.FBIDToken && this.state.FBIDToken) {
+      this.handleGetMyPlaylists(this.state.FBIDToken)
+    }
+
   }
 
   
@@ -135,7 +119,7 @@ class App extends Component {
                   <Route path={['/profile','/profile/:spotifyUser']} component={Profile} />
                   <Route path='/' render={({match}) => {
                     return (
-                      <Home spotifyUser={this.state.spotifyUser} playlists={this.state.playlists} />
+                      <Home spotifyUser={this.state.spotifyUser} allPlaylists={this.state.allPlaylists} myPlaylists={this.state.myPlaylists} />
                     )
                   }} />
                 </Switch>

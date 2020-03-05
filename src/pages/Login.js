@@ -119,7 +119,7 @@ class Login extends Component{
                             {!loading ? (
                                 <span>Login</span>
                             ) : (
-                            <CircularProgress color="primary.light" className={classes.progress} />
+                            <CircularProgress color="primary" className={classes.progress} />
                             )}
                         </Button><br/>
                         <Link color="inherit" to="/signup">Create an Account</Link>

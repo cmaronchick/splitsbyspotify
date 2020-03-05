@@ -11,7 +11,7 @@ let db = {
     comments: [
         {
             spotifyUser: 'user',
-            imageUrl: 'this is an image url',
+            photoURL: 'this is an image url',
             playlistId: 'this is a string ID',
             createdAt: '2020-01-27T23:27:21.672Z',
             body: 'this is a string'

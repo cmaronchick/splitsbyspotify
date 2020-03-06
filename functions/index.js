@@ -4,7 +4,7 @@ const { db } = require('./util/admin')
 
 const app = require('express')();
 
-const {getPlaylists, getPlaylist, deletePlaylist, addPlaylist, commentOnPlaylist, deleteCommentOnPlaylist, likeAPlaylist, unlikeAPlaylist} = require('./handlers/playlists')
+const {getPlaylists, getMyPlaylists, getPlaylist, deletePlaylist, addPlaylist, commentOnPlaylist, deleteCommentOnPlaylist, likeAPlaylist, unlikeAPlaylist} = require('./handlers/playlists')
 const {
     signUp,
     login,
@@ -23,6 +23,7 @@ const {errors} = require('./handlers/errors')
 
 // Playlist Routes
 app.get('/playlists', getPlaylists)
+app.get('/playlists/my', FBAuth, getMyPlaylists, errors)
 app.post('/playlists', FBAuth, addPlaylist, errors)
 app.get('/playlists/:playlistId', getPlaylist, errors)
 app.delete('/playlists/:playlistId', FBAuth, deletePlaylist, errors)

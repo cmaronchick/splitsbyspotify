@@ -242,10 +242,8 @@ const getAuthenticatedUser = (req, res, next) => {
                 })
             }
             console.log('res.statusCode', res.statusCode)
-            if (!res.statusCode) {
-                return res.status(200).json(userData)
-            }
-            return next()
+            return res.status(200).json(userData)
+            //return next()
         })
         .catch(getAuthenticatedUserErrorResponse => {
             console.error({getAuthenticatedUserErrorResponse})
@@ -255,7 +253,7 @@ const getAuthenticatedUser = (req, res, next) => {
                 req.error = getAuthenticatedUserErrorResponse
                 return next()
             }
-            return
+            return next()
             //return res.json(userData)
         })
 }

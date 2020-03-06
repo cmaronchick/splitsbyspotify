@@ -22,8 +22,8 @@ const FBAuth = (req, res, next) => {
             }
         })
         .then(DecodedIdToken => {
-            console.log('DecodedIdToken', DecodedIdToken)
-            console.log('DecodedIDToken', DecodedIdToken && DecodedIdToken.user ? DecodedIdToken.user.uid : DecodedIdToken)
+            // console.log('DecodedIdToken', DecodedIdToken)
+            // console.log('DecodedIDToken', DecodedIdToken && DecodedIdToken.user ? DecodedIdToken.user.uid : DecodedIdToken)
             req.user = DecodedIdToken.user ? DecodedIdToken.user : DecodedIdToken;
             return db.collection('users')
                 .where('userId', '==', req.user.uid)
@@ -36,28 +36,9 @@ const FBAuth = (req, res, next) => {
             req.user.photoURL = data.docs[0].data().photoURL
             return next();
         })
-        .catch(DecodedIdTokenError => {
-            console.error({ DecodedIdTokenError })
-            
-            if (DecodedIdTokenError.code === "auth/argument-error") {
-                return firebase.auth().signInWithCustomToken(idToken)
-            }
-            return res.status(403).json(DecodedIdTokenError)
-        })
-        .then(data => {
-            //console.log('data', data)
-            return db.collection('users')
-                .where('userId', '==', req.user.uid)
-                .limit(1)
-                .get()
-        })
-        .then(data => {
-            req.user.spotifyUser = data.docs[0].data().spotifyUser
-            req.user.photoURL = data.docs[0].data().photoURL
-            return next();
-        })
-        .catch(err => {
-            console.log('err', err)
+        .catch(error => {
+            console.log('err', error)
+            return res.status(500).json({ error })
         })
 }
 

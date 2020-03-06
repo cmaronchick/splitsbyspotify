@@ -9,6 +9,10 @@ import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import AddCircle from '@material-ui/icons/AddCircle'
 
 const styles = {
     card: {
@@ -31,17 +35,29 @@ const styles = {
     }
 }
 
+
 const PlaylistPreview = (props) => {
+    const handleAddPlaylistClick = (playlistId) => {
+        props.handleAddPlaylistClick(playlistId)
+    }
+    const handleRemovePlaylistClick = (playlistId) => {
+        props.handleRemovePlaylistClick(playlistId)
+    }
     dayjs.extend(relativeTime)
     if (!props.playlist) {
         return (<div></div>)
     }
     const { classes, playlist : { name, images, id, owner } } = props
-    console.log('images', images)
     return (
         <Card className={classes.card}>
             <CardHeader
             title={name}
+
+            action={
+                <IconButton aria-label="settings"  onClick={() => handleAddPlaylistClick(id)}>
+                    <AddCircle/>
+                </IconButton>
+            }
             />
             <CardContent className={classes.content}>
                 

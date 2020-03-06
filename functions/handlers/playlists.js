@@ -23,6 +23,30 @@ const getPlaylists = (req, res) => {
         })
 }
 
+const getMyPlaylists = (req, res, next) => {
+    db
+        .collection('playlists')
+        .where('spotifyUser','==',req.user.spotifyUser)
+        .orderBy('createdAt', 'desc')
+        .get()
+        .then(data => {
+            let playlists = []
+            data.docs.forEach(doc => {
+                let playlist = doc.data()
+                playlists.push({
+                    id: doc.id,
+                    ...playlist
+                })
+            })
+            return res.status(200).json(playlists)
+        })
+        .catch(getPlaylistsError => {
+            console.error(getPlaylistsError)
+            req.error = getPlaylistsError
+            return next()
+        })
+}
+
 const getPlaylist = (req, res, next) => {
     let playlistData = {};
     const { playlistId } = req.params;
@@ -290,9 +314,8 @@ const unlikeAPlaylist = (req, res) => {
 }
 
 const addPlaylist = (req, res) => {
-    console.log('req.user', req.user)
+    console.log('req.body', req.body)
     const newPlaylist = {
-        playlistName: req.body.playlistName,
         playlistId: req.body.playlistId,
         spotifyUser: req.user.spotifyUser,
         photoURL: req.user.photoURL,
@@ -301,9 +324,19 @@ const addPlaylist = (req, res) => {
         commentCount: 0
 
     }
-    return db
-        .collection('playlists')
-        .add(newPlaylist)
+    return db.collection(`playlists`)
+        .where('playlistId','==',req.body.playlistId)
+        .get()
+    .then(playlistDocs => {
+            if (playlistDocs.docs && playlistDocs.docs.length === 0) {
+                console.log('newPlaylist', newPlaylist)
+                return db
+                    .collection('playlists')
+                    .add(newPlaylist)
+            } else {
+                return res.json( { message: `Playlist ${playlistId} already exists`})
+            }
+        })
         .then(doc => {
             const resPlaylist = newPlaylist;
             resPlaylist.playlistId = doc.id
@@ -315,4 +348,4 @@ const addPlaylist = (req, res) => {
         })
 }
 
-module.exports = { getPlaylists, getPlaylist, addPlaylist, deletePlaylist, commentOnPlaylist, deleteCommentOnPlaylist, likeAPlaylist, unlikeAPlaylist }
+module.exports = { getPlaylists, getMyPlaylists, getPlaylist, addPlaylist, deletePlaylist, commentOnPlaylist, deleteCommentOnPlaylist, likeAPlaylist, unlikeAPlaylist }

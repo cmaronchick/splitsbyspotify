@@ -2,9 +2,16 @@ import React, { Component } from 'react';
 import './App.css';
 import { ThemeProvider as MuiThemeProvider} from '@material-ui/core/styles'
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme'
-import ky from 'ky'
 
-import { login, logout, refreshAccessToken, getAllUserPlaylists, getMyUserPlaylists } from './functions/spotify'
+import {
+  login,
+  logout,
+  refreshAccessToken,
+  getAllUserPlaylists,
+  getMyUserPlaylists,
+  getPlaylistFromSpotify,
+  addToMyPlaylists,
+  removeFromMyPlaylists } from './functions/spotify'
 import { getUrlParameters } from './functions/utils'
 import { spotifyConfig } from './constants/spotifyConfig'
 import themeFile from './constants/theme'
@@ -29,6 +36,7 @@ class App extends Component {
       spotifyUser: null,
       spotifyAccessToken: null,
       spotifyRefreshToken: null,
+      FBIDToken: token
     }
   }
 
@@ -51,33 +59,98 @@ class App extends Component {
   }
 
   handleSpotifyRefreshToken = async (refresh_token) => {
-    let spotifyData = await refreshAccessToken(refresh_token)
-    console.log('spotifyRefreshData', spotifyData)
-    this.setState({
-      ...spotifyData
-    })
+    try {
+      let spotifyData = await refreshAccessToken(refresh_token)
+      console.log('spotifyRefreshData', spotifyData)
+      this.setState({
+        ...spotifyData
+      })
+    }catch(refreshTokenError) {
+      console.log('refreshTokenError', refreshTokenError)
+    }
 
   }
   handleSpotifyCallback = async (location, access_token) => {
-    let spotifyData = await login(location);
-    //let FBLoginData = await FBLoginData()
-    console.log('spotifyData', spotifyData)
-    this.setState({...spotifyData})
-    localStorage.spotifyAccessToken = spotifyData.spotifyAccessToken;
-    localStorage.spotifyRefreshToken = spotifyData.spotifyRefreshToken;
-    window.history.pushState({ 'page_id': 1, 'user': 'spotifyUser'}, '', '/')
+    try {
+      let spotifyData = await login(location);
+      //let FBLoginData = await FBLoginData()
+      console.log('spotifyData', spotifyData)
+      this.setState({...spotifyData})
+      localStorage.spotifyAccessToken = spotifyData.spotifyAccessToken;
+      localStorage.spotifyRefreshToken = spotifyData.spotifyRefreshToken;
+      window.history.pushState({ 'page_id': 1, 'user': 'spotifyUser'}, '', '/')
+    } catch(loginError) {
+      console.log('loginError', loginError)
+    }
   }
   handleGetAllPlaylists = async (access_token) => {
-    let allPlaylistsResponse = await getAllUserPlaylists(access_token)
-    this.setState({ allPlaylists: allPlaylistsResponse.playlists })
+    try {
+      let allPlaylistsResponse = await getAllUserPlaylists(access_token)
+      let allPlaylists = {}
+      allPlaylistsResponse.playlists.map(playlist => {
+        allPlaylists[playlist.id] = {...playlist}
+      })
+      this.setState({ allPlaylists })
+    } catch (getAllPlaylistsError) {
+      console.log('getAllPlaylistsError', getAllPlaylistsError)
+    }
   }
   handleGetMyPlaylists = async (FBIDToken) => {
-    let myPlaylistsResponse = await getMyUserPlaylists(FBIDToken)
-    this.setState({ myPlaylists: myPlaylistsResponse.playlists })
+    try {
+      let myPlaylistsResponse = await getMyUserPlaylists(FBIDToken)
+      let myPlaylists = {}
+      myPlaylistsResponse.myPlaylists.forEach(playlist => {
+        myPlaylists[playlist.id] = {...playlist}
+      })
+      this.setState({ myPlaylists })
+      Object.keys(myPlaylists).forEach(id => {
+        this.handleGetPlaylistFromSpotify(this.state.spotifyAccessToken, id, myPlaylists[id].playlistId)
+      })
+    } catch (getMyUserPlaylistsError) {
+      console.log('getMyUserPlaylistsError', getMyUserPlaylistsError)
+    }
+  }
+  handleGetPlaylistFromSpotify = async(spotifyAccessToken, id, playlistId) => {
+    try {
+      let playlistResponse = await getPlaylistFromSpotify(spotifyAccessToken, playlistId)
+      console.log('playlistResponse', playlistResponse)
+      let myPlaylists = {...this.state.myPlaylists}
+      myPlaylists[id] = playlistResponse
+      this.setState({
+        myPlaylists
+      })
+
+    } catch (getPlaylistFromSpotifyError) {
+      console.log('getPlaylistFromSpotifyError', getPlaylistFromSpotifyError)
+    }
+  }
+
+  checkSpotifyPlaylistInMyPlaylists = () => {
+    const { allPlaylists, myPlaylists } = this.state
+    if (allPlaylists && allPlaylists.length > 0) {
+      allPlaylists.map(playlist => {
+
+      })
+    }
+  }
+
+
+  handleAddPlaylist = async (playlistId) => {
+    try {
+      let addPlaylistResponse = await addToMyPlaylists(this.state.FBIDToken, playlistId)
+      console.log('addPlaylistResponse', addPlaylistResponse)
+      this.handleGetMyPlaylists(this.state.FBIDToken)
+    } catch (addPlaylistError) {
+      console.log('addPlaylistError', addPlaylistError)
+    }
+  }
+  handleRemovePlaylist = async (playlistId) => {
+    let removePlaylistResponse = await removeFromMyPlaylists(this.state.FBIDToken, playlistId)
   }
 
   componentDidMount() {
     let refreshToken = localStorage.spotifyRefreshToken
+    let FBIDToken = localStorage.FBIDToken
     console.log('refreshToken', refreshToken)
     if (refreshToken) {
       console.log('The cookie "reader" exists (ES6)')
@@ -91,10 +164,9 @@ class App extends Component {
   componentDidUpdate(prevProps, prevState) {
     if (prevState.spotifyAccessToken !== this.state.spotifyAccessToken && this.state.spotifyAccessToken) {
       this.handleGetAllPlaylists(this.state.spotifyAccessToken)
-    }
-    if (prevState.FBIDToken !== this.state.FBIDToken && this.state.FBIDToken) {
       this.handleGetMyPlaylists(this.state.FBIDToken)
     }
+
 
   }
 
@@ -119,7 +191,11 @@ class App extends Component {
                   <Route path={['/profile','/profile/:spotifyUser']} component={Profile} />
                   <Route path='/' render={({match}) => {
                     return (
-                      <Home spotifyUser={this.state.spotifyUser} allPlaylists={this.state.allPlaylists} myPlaylists={this.state.myPlaylists} />
+                      <Home 
+                        spotifyUser={this.state.spotifyUser} 
+                        allPlaylists={this.state.allPlaylists} 
+                        myPlaylists={this.state.myPlaylists}
+                        handleAddPlaylistClick={this.handleAddPlaylist} />
                     )
                   }} />
                 </Switch>

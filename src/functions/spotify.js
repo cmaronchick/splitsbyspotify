@@ -1,4 +1,4 @@
-import ky from 'ky'
+import ky from 'ky/umd'
 import { getUrlParameters } from './utils'
 import { spotifyConfig } from '../constants/spotifyConfig'
 
@@ -181,9 +181,8 @@ export const getAllUserPlaylists = async (access_token) => {
     }
 }
 export const getMyUserPlaylists = async (FBIDToken) => {
-  console.log('FBIDToken', FBIDToken)
     try {
-      let myPlaylists = await ky.get('/playlists', {
+      let myPlaylists = await ky.get('/playlists/my', {
         headers: {
           Authorization: `Bearer ${FBIDToken}`
         }
@@ -195,4 +194,51 @@ export const getMyUserPlaylists = async (FBIDToken) => {
       console.log({ getUserPlaylistsError })
       return { error: getUserPlaylistsError }
     }
+}
+
+export const addToMyPlaylists = async (FBIDToken, playlistId) => {
+  const searchParams = new URLSearchParams()
+  searchParams.set('playlistId', playlistId)
+  try {
+    let addPlaylistResponse = await ky.post('/playlists', {
+      headers: {
+        Authorization: `Bearer ${FBIDToken}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: searchParams
+    }).json()
+    console.log('addPlaylistResponse', addPlaylistResponse)
+  } catch (addPlaylistErrorResponse) {
+    console.log('addPlaylistErrorResponse', addPlaylistErrorResponse)
+    try {
+      let addPlaylistErrorJSON = await addPlaylistErrorResponse.json()
+      console.log('addPlaylistError', addPlaylistErrorJSON)
+      throw new Error(addPlaylistErrorJSON)
+    } catch (addPlaylistError) {
+      console.log('addPlaylistError', addPlaylistError)
+      throw new Error(addPlaylistError)
+    }
+  }
+
+}
+
+export const removeFromMyPlaylists = async (FBIDToken, playlistId) => {
+
+}
+
+export const getPlaylistFromSpotify = async (spotifyAccessToken, playlistId) => {
+  console.log('spotifyAccessToken', spotifyAccessToken)
+  try {
+    let spotifyPlaylistResponse = await ky.get(`https://api.spotify.com/v1/playlists/${playlistId}`, {
+      headers: {
+        Authorization: `Bearer ${spotifyAccessToken}`
+      }
+    }).json()
+    //console.log('spotifyPlaylistResponse', spotifyPlaylistResponse)
+    return { ...spotifyPlaylistResponse }
+  } catch (getPlaylistFromSpotifyError) {
+    console.log('getPlaylistFromSpotifyError', getPlaylistFromSpotifyError)
+    throw new Error(JSON.stringify(getPlaylistFromSpotifyError))
+  }
+
 }

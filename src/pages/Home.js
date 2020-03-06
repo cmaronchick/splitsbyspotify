@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import Grid from '@material-ui/core/Grid'
-import ky from 'ky'
+import ky from 'ky/umd'
 
 import PlaylistPreview from '../components/PlaylistPreview'
 import Typography from '@material-ui/core/Typography'
@@ -12,7 +12,9 @@ class Home extends Component {
         this.state = {
             user: null,
             allPlaylists: props.allPlaylists,
-            myPlaylists: props.myPlaylists
+            myPlaylists: props.myPlaylists,
+            handleAddPlaylistClick: props.handleAddPlaylistClick,
+            handleRemovePlaylistClick: props.handleRemovePlaylistClick
         }
     }
     async componentDidMount() {
@@ -40,13 +42,13 @@ class Home extends Component {
     }
     render() {
         let recentPlaylistsMarkup = (playlists) => playlists ? (
-            playlists.map(playlist => {
+            Object.keys(playlists).map(playlistId => {
                 return (
-                    <PlaylistPreview playlist={playlist} key={playlist.id} />
+                    <PlaylistPreview playlist={playlists[playlistId]} key={playlistId} handleAddPlaylistClick={this.state.handleAddPlaylistClick} handleRemovePlaylistClick={this.state.handleRemovePlaylistClick} />
                 )
             })
         ) : (
-            <div>Loading...</div>
+            <div>You have no playlists.</div>
         )
         return (
             <Grid container spacing={2}>

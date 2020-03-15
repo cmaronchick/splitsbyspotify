@@ -1,3 +1,5 @@
+Spotify scopes: user-read-email playlist-modify-public playlist-modify-private user-library-modify user-follow-modify
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

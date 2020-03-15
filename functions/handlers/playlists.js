@@ -319,6 +319,8 @@ const addPlaylist = (req, res) => {
         playlistId: req.body.playlistId,
         spotifyUser: req.user.spotifyUser,
         photoURL: req.user.photoURL,
+        public: req.body.public ? req.body.public : false,
+        collaborative: req.body.collaborative ? req.body.collaborative : false,
         createdAt: new Date().toISOString(),
         likeCount: 0,
         commentCount: 0

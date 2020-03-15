@@ -13,6 +13,7 @@ import IconButton from '@material-ui/core/IconButton';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import AddCircle from '@material-ui/icons/AddCircle'
+import RemoveCircle from '@material-ui/icons/RemoveCircle'
 
 const styles = {
     card: {
@@ -28,7 +29,7 @@ const styles = {
     },
     content: {
         display: 'flex',
-        flexDirection: 'row',
+        flexDirection: 'column',
         justifyContent: 'space-evenly',
         alignItems: 'center',
         padding: 25
@@ -40,25 +41,35 @@ const PlaylistPreview = (props) => {
     const handleAddPlaylistClick = (playlistId) => {
         props.handleAddPlaylistClick(playlistId)
     }
-    const handleRemovePlaylistClick = (playlistId) => {
-        props.handleRemovePlaylistClick(playlistId)
+    const showConfirmDeleteDialog = (playlistId, playlistName) => {
+        console.log('playlistId, playlistName', playlistId, playlistName)
+        props.handleShowConfirmDeleteDialog(playlistId, playlistName)
     }
     dayjs.extend(relativeTime)
     if (!props.playlist) {
         return (<div></div>)
     }
-    const { classes, playlist : { name, images, id, owner } } = props
+    const { classes, playlist : { name, images, id, owner, collaborative, inMyPlaylists, href } } = props
+    const fbId = props.id
+    const publicPlaylist = props.public
     return (
         <Card className={classes.card}>
+            <Link to={`/playlist/${id}`} onClick={() => props.handleGetPlaylistTracks(props.playlist)}>
             <CardHeader
             title={name}
 
-            action={
+            action={ inMyPlaylists ? (
+                <IconButton aria-label="settings"  onClick={() => showConfirmDeleteDialog(fbId, name)}>
+                    <RemoveCircle/>
+                </IconButton>
+                ) : (
                 <IconButton aria-label="settings"  onClick={() => handleAddPlaylistClick(id)}>
                     <AddCircle/>
                 </IconButton>
+                )
             }
             />
+            </Link>
             <CardContent className={classes.content}>
                 
                 {images && images.length > 0 ? (

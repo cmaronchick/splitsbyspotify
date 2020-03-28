@@ -1,16 +1,13 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core/styles'
-import theme from '../constants/theme'
+import theme from '../../constants/theme'
 import Grid from '@material-ui/core/Grid'
 
 const styles = {
     track: {
-
-    },
-    track: {
         borderWidth: 1,
-        borderColor: theme.palette.secondary.dark,
+        borderColor: '#4f98ca',
         borderStyle: 'solid'
     }
 }

@@ -47,7 +47,6 @@ export const login = async (location) => {
                 photoURL = spotifyResponse.images && spotifyResponse.images.length > 0 ? spotifyResponse.images[0].url : '',
                 email = spotifyResponse.email,
                 accessToken = spotifyResponse.accessToken;
-              let FBIDToken;
               try {
                 let body = new URLSearchParams()
                 body.set('spotifyID', spotifyID)

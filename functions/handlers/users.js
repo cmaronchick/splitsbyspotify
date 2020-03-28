@@ -109,7 +109,9 @@ const login = (req, res) => {
 }
 
 createFirebaseAccount = (req, res) => {
+    console.log('req.body', req.body)
     const {spotifyID, display_name, photoURL, email, accessToken} = req.body
+    console.log('spotifyID, display_name, photoURL, email, accessToken:', spotifyID, display_name, photoURL, email, accessToken)
     // The UID we'll assign to the user.
     const uid = `spotify:${spotifyID}`;
   
@@ -118,7 +120,7 @@ createFirebaseAccount = (req, res) => {
   
     // Create or update the user account.
     const userCreationTask = admin.auth().updateUser(uid, {
-        display_name: display_name,
+        displayName: display_name,
         photoURL: photoURL,
         email: email,
         emailVerified: true,
@@ -130,25 +132,12 @@ createFirebaseAccount = (req, res) => {
         return admin.auth().createUser({
           uid: uid,
           spotifyUser: spotifyID,
-          display_name: display_name,
+          displayName: display_name,
           photoURL: photoURL,
           email: email,
           emailVerified: true,
-        });
-      }
-      throw error;
-    })
-    
-    
-    // Wait for all async tasks to complete, then generate and return a custom auth token.
-    Promise.all([userCreationTask, databaseTask])
-    .then(res => {
-        // Create a Firebase custom auth token.
-        return admin.auth().createCustomToken(uid);
-    })
-    .then (token => {
-        console.log('Created Custom token for UID "', uid, '" Token:', token);
-        if (token) {
+        })
+        .then(() => {
             const userCredentials = {
                 spotifyUser: spotifyID,
                 display_name: display_name,
@@ -158,9 +147,19 @@ createFirebaseAccount = (req, res) => {
                 userId: uid
             }
             return db.doc(`/users/${spotifyID}`).set(userCredentials);
-        }
-        return new Error('No IdToken returned')
+        })
+      }
+      throw error;
+    })
 
+    const addUserToUsersDB = 
+    
+    
+    // Wait for all async tasks to complete, then generate and return a custom auth token.
+    Promise.all([userCreationTask, databaseTask])
+    .then(res => {
+        // Create a Firebase custom auth token.
+        return admin.auth().createCustomToken(uid);
     })
     .then(data => {
         console.log('data', data)
@@ -204,8 +203,6 @@ const spotifyLogin = (req, res) => {
 
 // Get Own User Details
 const getAuthenticatedUser = (req, res, next) => {
-    console.log('req.user', req.user.spotifyUser)
-    console.log('res.statusCode 208', res.statusCode)
     let userData = {};
     return db.doc(`/users/${req.user.spotifyUser}`).get()
         .then(doc => {
@@ -220,7 +217,6 @@ const getAuthenticatedUser = (req, res, next) => {
             }
         })
         .then(data => {
-            console.log('res.statusCode 220', res.statusCode, data.docs.length)
             userData.playlists = [];
             if (data && data.docs && data.docs.length > 0) {
                 data.forEach(doc => {
@@ -232,16 +228,26 @@ const getAuthenticatedUser = (req, res, next) => {
                 .orderBy('createdAt', 'desc').limit(10)
                 .get()
         })
-        .then(notifications => {
-            console.log('res.statusCode 233', res.statusCode)
-            userData.notifications = []
-            if (notifications && notifications.docs && notifications.docs.length > 0) {
-                notifications.docs.forEach(notificationObj => {
-                    const notification = notificationObj.data()
-                    userData.notifications.push({notificationId: notification.id, ...notification})
+        .then(data => {
+            userData.playlists = [];
+            if (data && data.docs && data.docs.length > 0) {
+                data.forEach(doc => {
+                    userData.playlists.push(doc.data())
                 })
             }
-            console.log('res.statusCode', res.statusCode)
+            return db.collection('likes')
+                .where('spotifyUser','==',req.user.spotifyUser)
+                .orderBy('likedAt', 'desc')
+                .get()
+        })
+        .then(likes => {
+            userData.likes = []
+            if (likes && likes.docs && likes.docs.length > 0) {
+                likes.docs.forEach(likesObj => {
+                    const like = likesObj.data()
+                    userData.likes.push({likeId: like.id, ...like})
+                })
+            }
             return res.status(200).json(userData)
             //return next()
         })
@@ -314,6 +320,7 @@ const getUserDetails = (req, res, next) => {
 
 // Upload a profile image for users
 const uploadImage = (req, res) => {
+    console.log('req.user', req.headers)
     const BusBoy = require('busboy')
     const path = require('path')
     const os = require('os')
@@ -327,12 +334,15 @@ const uploadImage = (req, res) => {
         if (mimetype !== 'image/jpeg' && mimetype !== 'image/png') {
             return res.status(400).json({ error: 'Please submit JPG or PNG files only.'})
         }
+        console.log('File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype);
         const imageExtension = filename.split('.')[filename.split('.').length-1];
         imageFilename = `${Math.round(Math.random()*100000000000)}.${imageExtension}`;
         const filepath = path.join(os.tmpdir(), imageFilename);
+        console.log('filepath', filepath)
         imageToBeUploaded = { filepath, mimetype }
         return file.pipe(fs.createWriteStream(filepath))
     });
+    //console.log('imageToBeUploaded', imageToBeUploaded)
     busboy.on('finish', () => {
         admin
             .storage()
@@ -344,8 +354,8 @@ const uploadImage = (req, res) => {
             }
         })
         .then(() => {
-            const photoURL = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFilename}?alt=media`
-            return db.doc(`/users/${req.user.spotifyUser}`).update({ photoURL })
+            const imageURL = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFilename}?alt=media`
+            return db.doc(`/users/${req.user.spotifyUser}`).update({ imageURL })
         })
         .catch((uploadImageError) => {
             console.error(uploadImageError)

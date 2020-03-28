@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import {withStyles} from '@material-ui/core/styles'
 import Grid from '@material-ui/core/Grid'
 import GridList from '@material-ui/core/GridList'
@@ -8,9 +9,12 @@ import CardHeader from '@material-ui/core/CardHeader'
 import CardMedia from '@material-ui/core/CardMedia'
 import CardContent from '@material-ui/core/CardContent'
 
-import DistancePaceCalculator from '../components/DistancePaceCalculator'
-import Splits from '../components/Splits'
-import Tracks from '../components/Tracks'
+import DistancePaceCalculator from '../components/splits/DistancePaceCalculator'
+import Splits from '../components/splits/Splits'
+import Tracks from '../components/playlists/Tracks'
+import { getMyPlaylist, getSinglePlaylistFromSpotify } from '../redux/actions/spotifyActions'
+
+import { connect } from 'react-redux'
 
 const styles = {
     card: {
@@ -71,4 +75,15 @@ const Playlist = (props) => {
     )
 }
 
-export default Playlist
+const mapStateToProps = (state) => ({
+    playlist: state.spotify.playlist,
+    spotifyUser: state.user.spotifyUser,
+    FBUser: state.user.FBUser
+})
+
+const mapActionsToProps = {
+    // getMyPlaylist,
+    // getSinglePlaylistFromSpotify
+}
+
+export default connect(mapStateToProps, mapActionsToProps)(withStyles(styles)(Playlist))

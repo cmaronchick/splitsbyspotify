@@ -32,14 +32,15 @@ const styles = {
 
 const ConfirmDeleteDialog = (props) => {
   const classes = props.classes;
-  const { onClose, playlistId, open } = props;
+  const { onClose, playlistId, FBId, open } = props;
 
   const handleClose = () => {
     onClose();
   };
 
-  const handleConfirmDeleteButtonClick = playlistId => {
-    props.handleConfirmDeletePlaylist(playlistId);
+  const handleConfirmDeleteButtonClick = (playlistId, FBId) => {
+    console.log('playlistId, FBId', playlistId, FBId)
+    props.handleConfirmDeletePlaylist(playlistId, FBId);
   };
 
   return (
@@ -53,7 +54,7 @@ const ConfirmDeleteDialog = (props) => {
                 NOTE: You will lose any Splits Playlists that you have previously saved.
             </DialogContentText>
         <DialogActions>
-            <Button onClick={() => handleConfirmDeleteButtonClick(playlistId)} className={classes.alertButton} color="secondary" variant="contained">
+            <Button onClick={() => handleConfirmDeleteButtonClick(playlistId, FBId)} className={classes.alertButton} color="secondary" variant="contained">
                 Delete
             </Button>
             <Button onClick={() => handleClose()}>

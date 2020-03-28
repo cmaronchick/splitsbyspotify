@@ -13,7 +13,7 @@ import Button from '@material-ui/core/Button'
 
 import Typography from '@material-ui/core/Typography'
 
-import distanceSplits from '../constants/distanceSplits'
+import distanceSplits from '../../constants/distanceSplits'
 
 const styles = {
     formDiv: {
@@ -29,8 +29,6 @@ const styles = {
     },
     formControl: {
         minWidth: 120,
-    },
-    selectEmpty: {
     },
 }
 

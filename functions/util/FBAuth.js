@@ -11,7 +11,6 @@ const FBAuth = (req, res, next) => {
         console.error('No Token found')
         return res.status(403).json({ error: 'Unauthorized'})
     }
-    console.log('idToken', idToken)
     return admin.auth().verifyIdToken(idToken)
         .catch(tokenError => {
             if (tokenError.code === 'auth/argument-error') {
@@ -31,7 +30,6 @@ const FBAuth = (req, res, next) => {
                 .get()
         })
         .then(data => {
-            console.log('data.docs[0].data()', data.docs[0].data())
             req.user.spotifyUser = data.docs[0].data().spotifyUser
             req.user.photoURL = data.docs[0].data().photoURL
             return next();

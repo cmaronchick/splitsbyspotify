@@ -242,7 +242,7 @@ const likeAPlaylist = (req, res) => {
             return playlistDocument.update({ likeCount: playlistData.likeCount })
         })
         .then(() => {
-            return res.status(200).json({ message: 'Like added successfully'})
+            return res.status(200).json(playlistData)
         })
         .catch(errObject => {
             const err = errObject && errObject.message ? JSON.parse(errObject.message) : { code: 500, message: 'Something went wrong'}
@@ -304,13 +304,12 @@ const unlikeAPlaylist = (req, res) => {
             console.error({ playlistIncrementCount})
         })
         .then(() => {
-            return res.status(200).json({ message: 'Like removed successfully'})
+            return res.status(200).json(playlistData)
         })
         .catch(err => {
             console.error(err)
             return res.status(500).json({ message: 'Something went wrong'})
         })
-
 }
 
 const addPlaylist = (req, res, next) => {

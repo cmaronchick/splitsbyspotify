@@ -7,10 +7,13 @@ import firebase from './constants/firebase'
 import {Provider} from 'react-redux'
 import store from './redux/store'
 
-import { login, logout, refreshTokens } from './redux/actions/userActions'
+import { login, logout, refreshTokens, getUserData } from './redux/actions/userActions'
+import { getAllPlaylists, getAllMyPlaylistsFromSpotify, getMyPlaylists, likePlaylist, unlikePlaylist } from './redux/actions/spotifyActions'
+import { SET_USER, SET_AUTHENTICATED, SET_UNAUTHENTICATED, SET_PLAYLISTS_MY, LOADING_USER } from './redux/types'
 
 import './App.css';
-import { ThemeProvider as MuiThemeProvider, withStyles} from '@material-ui/core/styles'
+import { withStyles} from '@material-ui/core/styles'
+import { ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme'
 
 import {
@@ -25,29 +28,29 @@ import { getUrlParameters, generateRandomString } from './functions/utils'
 import { spotifyConfig } from './constants/spotifyConfig'
 import themeFile from './constants/theme'
 
-import Navbar from './components/Navbar'
+import Navbar from './components/layout/Navbar'
 import Home from './pages/Home'
 import Signup from './pages/Signup'
 import Login from './pages/Login'
 import Profile from './pages/Profile'
 import Playlist from './pages/Playlist'
-import SpotifyLogin from './components/SpotifyLogin'
-import AuthRoute from './components/AuthRoute'
+import SpotifyLogin from './components/layout/SpotifyLogin'
+import AuthRoute from './components/util/AuthRoute'
 import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom'
 
 const theme = createMuiTheme(themeFile)
-let authenticated;
-const token = localStorage.FBIDToken
-if (token) {
-  console.log('token', token)
-  const decodedToken = jwtDecode(token);
-  console.log('decodedToken.exp', decodedToken.exp*1000)
-  console.log('Date.now()', Date.now())
-  if (decodedToken.exp * 1000 < Date.now()) {
+const FBIDToken = localStorage.FBIDToken
+const spotifyAccessToken = localStorage.spotifyAccessToken
+const spotifyRefreshToken = localStorage.spotifyRefreshToken
+if (FBIDToken && spotifyAccessToken) {
+  const decodedToken = jwtDecode(FBIDToken);
+  if (decodedToken.exp * 1000 > Date.now()) {
     //window.location.href = '/login'
-    authenticated = false
+    store.dispatch({ type: SET_AUTHENTICATED })
+    store.dispatch(refreshTokens(spotifyRefreshToken));
   } else {
-    authenticated = true
+    console.log('old token', decodedToken.exp * 1000 > Date.now())
+    store.dispatch(logout())
   }
 }
 var stateKey = 'spotify_auth_state';
@@ -60,7 +63,7 @@ class App extends Component {
       spotifyUser: null,
       spotifyAccessToken: null,
       spotifyRefreshToken: null,
-      FBIDToken: token,
+      FBIDToken: FBIDToken,
       confirmDeletePlaylistId: null,
       confirmDeletePlaylistName: null,
       showConfirmDeleteDialog: false,
@@ -76,8 +79,8 @@ class App extends Component {
   handleSpotifyLogin = () => {
     let state = generateRandomString(16)
     localStorage[stateKey] = state
-    let currentHref = window.location.href
-    window.location.href = `https://accounts.spotify.com/authorize?response_type=code&client_id=${spotifyConfig.client_id}&scope=${spotifyConfig.scope}&redirect_uri=${currentHref}spotifyCallback&state=${state}`
+    let currentOrigin = window.location.origin
+    window.location.href = `https://accounts.spotify.com/authorize?response_type=code&client_id=${spotifyConfig.client_id}&scope=${spotifyConfig.scope}&redirect_uri=${currentOrigin}/spotifyCallback&state=${state}`
   }
   handleSpotifyLogout = () => {
     let logoutResponse = store.dispatch(logout());
@@ -106,40 +109,33 @@ class App extends Component {
 
   }
   handleSpotifyCallback = async (location, access_token) => {
+    store.dispatch({
+      type: LOADING_USER
+    })
     let state = getUrlParameters(location.href, 'state')
     let storedState = localStorage[stateKey];
     if (state === null || storedState !== state) {
       return { error: 'state_mismatch'}
     }
-    //try {
-
-      //this.props.loginUser(location, this.props.history)
-      store.dispatch(login(location, this.props.history));
-      //let FBLoginData = await FBLoginData()
-      // console.log('spotifyData', spotifyData)
-      // this.setState({...spotifyData})
-      // localStorage.spotifyAccessToken = spotifyData.spotifyAccessToken;
-      // localStorage.spotifyRefreshToken = spotifyData.spotifyRefreshToken;
-      // window.history.pushState({ 'page_id': 1, 'user': 'spotifyUser'}, '', '/')
-    // } catch(loginError) {
-    //   console.log('loginError', loginError)
-    // }
+    store.dispatch(login(location, this.props.history));
   }
   handleGetAllPlaylists = async (access_token) => {
-    try {
-      let allPlaylistsResponse = await getAllUserPlaylists(access_token)
-      let allPlaylists = {}
-      allPlaylistsResponse.playlists.forEach(playlist => {
-        allPlaylists[playlist.id] = {...playlist}
-      })
-      this.setState({ allPlaylists })
-      if (window.location.pathname.indexOf('/playlist') > -1 && window.location.pathname.split('/').length > 2) {
-        let playlistId = window.location.pathname.split('/')[2]
-        this.handleGetPlaylistTracks(this.state.allPlaylists[playlistId])
-      }
-    } catch (getAllPlaylistsError) {
-      console.log('getAllPlaylistsError', getAllPlaylistsError)
-    }
+    store.dispatch(getAllPlaylists())
+    // try {
+    //   let allPlaylistsResponse = await getAllUserPlaylists(access_token)
+    //   let allPlaylists = {}
+    //   allPlaylistsResponse.playlists.forEach(playlist => {
+    //     allPlaylists[playlist.id] = {...playlist}
+    //   })
+    //   this.setState({ allPlaylists })
+    //   if (window.location.pathname.indexOf('/playlist') > -1 && window.location.pathname.split('/').length > 2) {
+    //     let playlistId = window.location.pathname.split('/')[2]
+    //     this.handleGetPlaylistTracks(this.state.allPlaylists[playlistId])
+    //   }
+    // } catch (getAllPlaylistsError) {
+    //   console.log('getAllPlaylistsError', getAllPlaylistsError)
+    // }
+
   }
   handleGetMyPlaylists = async () => {
     let FBIDToken
@@ -150,19 +146,15 @@ class App extends Component {
       console.log('getTokenError120', getTokenError)
     }
     try {
-      let myPlaylistsResponse = await getMyUserPlaylists(FBIDToken)
-      let myPlaylists = {}
-      myPlaylistsResponse.myPlaylists.forEach(playlist => {
-        myPlaylists[playlist.id] = {...playlist}
-        myPlaylists[playlist.id].inMyPlaylists = true
-      })
-      this.setState({ myPlaylists })
-      Object.keys(myPlaylists).forEach(id => {
-        this.handleGetPlaylistFromSpotify(this.state.spotifyAccessToken, id, myPlaylists[id].playlistId)
-      })
+      
+      store.dispatch(getMyPlaylists(FBIDToken))
+      // Object.keys(myPlaylists).forEach(id => {
+      //   this.handleGetPlaylistFromSpotify(this.state.spotifyAccessToken, id, myPlaylists[id].playlistId)
+      // })
     } catch (getMyUserPlaylistsError) {
       console.log('getMyUserPlaylistsError', getMyUserPlaylistsError)
     }
+
   }
   handleGetPlaylistFromSpotify = async(spotifyAccessToken, id, playlistId) => {
     try {
@@ -301,8 +293,7 @@ class App extends Component {
   componentDidMount() {
     let refreshToken = localStorage.spotifyRefreshToken
     let FBIDToken = localStorage.FBIDToken
-    if (refreshToken && refreshToken !== "null" && refreshToken !== "undefined") {
-      console.log('refreshToken', refreshToken)
+    if (!store.getState().user.authenticated && refreshToken && refreshToken !== "null" && refreshToken !== "undefined") {
       this.handleSpotifyRefreshToken(refreshToken)
     }
     if (window.location.pathname === '/spotifyCallback') {
@@ -315,23 +306,24 @@ class App extends Component {
       //let currentPlaylist = this.state.allPlaylists
       this.handleGetPlaylistFromSpotify(this.state.spotifyAccessToken, playlistId, playlistId)
     }
+    store.dispatch(getAllPlaylists())
   }
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.spotifyAccessToken !== this.state.spotifyAccessToken && this.state.spotifyAccessToken) {
-      this.handleGetAllPlaylists(this.state.spotifyAccessToken)
-    }
-    if (this.state.FBUser && this.state.FBUser !== prevState.FBUser) {
-      this.handleGetMyPlaylists()
-    }
-    if (prevState.myPlaylists !== this.state.myPlaylists && this.state.myPlaylists.length > 0) {
-      this.checkSpotifyPlaylistInMyPlaylists()
-    }
+    // if (prevState.spotifyAccessToken !== this.state.spotifyAccessToken && this.state.spotifyAccessToken) {
+    //   this.handleGetAllPlaylists(this.state.spotifyAccessToken)
+    // }
+    // if (this.state.FBUser && this.state.FBUser !== prevState.FBUser) {
+    //   this.handleGetMyPlaylists()
+    // }
+    // if (prevState.myPlaylists !== this.state.myPlaylists && this.state.myPlaylists.length > 0) {
+    //   this.checkSpotifyPlaylistInMyPlaylists()
+    // }
   }
 
   
 
   render() {
-    console.log('this.props', this.props)
+    //console.log('theme', theme)
     return (
       <MuiThemeProvider theme={theme}>
         <Provider store={store}>
@@ -343,10 +335,10 @@ class App extends Component {
                 <Navbar color="primary.main" />
               </div>
               <div className="container">
-                <SpotifyLogin user={this.state.user} spotifyUser={this.state.spotifyUser} handleSpotifyLogin={this.handleSpotifyLogin} handleSpotifyLogout={this.handleSpotifyLogout} />
+                <SpotifyLogin handleSpotifyLogin={this.handleSpotifyLogin} handleSpotifyLogout={this.handleSpotifyLogout} />
                 <Switch>
-                  <AuthRoute path='/signup' component={Signup} authenticated={authenticated} />
-                  <AuthRoute path='/login' component={Login} authenticated={authenticated}/>
+                  <AuthRoute path='/signup' component={Signup}/>
+                  <AuthRoute path='/login' component={Login}/>
                   <Route path={['/profile','/profile/:spotifyUser']} component={Profile} />
                   <Route path={['/playlist/:playlistId', '/playlist']} render={({match}) => {
                     return <Playlist
@@ -368,9 +360,9 @@ class App extends Component {
                   <Route path='/' render={({match}) => {
                     return (
                       <Home 
-                        spotifyUser={this.state.spotifyUser} 
-                        allPlaylists={this.state.allPlaylists} 
-                        myPlaylists={this.state.myPlaylists}
+                        // spotifyUser={this.state.spotifyUser} 
+                        // allPlaylists={this.state.allPlaylists} 
+                        // myPlaylists={this.state.myPlaylists}
                         handleAddPlaylistClick={this.handleAddPlaylist}
                         handleRemovePlaylistClick={this.handleRemovePlaylist}
                         handleGetPlaylistTracks={this.handleGetPlaylistTracks}

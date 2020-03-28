@@ -2,19 +2,29 @@ import React, { Component } from 'react'
 import Grid from '@material-ui/core/Grid'
 import withStyles from '@material-ui/core/styles/withStyles'
 import ky from 'ky/umd'
+import PropTypes from 'prop-types'
 
-import PlaylistPreview from '../components/PlaylistPreview'
+import PlaylistPreview from '../components/playlists/PlaylistPreview'
 import Typography from '@material-ui/core/Typography'
-import ConfirmDeleteDialog from '../components/ConfirmDeleteDialog'
+import ConfirmDeleteDialog from '../components/playlists/ConfirmDeleteDialog'
+import CircularProgress from '@material-ui/core/CircularProgress'
 
 // Redux
 import { connect } from 'react-redux'
+import { getAllPlaylists, 
+    getAllMyPlaylistsFromSpotify, 
+    getMyPlaylists, 
+    getPlaylistsFromSpotify, 
+    addToMyPlaylists,
+    removeFromMyPlaylists,
+    confirmRemoveFromMyPlaylists,
+    cancelRemoveFromMyPlaylists,
+    likePlaylist, 
+    unlikePlaylist } from '../redux/actions/spotifyActions'
 
-const styles = {
-    container: {
-        padding: '0 15px'
-    }
-}
+const styles = (theme) => ({
+    ...theme.spreadThis
+})
 
 class Home extends Component {
     constructor(props) {
@@ -35,70 +45,124 @@ class Home extends Component {
 
         }
     }
-    async componentDidMount() {
-        try {
-            let playlists = this.props.playlists ? this.props.playlists : await ky.get('/playlists').json()
-            this.setState({
-                playlists: playlists
-            })  
-        } catch(error) {
-            console.error(error)   
+    componentDidMount() {
+        if (this.props.spotifyAccessToken) {
+            this.props.getAllMyPlaylistsFromSpotify(this.props.spotifyAccessToken);
         }
     }
     componentDidUpdate(prevProps, prevState) {
-        if (prevProps.allPlaylists !== this.props.allPlaylists) {
-          this.setState({
-            allPlaylists: this.props.allPlaylists
-          })
-        }
-        if (prevProps.myPlaylists !== this.props.myPlaylists) {
-          this.setState({
-            myPlaylists: this.props.myPlaylists
-          })
+        if (this.props.spotifyAccessToken !== prevProps.spotifyAccessToken) {
+            this.props.getAllMyPlaylistsFromSpotify(this.props.spotifyAccessToken);
         }
     }
 
+    recentPlaylistsMarkup = (playlists) => playlists ? (
+        Object.keys(playlists).map(playlistId => {
+            return (
+                <PlaylistPreview
+                 playlist={playlists[playlistId]}
+                 id={playlistId}
+                 key={playlistId}
+                 handleAddPlaylistClick={this.state.handleAddPlaylistClick}
+                 handleGetPlaylistTracks={this.state.handleGetPlaylistTracks}
+                 handleShowConfirmDeleteDialog={this.state.handleShowConfirmDeleteDialog}
+                 handleHideConfirmDeleteDialog={this.state.handleHideConfirmDeleteDialog}
+                 handleLikePlaylist={this.props.likePlaylist}
+                 handleUnlikePlaylist={this.props.unlikePlaylist}/>
+            )
+        })
+    ) : (
+        <div>You have no playlists.</div>
+    )
+
     render() {
-        let recentPlaylistsMarkup = (playlists) => playlists ? (
-            Object.keys(playlists).map(playlistId => {
-                return (
-                    <PlaylistPreview
-                     playlist={playlists[playlistId]}
-                     id={playlistId}
-                     key={playlistId}
-                     handleAddPlaylistClick={this.state.handleAddPlaylistClick}
-                     handleGetPlaylistTracks={this.state.handleGetPlaylistTracks}
-                     handleShowConfirmDeleteDialog={this.state.handleShowConfirmDeleteDialog}
-                     handleHideConfirmDeleteDialog={this.state.handleHideConfirmDeleteDialog}/>
-                )
-            })
-        ) : (
-            <div>You have no playlists.</div>
-        )
+        const { classes } = this.props
         return (
             <Grid container spacing={2} className={this.props.classes.container}>
                 <Grid item sm={6} xs={12}>
                     <Typography variant="h4" value="All Playlists">All Playlists</Typography>
                     <div className="playlist-container">
-                        {recentPlaylistsMarkup(this.props.allPlaylists)}
+                        {!this.props.myPlaylistsFromSpotifyLoading ? (
+                            this.recentPlaylistsMarkup(this.props.myPlaylistsFromSpotify)
+                        ) : (
+                            <CircularProgress size={30} className={classes.progress} />
+                        )}
+
                     </div>
                 </Grid>
                 <Grid item sm={6} xs={12}>
                     <Typography variant="h4" value="All Playlists">My Running Playlists</Typography>
                     <div className="playlist-container">
-                        {recentPlaylistsMarkup(this.props.myPlaylists)}
+
+                        {!this.props.myPlaylistsLoading ? (
+                            this.recentPlaylistsMarkup(this.props.myPlaylists)
+                        ) : (
+                            <CircularProgress size={30} className={classes.progress} />
+                        )}
                     </div>
                 </Grid>
 
                 <ConfirmDeleteDialog
-                 open={this.props.showConfirmDeleteDialog}
-                 playlistName={this.props.confirmDeletePlaylistName}
-                 playlistId={this.props.confirmDeletePlaylistId}
-                 handleConfirmDeletePlaylist={this.props.handleConfirmDeletePlaylist}
-                 onClose={this.props.handleHideConfirmDeleteDialog}/>
+                 open={this.props.showConfirmRemoveDialog}
+                 playlistName={this.props.removePlaylistName}
+                 playlistId={this.props.removePlaylistId}
+                 FBId={this.props.removePlaylistFBId}
+                 handleConfirmDeletePlaylist={this.props.removeFromMyPlaylists}
+                 onClose={this.props.cancelRemoveFromMyPlaylists}/>
             </Grid>
         )
     }
 }
 
-export default withStyles(styles)(Home)
+Home.propTypes = {
+    allPlaylists: PropTypes.object,
+    allPlaylistsLoading: PropTypes.bool,
+    myPlaylists: PropTypes.object,
+    myPlaylistsLoading: PropTypes.bool,
+    myPlaylistsFromSpotify: PropTypes.object,
+    myPlaylistsFromSpotifyLoading: PropTypes.bool,
+    spotifyUser: PropTypes.object,
+    spotifyAccessToken: PropTypes.string,
+    FBUser: PropTypes.object,
+    handleAddPlaylistClick: PropTypes.func.isRequired,
+    handleRemovePlaylistClick: PropTypes.func.isRequired,
+    handleGetPlaylistTracks: PropTypes.func.isRequired,
+    handleConfirmDeletePlaylist: PropTypes.func.isRequired,
+    handleShowConfirmDeleteDialog: PropTypes.func.isRequired,
+    handleHideConfirmDeleteDialog: PropTypes.func.isRequired,
+    showConfirmDeleteDialog: PropTypes.bool.isRequired,
+    confirmDeletePlaylistName: PropTypes.string,
+    confirmDeletePlaylistId: PropTypes.number
+}
+
+const mapStateToProps = (state) => ({
+    allPlaylists: state.spotify.allPlaylists,
+    allPlaylistsLoading: state.spotify.allPlaylistsLoading,
+    myPlaylists: state.spotify.myPlaylists,
+    myPlaylistsLoading: state.spotify.myPlaylistsLoading,
+    myPlaylistsFromSpotify: state.spotify.myPlaylistsFromSpotify,
+    myPlaylistsFromSpotifyLoading: state.spotify.myPlaylistsFromSpotifyLoading,
+    spotifyUser: state.user.spotifyUser,
+    spotifyAccessToken: state.user.spotifyAccessToken,
+    FBUser: state.user.FBUser,
+    showConfirmRemoveDialog: state.spotify.showConfirmRemoveDialog,
+    removePlaylistId: state.spotify.removePlaylistId,
+    removePlaylistFBId: state.spotify.removePlaylistFBId,
+    removePlaylistName: state.spotify.removePlaylistName,
+})
+
+const mapActionsToProps = {
+    getAllPlaylists,
+    getMyPlaylists,
+    getAllMyPlaylistsFromSpotify,
+    getPlaylistsFromSpotify,
+    addToMyPlaylists,
+    removeFromMyPlaylists,
+    confirmRemoveFromMyPlaylists,
+    cancelRemoveFromMyPlaylists,
+    likePlaylist,
+    unlikePlaylist
+}
+
+
+export default connect(mapStateToProps, mapActionsToProps)(withStyles(styles)(Home))

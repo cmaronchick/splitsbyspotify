@@ -88,7 +88,7 @@ export const getAllMyPlaylistsFromSpotify = (access_token) => async (dispatch) =
 export const getPlaylistsFromSpotify = (spotifyAccessToken, playlists) => async (dispatch) => {
   try {
     Object.keys(playlists).forEach(async (id) => {
-        let spotifyPlaylistResponse = await ky.get(`https://api.spotify.com/v1/playlists/${playlists[id].playlistId}`, {
+        let spotifyPlaylistResponse = await ky.get(`https://api.spotify.com/v1/playlists/${playlists[id].spotifyPlaylistId}`, {
         headers: {
             Authorization: `Bearer ${spotifyAccessToken}`
         }

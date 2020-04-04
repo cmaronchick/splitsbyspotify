@@ -18,7 +18,7 @@ import { generateRandomString } from '../../functions/utils'
 
 import { getAllMyPlaylistsFromSpotify, getMyPlaylists, getMyPlaylist } from './spotifyActions'
 
-const api = ky.create({prefixUrl: process.env.NODE_ENV === 'production' ? 'https://us-central1-splitsbyspotify.cloudfunctions.net/api/' : 'http://localhost:5000/splitsbyspotify/us-central1/api/'});
+const api = ky.create({prefixUrl: process.env.NODE_ENV === 'production' ? 'https://us-central1-splitsbyspotify.cloudfunctions.net/api/' : 'http://localhost:5001/splitsbyspotify/us-central1/api/'});
 
 export const login = (location, history) => async (dispatch) => {
 
@@ -94,7 +94,8 @@ export const login = (location, history) => async (dispatch) => {
                 }
             })
             dispatch(getUserData(access_token, FBIDToken))
-            window.history.pushState({ 'page_id': 1, 'user': 'spotifyUser'}, '', '/')
+            //window.history.pushState({ 'page_id': 1, 'user': 'spotifyUser'}, '', '/')
+            window.history.back()
 
         } else {
 

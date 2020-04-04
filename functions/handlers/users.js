@@ -109,7 +109,6 @@ const login = (req, res) => {
 }
 
 createFirebaseAccount = (req, res) => {
-    console.log('req.body', req.body)
     const {spotifyID, display_name, photoURL, email, accessToken} = req.body
     console.log('spotifyID, display_name, photoURL, email, accessToken:', spotifyID, display_name, photoURL, email, accessToken)
     // The UID we'll assign to the user.
@@ -152,7 +151,7 @@ createFirebaseAccount = (req, res) => {
       throw error;
     })
 
-    const addUserToUsersDB = 
+    const addUserToUsersDB = {};
     
     
     // Wait for all async tasks to complete, then generate and return a custom auth token.
@@ -220,7 +219,10 @@ const getAuthenticatedUser = (req, res, next) => {
             userData.playlists = [];
             if (data && data.docs && data.docs.length > 0) {
                 data.forEach(doc => {
-                    userData.playlists.push(doc.data())
+                    userData.playlists.push({
+                        FBId: doc.id,
+                        ...doc.data()
+                    })
                 })
             }
             return db.collection('notifications')
@@ -229,10 +231,13 @@ const getAuthenticatedUser = (req, res, next) => {
                 .get()
         })
         .then(data => {
-            userData.playlists = [];
+            userData.notifications = [];
             if (data && data.docs && data.docs.length > 0) {
                 data.forEach(doc => {
-                    userData.playlists.push(doc.data())
+                    userData.notifications.push({
+                        notificationId: doc.id,
+                        ...doc.data()
+                    })
                 })
             }
             return db.collection('likes')
@@ -374,8 +379,10 @@ const uploadImage = (req, res) => {
 }
 
 const markNotificationsAsRead = (req, res, next) => {
+    console.log('req.body', req.body)
+    let notificationIds = JSON.parse(req.body)
     let batch = db.batch()
-    req.body.forEach(notificationId => {
+    notificationIds.forEach(notificationId => {
         const notification = db.doc(`/notifications/${notificationId}`)
         batch.update(notification, { read: true });
     });

@@ -8,19 +8,23 @@ import PlaylistPreview from '../components/playlists/PlaylistPreview'
 import Typography from '@material-ui/core/Typography'
 import ConfirmDeleteDialog from '../components/playlists/ConfirmDeleteDialog'
 import CircularProgress from '@material-ui/core/CircularProgress'
+import Comments from '../components/playlists/Comments'
+import PlaylistSkeleton from '../util/PlaylistSkeleton'
 
 // Redux
 import { connect } from 'react-redux'
 import { getAllPlaylists, 
     getAllMyPlaylistsFromSpotify, 
-    getMyPlaylists, 
+    getMyPlaylists,
+    getMyPlaylist,
     getPlaylistsFromSpotify, 
     addToMyPlaylists,
     removeFromMyPlaylists,
     confirmRemoveFromMyPlaylists,
     cancelRemoveFromMyPlaylists,
     likePlaylist, 
-    unlikePlaylist } from '../redux/actions/spotifyActions'
+    unlikePlaylist
+} from '../redux/actions/spotifyActions'
 
 const styles = (theme) => ({
     ...theme.spreadThis
@@ -41,8 +45,8 @@ class Home extends Component {
             handleHideConfirmDeleteDialog: props.handleHideConfirmDeleteDialog,
             showConfirmDeleteDialog: props.showConfirmDeleteDialog,
             confirmDeletePlaylistName: props.confirmDeletePlaylistName,
-            confirmDeletePlaylistId: props.confirmDeletePlaylistId
-
+            confirmDeletePlaylistId: props.confirmDeletePlaylistId,
+            showCommentsDialog: false
         }
     }
     componentDidMount() {
@@ -56,7 +60,28 @@ class Home extends Component {
         }
     }
 
-    recentPlaylistsMarkup = (playlists) => playlists ? (
+    handleShowCommentsDialog = (playlistName, playlistId, FBId, comments) => {
+        this.setState({
+            showCommentsDialog: true,
+            commentsPlaylistName: playlistName,
+            commentsPlaylistId: playlistId,
+            commentsPlaylistFBId: FBId,
+            commentsPlaylistCommentsArray: comments
+        })
+        this.props.getMyPlaylist(FBId)
+
+    }
+    handleHideCommentsDialog = () => {
+        this.setState({
+            showCommentsDialog: false,
+            commentsPlaylistName: null,
+            commentsPlaylistId: null,
+            commentsPlaylistFBId: null,
+            commentsPlaylistCommentsArray: null
+        })
+    }
+
+    playlistsMarkup = (playlists) => playlists && Object.keys(playlists).length > 0 ? (
         Object.keys(playlists).map(playlistId => {
             return (
                 <PlaylistPreview
@@ -68,11 +93,12 @@ class Home extends Component {
                  handleShowConfirmDeleteDialog={this.state.handleShowConfirmDeleteDialog}
                  handleHideConfirmDeleteDialog={this.state.handleHideConfirmDeleteDialog}
                  handleLikePlaylist={this.props.likePlaylist}
-                 handleUnlikePlaylist={this.props.unlikePlaylist}/>
+                 handleUnlikePlaylist={this.props.unlikePlaylist}
+                 handleShowCommentsDialog={this.handleShowCommentsDialog}/>
             )
         })
     ) : (
-        <div>You have no playlists.</div>
+        <Typography variant="body1" color="inherit">You have no playlists yet. Add some of yours from Spotify or browse other users' playlists.</Typography>
     )
 
     render() {
@@ -80,24 +106,24 @@ class Home extends Component {
         return (
             <Grid container spacing={2} className={this.props.classes.container}>
                 <Grid item sm={6} xs={12}>
-                    <Typography variant="h4" value="All Playlists">All Playlists</Typography>
                     <div className="playlist-container">
+                    <Typography variant="h4" value="My Spotify Playlists">My Spotify Playlists</Typography>
                         {!this.props.myPlaylistsFromSpotifyLoading ? (
-                            this.recentPlaylistsMarkup(this.props.myPlaylistsFromSpotify)
+                            this.playlistsMarkup(this.props.myPlaylistsFromSpotify)
                         ) : (
-                            <CircularProgress size={30} className={classes.progress} />
+                            <PlaylistSkeleton />
                         )}
 
                     </div>
                 </Grid>
                 <Grid item sm={6} xs={12}>
-                    <Typography variant="h4" value="All Playlists">My Running Playlists</Typography>
                     <div className="playlist-container">
+                    <Typography variant="h4" value="My Workout Playlists">My Workout Playlists</Typography>
 
                         {!this.props.myPlaylistsLoading ? (
-                            this.recentPlaylistsMarkup(this.props.myPlaylists)
+                            this.playlistsMarkup(this.props.myPlaylists)
                         ) : (
-                            <CircularProgress size={30} className={classes.progress} />
+                            <PlaylistSkeleton />
                         )}
                     </div>
                 </Grid>
@@ -109,6 +135,14 @@ class Home extends Component {
                  FBId={this.props.removePlaylistFBId}
                  handleConfirmDeletePlaylist={this.props.removeFromMyPlaylists}
                  onClose={this.props.cancelRemoveFromMyPlaylists}/>
+                 <Comments
+                    open={this.state.showCommentsDialog}
+                    playlistName={this.state.commentsPlaylistName}
+                    playlistId={this.state.commentsPlaylistId}
+                    FBId={this.state.commentsPlaylistFBId}
+                    comments={this.state.commentsPlaylistCommentsArray}
+                    onClose={this.handleHideCommentsDialog}
+                    user={this.props.user} />
             </Grid>
         )
     }
@@ -136,6 +170,7 @@ Home.propTypes = {
 }
 
 const mapStateToProps = (state) => ({
+    user: state.user,
     allPlaylists: state.spotify.allPlaylists,
     allPlaylistsLoading: state.spotify.allPlaylistsLoading,
     myPlaylists: state.spotify.myPlaylists,
@@ -154,6 +189,7 @@ const mapStateToProps = (state) => ({
 const mapActionsToProps = {
     getAllPlaylists,
     getMyPlaylists,
+    getMyPlaylist,
     getAllMyPlaylistsFromSpotify,
     getPlaylistsFromSpotify,
     addToMyPlaylists,

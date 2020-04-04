@@ -1,29 +1,22 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types'
-import dotenv from 'dotenv'
 import jwtDecode from 'jwt-decode'
 import firebase from './constants/firebase'
+import ky from 'ky/umd'
 
 import {Provider} from 'react-redux'
 import store from './redux/store'
 
-import { login, logout, refreshTokens, getUserData } from './redux/actions/userActions'
-import { getAllPlaylists, getAllMyPlaylistsFromSpotify, getMyPlaylists, likePlaylist, unlikePlaylist } from './redux/actions/spotifyActions'
-import { SET_USER, SET_AUTHENTICATED, SET_UNAUTHENTICATED, SET_PLAYLISTS_MY, LOADING_USER } from './redux/types'
+import { login, logout, refreshTokens } from './redux/actions/userActions'
+import { getAllPlaylists,
+  getMyPlaylists,
+  getMyPlaylist, } from './redux/actions/spotifyActions'
+import { SET_AUTHENTICATED, LOADING_USER, LOADING_PLAYLIST } from './redux/types'
 
 import './App.css';
-import { withStyles} from '@material-ui/core/styles'
 import { ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme'
 
-import {
-  refreshAccessToken,
-  getAllUserPlaylists,
-  getMyUserPlaylists,
-  getPlaylistFromSpotify,
-  getPlaylistTracks,
-  addToMyPlaylists,
-  removeFromMyPlaylists } from './functions/spotify'
 import { getUrlParameters, generateRandomString } from './functions/utils'
 import { spotifyConfig } from './constants/spotifyConfig'
 import themeFile from './constants/theme'
@@ -54,6 +47,10 @@ if (FBIDToken && spotifyAccessToken) {
   }
 }
 var stateKey = 'spotify_auth_state';
+console.log('process.env.NODE_ENV', process.env.NODE_ENV)
+ky.create({ 
+    prefixUrl: process.env.NODE_ENV === 'development' ? 'http://localhost:5000/api' : 'https://us-central1-splitsbyspotify.cloudfunctions.net/api'
+})
 
 class App extends Component {
   constructor(props) {
@@ -156,20 +153,25 @@ class App extends Component {
     }
 
   }
-  handleGetPlaylistFromSpotify = async(spotifyAccessToken, id, playlistId) => {
-    try {
-      let playlistResponse = await getPlaylistFromSpotify(spotifyAccessToken, playlistId)
-      let myPlaylists = {...this.state.myPlaylists}
-      myPlaylists[id] = playlistResponse
-      myPlaylists[id].inMyPlaylists = true
-      this.setState({
-        myPlaylists
-      })
-      this.checkSpotifyPlaylistInMyPlaylists()
-    } catch (getPlaylistFromSpotifyError) {
-      console.log('getPlaylistFromSpotifyError', getPlaylistFromSpotifyError)
-    }
+
+  handleGetMyPlaylist = (FBId) => {
+    console.log('handleGetMyPlaylist FBId', FBId)
+    store.dispatch(getMyPlaylist(FBId))
   }
+  // handleGetPlaylistFromSpotify = async(spotifyAccessToken, id, playlistId) => {
+  //   try {
+  //     let playlistResponse = await getPlaylistFromSpotify(spotifyAccessToken, playlistId)
+  //     let myPlaylists = {...this.state.myPlaylists}
+  //     myPlaylists[id] = playlistResponse
+  //     myPlaylists[id].inMyPlaylists = true
+  //     this.setState({
+  //       myPlaylists
+  //     })
+  //     this.checkSpotifyPlaylistInMyPlaylists()
+  //   } catch (getPlaylistFromSpotifyError) {
+  //     console.log('getPlaylistFromSpotifyError', getPlaylistFromSpotifyError)
+  //   }
+  // }
 
   checkSpotifyPlaylistInMyPlaylists = () => {
     
@@ -188,41 +190,40 @@ class App extends Component {
   }
 
 
-  handleAddPlaylist = async (playlistId, publicPlaylist, collaborative) => {
-    try {
-      let addPlaylistResponse = await addToMyPlaylists(this.state.FBIDToken, playlistId, publicPlaylist, collaborative)
-      console.log('addPlaylistResponse', addPlaylistResponse)
-      this.handleGetMyPlaylists(this.state.FBIDToken)
-    } catch (addPlaylistError) {
-      console.log('addPlaylistError', addPlaylistError)
-    }
-  }
-  handleRemovePlaylist = async (playlistId) => {
-    try {
-      let removePlaylistResponse = await removeFromMyPlaylists(this.state.FBIDToken, playlistId)
-      this.handleGetMyPlaylists(this.state.FBIDToken)
-    } catch (removePlaylistError) {
-      console.log('removePlaylistError', removePlaylistError)
-    }
-  }
-  handleGetPlaylistTracks = async ({id, href}) => {
-    this.setState({
-      currentPlaylistId: id,
-      currentPlaylistLoading: true
-    })
-    try {
-      let currentPlaylistResponse = await getPlaylistTracks(this.state.spotifyAccessToken, href)
-      console.log('currentPlaylistResponse', currentPlaylistResponse)
-      this.setState({
-        currentPlaylist: currentPlaylistResponse.currentPlaylist,
-        currentPlaylistLoading: false
+  // handleAddPlaylist = async (playlistId, publicPlaylist, collaborative) => {
+  //   try {
+  //     let addPlaylistResponse = await addToMyPlaylists(this.state.FBIDToken, playlistId, publicPlaylist, collaborative)
+  //     console.log('addPlaylistResponse', addPlaylistResponse)
+  //     this.handleGetMyPlaylists(this.state.FBIDToken)
+  //   } catch (addPlaylistError) {
+  //     console.log('addPlaylistError', addPlaylistError)
+  //   }
+  // }
+  // handleRemovePlaylist = async (playlistId) => {
+  //   try {
+  //     let removePlaylistResponse = await removeFromMyPlaylists(this.state.FBIDToken, playlistId)
+  //     this.handleGetMyPlaylists(this.state.FBIDToken)
+  //   } catch (removePlaylistError) {
+  //     console.log('removePlaylistError', removePlaylistError)
+  //   }
+  // }
+  // handleGetPlaylistTracks = async ({id, href}) => {
+  //   store.dispatch({
+  //     type: LOADING_PLAYLIST
+  //   })
+  //   try {
+  //     let currentPlaylistResponse = await getPlaylistTracks(this.state.spotifyAccessToken, href)
+  //     console.log('currentPlaylistResponse', currentPlaylistResponse)
+  //     this.setState({
+  //       currentPlaylist: currentPlaylistResponse.currentPlaylist,
+  //       currentPlaylistLoading: false
 
-      })
-    } catch (getPlaylistTracksError) {
-      console.log('getPlaylistTracksError', getPlaylistTracksError)
+  //     })
+  //   } catch (getPlaylistTracksError) {
+  //     console.log('getPlaylistTracksError', getPlaylistTracksError)
 
-    }
-  }
+  //   }
+  // }
   handleShowConfirmDeleteDialog = (playlistId, playlistName) => {
       this.setState({
           confirmDeletePlaylistId: playlistId,
@@ -301,10 +302,11 @@ class App extends Component {
       this.handleSpotifyCallback(window.location)
     }
     if (window.location.pathname.indexOf('/playlist') > -1 && window.location.pathname.split('/').length > 2) {
-      let playlistId = window.location.pathname.split('/')[2]
-      console.log('looking up playlist', playlistId)
+      let FBId = window.location.pathname.split('/')[2]
+      console.log('looking up playlist', FBId)
       //let currentPlaylist = this.state.allPlaylists
-      this.handleGetPlaylistFromSpotify(this.state.spotifyAccessToken, playlistId, playlistId)
+      //this.handleGetPlaylistFromSpotify(this.state.spotifyAccessToken, playlistId, playlistId)
+      //this.handleGetMyPlaylist(FBId)
     }
     store.dispatch(getAllPlaylists())
   }
@@ -342,18 +344,17 @@ class App extends Component {
                   <Route path={['/profile','/profile/:spotifyUser']} component={Profile} />
                   <Route path={['/playlist/:playlistId', '/playlist']} render={({match}) => {
                     return <Playlist
-                    spotifyUser={this.state.spotifyUser}
-                    selectedDistance={this.state.selectedDistance}
-                    targetPace={this.state.targetPace}
-                    splits={this.state.splits}
-                    handleGetPlaylistTracks={this.handleGetPlaylistTracks}
-                    handleSelectDistance={this.handleSelectDistance}
-                    handleTextInput={this.handleTextInput}
-                    handleCalculateButtonClick={this.handleCalculateButtonClick}
-                    checkForPlaylist={this.checkForPlaylist}
-                    playlist={this.state.currentPlaylist}
-                    playlistId={match.params.playlistId}
-                    playlistLoading={this.state.currentPlaylistLoading}
+                    // selectedDistance={this.state.selectedDistance}
+                    // targetPace={this.state.targetPace}
+                    // splits={this.state.splits}
+                    // handleGetPlaylistTracks={this.handleGetPlaylistTracks}
+                    // handleSelectDistance={this.handleSelectDistance}
+                    // handleTextInput={this.handleTextInput}
+                    // handleCalculateButtonClick={this.handleCalculateButtonClick}
+                    // checkForPlaylist={this.checkForPlaylist}
+                    // playlistObj={this.state.currentPlaylist}
+                    // playlistId={match.params.playlistId}
+                    // playlistLoading={this.state.currentPlaylistLoading}
                     />
                     }
                   } />

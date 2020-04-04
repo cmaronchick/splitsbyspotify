@@ -24,7 +24,9 @@ const initialState = {
     allPlaylists: {},
     myPlaylists: {},
     myPlaylistsFromSpotify: {},
-    playlist: {},
+    playlist: {
+        comments: []
+    },
     showConfirmRemoveDialog: false,
     allPlaylistsLoading: false,
     myPlaylistsLoading: false,
@@ -49,7 +51,6 @@ export default function(state = initialState, action) {
                         FBId: FBId,
                         inMyPlaylists: true
                     }
-                    console.log('myPlaylistsFromSpotify[action.payload.myPlaylists[FBId].playlistId]', myPlaylistsFromSpotify[action.payload.myPlaylists[FBId].playlistId])
                 }
             })
 
@@ -66,6 +67,7 @@ export default function(state = initialState, action) {
                 myPlaylistsFromSpotifyLoading: false,
             }
         case SET_PLAYLIST:
+            console.log('action.payload', action.payload)
             return {
                 ...state,
                 playlist: action.payload,
@@ -116,8 +118,7 @@ export default function(state = initialState, action) {
             let removeFromMyPlaylists = {...state.myPlaylists}
             let removeFromAllPlaylists = {...state.allPlaylists}
             let removeFromAllMySpotifyPlaylists = {...state.myPlaylistsFromSpotify}
-            delete removeFromMyPlaylists[action.payload.FBId]
-            removeFromAllPlaylists[action.payload.FBId].inMyPlaylists = false
+            delete removeFromMyPlaylists[action.payload.FBId]   
             removeFromAllMySpotifyPlaylists[action.payload.playlistId].inMyPlaylists = false
             return {
                 ...state,
@@ -170,11 +171,15 @@ export default function(state = initialState, action) {
             }
         case COMMENT_ON_PLAYLIST:
             let myPlaylists = {...state.myPlaylists}
-            myPlaylists[action.payload.FBId].comments.push({...action.payload})
-            myPlaylists[action.payload.FBId].commentCount++;
+            myPlaylists[action.payload.playlistId].comments ? myPlaylists[action.payload.playlistId].comments.push({...action.payload}) : myPlaylists[action.payload.playlistId].comments = [action.payload]
+            myPlaylists[action.payload.playlistId].commentCount++;
+            let playlist = {...state.playlist}
+            playlist.comments = myPlaylists[action.payload.playlistId].comments
+            playlist.commentCount++;
             return {
                 ...state,
-                myPlaylists
+                myPlaylists,
+                playlist
             }
         case DELETE_COMMENT_ON_PLAYLIST:
             return {

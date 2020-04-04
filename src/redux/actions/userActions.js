@@ -8,14 +8,17 @@ import {
     LOADING_USER,
     CLEAR_PLAYLISTS,
     LOADING_PLAYLISTS_MY,
-    LOADING_PLAYLISTS_MY_FROM_SPOTIFY} from '../types'
+    LOADING_PLAYLISTS_MY_FROM_SPOTIFY,
+    MARK_NOTIFICATIONS_READ} from '../types'
 import ky from 'ky/umd'
 import { getUrlParameters } from '../../functions/utils'
 import {spotifyConfig} from '../../constants/spotifyConfig'
 import firebase from '../../constants/firebase'
 import { generateRandomString } from '../../functions/utils'
 
-import { getAllMyPlaylistsFromSpotify, getMyPlaylists } from './spotifyActions'
+import { getAllMyPlaylistsFromSpotify, getMyPlaylists, getMyPlaylist } from './spotifyActions'
+
+const api = ky.create({prefixUrl: process.env.NODE_ENV === 'production' ? 'https://us-central1-splitsbyspotify.cloudfunctions.net/api/' : 'http://localhost:5000/splitsbyspotify/us-central1/api/'});
 
 export const login = (location, history) => async (dispatch) => {
 
@@ -29,7 +32,7 @@ export const login = (location, history) => async (dispatch) => {
 
     const searchParams = new URLSearchParams();
     searchParams.set('code', code)
-    searchParams.set('redirect_uri', 'http://localhost:3000/spotifyCallback')
+    searchParams.set('redirect_uri', `${window.location.origin}/spotifyCallback`)
     searchParams.set('grant_type', 'authorization_code')
     let authOptions = { 
         body: searchParams,
@@ -73,7 +76,7 @@ export const login = (location, history) => async (dispatch) => {
             body.set('photoURL', photoURL)
             body.set('email', email)
             body.set('accessToken', accessToken)
-            let firebaseResponse = await ky.post('/spotifyLogin', {
+            let firebaseResponse = await api.post('spotifyLogin', {
                 body: body
             }).json()
             FBIDToken = firebaseResponse.token
@@ -102,6 +105,7 @@ export const login = (location, history) => async (dispatch) => {
             })
         }
   }catch (spotifyTokenErrorResponse) {
+      console.log('spotifyTokenErrorResponse', spotifyTokenErrorResponse)
     let spotifyTokenError = spotifyTokenErrorResponse.response ? await spotifyTokenErrorResponse.response.json() : spotifyTokenErrorResponse
     console.log('spotifyTokenError', spotifyTokenError)
     dispatch({
@@ -176,7 +180,7 @@ export const refreshTokens = (spotifyRefreshToken) => async (dispatch) => {
                 body.set('photoURL', photoURL)
                 body.set('email', email)
                 body.set('accessToken', accessToken)
-                let firebaseResponse = await ky.post('/spotifyLogin', {
+                let firebaseResponse = await api.post('spotifyLogin', {
                   body: body
                 }).json()
                 FBIDToken = firebaseResponse.token
@@ -217,7 +221,7 @@ export const editUserDetails = (userDetails) => async (dispatch) => {
         let FBIDToken = await firebase.auth().currentUser.getIdToken()
         localStorage.FBIDToken = FBIDToken
 
-        let editUserResponse = await ky.post('/user', {
+        let editUserResponse = await api.post('user', {
             headers: {
                 Authorization: `Bearer ${FBIDToken}`,
                 'Content-type': 'application/json'
@@ -230,11 +234,30 @@ export const editUserDetails = (userDetails) => async (dispatch) => {
     }
 }
 
+export const markNotificationsRead = (notificationIds) => async (dispatch) => {
+    console.log('notificationIds', notificationIds)
+    try {
+        let FBIDToken = await firebase.auth().currentUser.getIdToken()
+        let notificationsResponse = await api.post('notifications', {
+            headers: {
+                Authorization: `Bearer ${FBIDToken}`
+            },
+            body: JSON.stringify(notificationIds)
+        })
+        console.log('notificationsResponse', notificationsResponse)
+        dispatch({
+            type: MARK_NOTIFICATIONS_READ
+        })
+    } catch (markNotificationsReadError) {
+        console.log('markNotificationsReadError', markNotificationsReadError)
+    }
+}
+
 export const uploadImage = (formData) => async (dispatch) => {
     try {
         let FBIDToken = await firebase.auth().currentUser.getIdToken()
         dispatch({ type: LOADING_USER })
-        let uploadImageResponse = await ky.post('/user/image', {
+        let uploadImageResponse = await api.post('user/image', {
             headers: {
                 Authorization: `Bearer ${FBIDToken}`
             },
@@ -249,6 +272,7 @@ export const uploadImage = (formData) => async (dispatch) => {
 }
 
 export const getUserData = (accessToken, IDToken) => async (dispatch) => {
+    dispatch({ type: LOADING_USER })
     const spotifyAccessToken = accessToken ? accessToken : localStorage.spotifyAccessToken
     const FBIDToken = IDToken ? IDToken : localStorage.FBIDToken
 
@@ -258,7 +282,7 @@ export const getUserData = (accessToken, IDToken) => async (dispatch) => {
                 Authorization: `Bearer ${spotifyAccessToken}`
             }
         }).json()
-        let FBUser = await ky.get('/user', {
+        let FBUser = await api.get('user', {
             headers: {
                 Authorization: `Bearer ${FBIDToken}`
             }
@@ -274,6 +298,15 @@ export const getUserData = (accessToken, IDToken) => async (dispatch) => {
             }
         })
         dispatch(getAllMyPlaylistsFromSpotify(spotifyAccessToken))
+        let FBId;
+        if (window.location.pathname.indexOf('/playlist') > -1 && window.location.pathname.split('/').length > 2) {
+            FBId = window.location.pathname.split('/')[2]
+            console.log('looking up playlist', FBId)
+            //let currentPlaylist = this.state.allPlaylists
+            //this.handleGetPlaylistFromSpotify(this.state.spotifyAccessToken, playlistId, playlistId)
+            //this.handleGetMyPlaylist(FBId)
+            dispatch(getMyPlaylist(FBId))
+        }
         dispatch(getMyPlaylists(FBIDToken))
 
     } catch (getUserDataError) {

@@ -8,7 +8,7 @@ const styles = {
     split: {
         borderWidth: 1,
         borderColor: '#4f98ca',
-        borderStyle: 'solid'
+        borderStyle: 'solid',
     }
 }
 

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import PropTypes from 'prop-types'
 import {withStyles} from '@material-ui/core/styles'
 import Grid from '@material-ui/core/Grid'
@@ -8,11 +8,15 @@ import Card from '@material-ui/core/Card'
 import CardHeader from '@material-ui/core/CardHeader'
 import CardMedia from '@material-ui/core/CardMedia'
 import CardContent from '@material-ui/core/CardContent'
+import CircularProgress from '@material-ui/core/CircularProgress'
 
 import DistancePaceCalculator from '../components/splits/DistancePaceCalculator'
 import Splits from '../components/splits/Splits'
 import Tracks from '../components/playlists/Tracks'
-import { getMyPlaylist, getSinglePlaylistFromSpotify } from '../redux/actions/spotifyActions'
+import Comments from '../components/playlists/Comments'
+import PostComment from '../components/playlists/PostComment'
+import { getMyPlaylist,
+    getSinglePlaylistFromSpotify } from '../redux/actions/spotifyActions'
 
 import { connect } from 'react-redux'
 
@@ -27,63 +31,70 @@ const Playlist = (props) => {
         targetPace,
         splits,
         playlistId,
-        playlist,
+        playlistObj,
         playlistLoading,
         spotifyUser,
         handleGetPlaylistTracks,
         handleSelectDistance,
         handleTextInput,
         handleCalculateButtonClick } = props
-    const tracks = playlist ? playlist.tracks : []
-    if (playlistId && !playlist && !playlistLoading) {
+    const tracks = playlistObj ? playlistObj.tracks : []
+    if (playlistId && !playlistObj && !playlistLoading) {
         console.log('spotifyUser', spotifyUser)
-        handleGetPlaylistTracks({id: playlistId, href:null})
+        props.getSinglePlaylistFromSpotify({id: playlistId, href:null})
     }
     return (
         <Grid container spacing={2}> 
-            <Grid item xs={12}>
-                <Card>
-                    <DistancePaceCalculator
-                    selectedDistance={selectedDistance}
-                    targetPace={targetPace}
-                    handleTextInput={handleTextInput}
-                    handleSelectDistance={handleSelectDistance}
-                    handleCalculateButtonClick={handleCalculateButtonClick} />
-                </Card>
-            </Grid>
-            <Grid container spacing={2} style={{padding: '0 10px'}}>
-            {splits && splits.length > 0 ? (
-                <Grid item sm={6}>
-                            <Card>
-                                <CardHeader title="Splits" />
-                                <CardContent>
-                                    <Splits targetPace={targetPace} splits={splits} />
-                                </CardContent>
-                            </Card>
-                </Grid>
-            ) : null}
-                <Grid item sm={6}>
+        {playlistLoading ? (
+            <CircularProgress />
+        ) : (
+            <Fragment>
+                <Grid item xs={12}>
+                    <Typography variant="h2">
+                        Playlist: {playlistObj.name}
+                    </Typography>
                     <Card>
-                        <CardHeader title="Tracks" />
-                        <CardContent>
-                            <Tracks tracks={tracks} />
-                        </CardContent>
+                        <DistancePaceCalculator
+                        selectedDistance={selectedDistance}
+                        targetPace={targetPace}
+                        handleTextInput={handleTextInput}
+                        handleSelectDistance={handleSelectDistance}
+                        handleCalculateButtonClick={handleCalculateButtonClick} />
                     </Card>
                 </Grid>
-            </Grid>
+                <Grid container spacing={2} style={{padding: '0 10px'}}>
+                {splits && splits.length > 0 && (
+                    <Grid item sm={6}>
+                                <Card>
+                                    <CardHeader title="Splits" />
+                                    <CardContent>
+                                        <Splits targetPace={targetPace} splits={splits} />
+                                    </CardContent>
+                                </Card>
+                    </Grid>
+                )}
+                    {tracks && tracks.items && 
+                    (<Grid item sm={6}>
+                        <Card>
+                            <CardHeader title="Tracks" />
+                            <CardContent>
+                                <Tracks tracks={tracks} />
+                            </CardContent>
+                        </Card>
+                    </Grid>)}
+                </Grid>
+            </Fragment>
+        )}
         </Grid>
     )
 }
 
 const mapStateToProps = (state) => ({
-    playlist: state.spotify.playlist,
+    playlistObj: state.spotify.playlist,
     spotifyUser: state.user.spotifyUser,
-    FBUser: state.user.FBUser
+    FBUser: state.user.FBUser,
+    playlistLoading: state.spotify.playlistLoading
 })
 
-const mapActionsToProps = {
-    // getMyPlaylist,
-    // getSinglePlaylistFromSpotify
-}
 
-export default connect(mapStateToProps, mapActionsToProps)(withStyles(styles)(Playlist))
+export default connect(mapStateToProps, null)(withStyles(styles)(Playlist))

@@ -2,9 +2,21 @@ const functions = require('firebase-functions');
 const { config, spotifyConfig } = require('./util/config')
 const { db } = require('./util/admin')
 
+const cors = require('cors')
 const app = require('express')();
+app.use(cors())
 
-const {getPlaylists, getMyPlaylists, getPlaylist, deletePlaylist, addPlaylist, commentOnPlaylist, deleteCommentOnPlaylist, likeAPlaylist, unlikeAPlaylist} = require('./handlers/playlists')
+const {
+    getPlaylists,
+    getMyPlaylists,
+    getPlaylist,
+    deletePlaylist,
+    addPlaylist,
+    updatePlaylist,
+    commentOnPlaylist,
+    deleteCommentOnPlaylist,
+    likeAPlaylist,
+    unlikeAPlaylist} = require('./handlers/playlists')
 const {
     signUp,
     login,
@@ -26,6 +38,7 @@ app.get('/playlists', getPlaylists)
 app.get('/playlists/my', FBAuth, getMyPlaylists, errors)
 app.post('/playlists', FBAuth, addPlaylist, errors)
 app.get('/playlists/:playlistId', getPlaylist, errors)
+app.post('/playlists/:playlistId', FBAuth, updatePlaylist, errors)
 app.delete('/playlists/:playlistId', FBAuth, deletePlaylist, errors)
 app.post('/playlists/:playlistId/like', FBAuth, likeAPlaylist)
 app.delete('/playlists/:playlistId/like', FBAuth, unlikeAPlaylist)

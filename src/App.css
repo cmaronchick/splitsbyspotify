@@ -28,3 +28,21 @@ a{
 .splits-container {
   padding: 5px 20px;
 }
+
+@keyframes anim1 {
+  from { font-size: 0px;}
+  to   { font-size: 10px;}
+}
+@-webkit-keyframes anim1{
+  from { font-size: 0px;}
+  to   { font-size: 10px;}
+}
+
+@keyframes anim2 {
+  from { font-size: 10px; }
+  to   { font-size: 0px; }
+}
+@-webkit-keyframes anim2{
+  from { font-size: 10px; }
+  to   { font-size: 0px; }
+} 

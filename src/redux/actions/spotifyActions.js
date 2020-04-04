@@ -23,7 +23,7 @@ import ky from 'ky/umd'
 import firebase from '../../constants/firebase'
 import store from '../store'
 
-const api = ky.create({prefixUrl: process.env.NODE_ENV === 'production' ? 'https://us-central1-splitsbyspotify.cloudfunctions.net/api/' : 'http://localhost:5000/splitsbyspotify/us-central1/api/'});
+const api = ky.create({prefixUrl: process.env.NODE_ENV === 'production' ? 'https://us-central1-splitsbyspotify.cloudfunctions.net/api/' : 'http://localhost:5001/splitsbyspotify/us-central1/api/'});
 
 // GET ALL PLAYLISTS
 

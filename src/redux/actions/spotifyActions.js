@@ -22,14 +22,15 @@ import {
 import ky from 'ky/umd'
 import firebase from '../../constants/firebase'
 import store from '../store'
-import Playlist from '../../pages/Playlist'
+
+const api = ky.create({prefixUrl: process.env.NODE_ENV === 'production' ? 'https://us-central1-splitsbyspotify.cloudfunctions.net/api/' : 'http://localhost:5000/splitsbyspotify/us-central1/api/'});
 
 // GET ALL PLAYLISTS
 
 export const getAllPlaylists = () => async (dispatch) => {
     dispatch({ type: LOADING_PLAYLISTS_ALL })
     try {
-        let getPlaylistsResponse = await ky.get('/playlists').json()
+        let getPlaylistsResponse = await api.get('playlists').json()
         console.log('getPlaylistsResponse', getPlaylistsResponse)
         let allPlaylists = {}
         getPlaylistsResponse.forEach(playlist => {
@@ -88,7 +89,7 @@ export const getAllMyPlaylistsFromSpotify = (access_token) => async (dispatch) =
 export const getPlaylistsFromSpotify = (spotifyAccessToken, playlists) => async (dispatch) => {
   try {
     Object.keys(playlists).forEach(async (id) => {
-        let spotifyPlaylistResponse = await ky.get(`https://api.spotify.com/v1/playlists/${playlists[id].playlistId}`, {
+        let spotifyPlaylistResponse = await ky.get(`https://api.spotify.com/v1/playlists/${playlists[id].spotifyPlaylistId}`, {
         headers: {
             Authorization: `Bearer ${spotifyAccessToken}`
         }
@@ -131,7 +132,7 @@ export const getMyPlaylists = (FBIDToken) => async (dispatch) => {
     dispatch({ type: LOADING_PLAYLISTS_MY })
     try {
         //let FBIDToken = firebase.auth().currentUser.getIdToken()
-        let getPlaylistsResponse = await ky.get('/playlists/my', {
+        let getPlaylistsResponse = await api.get('playlists/my', {
             headers: {
                 Authorization: `Bearer ${FBIDToken}`
             }
@@ -166,13 +167,24 @@ export const getMyPlaylists = (FBIDToken) => async (dispatch) => {
 export const getMyPlaylist = (FBId) => async (dispatch) => {
     dispatch({ type: LOADING_PLAYLIST })
     try {
-        let FBIDToken = firebase.auth().currentUser.getIdToken()
-        let getPlaylistResponse = await ky.get(`/playlists/${FBId}`, {
+        let FBIDToken = await firebase.auth().currentUser.getIdToken()
+        let getPlaylistResponse = await api.get(`playlists/${FBId}`, {
             headers: {
                 Authorization: `Bearer ${FBIDToken}`
             }
         }).json()
-        let playlist = {...getPlaylistResponse}
+        console.log('store.getState().user.spotifyAccessToken', store.getState().user.spotifyAccessToken)
+        let playlist = {...getPlaylistResponse.playlistData}
+        console.log('playlist', playlist)
+        let spotifyPlaylistResponse = await ky.get(`https://api.spotify.com/v1/playlists/${playlist.spotifyPlaylistId}`, {
+            headers: {
+                Authorization: `Bearer ${store.getState().user.spotifyAccessToken}`
+            }
+            }).json()
+        playlist = {
+            ...playlist,
+            ...spotifyPlaylistResponse
+        }
         dispatch({
             type: SET_PLAYLIST,
             payload: playlist
@@ -191,13 +203,15 @@ export const addToMyPlaylists = (playlist) => async (dispatch) => {
   const {id, name, collaborative} = playlist
   const publicPlaylist = playlist.public
   const searchParams = new URLSearchParams()
-  searchParams.set('playlistId', id)
+  searchParams.set('spotifyPlaylistId', id)
+  searchParams.set('playlistName', name)
+  searchParams.set('playlistImage', playlist.images[0].url)
   searchParams.set('public', publicPlaylist)
   searchParams.set('collaborative', collaborative)
   try {
     let FBIDToken = await firebase.auth().currentUser.getIdToken()
     console.log('FBUser', FBIDToken)
-    let addPlaylistResponse = await ky.post('/playlists', {
+    let addPlaylistResponse = await api.post('playlists', {
       headers: {
         Authorization: `Bearer ${FBIDToken}`,
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -229,12 +243,12 @@ export const removeFromMyPlaylists = (playlistId, FBId) => async (dispatch) => {
   try {
     let FBIDToken = await firebase.auth().currentUser.getIdToken()
     console.log('FBIDToken', FBIDToken)
-    let removePlaylistResponse = await ky.delete(`/playlists/${FBId}`, {
+    let removePlaylistResponse = await api.delete(`playlists/${FBId}`, {
       headers: {
         Authorization: `Bearer ${FBIDToken}`
       }
     }).json()
-    console.log('removePlaylistResponse playlistId', FBId)
+    console.log('removePlaylistResponse', removePlaylistResponse)
     dispatch({
         type: REMOVE_FROM_MY_PLAYLISTS,
         payload: {
@@ -283,7 +297,7 @@ export const likePlaylist = (playlistId) => async (dispatch) => {
             }
         }).json()
         console.log('FBUser', FBUser)
-        let likeResponse = await ky.post(`/playlists/${playlistId}/like`, {
+        let likeResponse = await api.post(`playlists/${playlistId}/like`, {
             headers: {
                 Authorization: `Bearer ${FBIDToken}`
             }
@@ -302,7 +316,7 @@ export const likePlaylist = (playlistId) => async (dispatch) => {
 export const unlikePlaylist = (playlistId) => async (dispatch) => {
     try {
         let FBIDToken = await firebase.auth().currentUser.getIdToken()
-        let unlikeResponse = await ky.delete(`/playlists/${playlistId}/like`, {
+        let unlikeResponse = await api.delete(`playlists/${playlistId}/like`, {
             headers: {
                 Authorization: `Bearer ${FBIDToken}`
             }
@@ -317,15 +331,19 @@ export const unlikePlaylist = (playlistId) => async (dispatch) => {
 }
 
 export const commentOnPlaylist = (FBId, commentBody) => async (dispatch) => {
+    console.log('commentBody', commentBody)
+    console.log('FBId', FBId)
     try {
         let FBIDToken = await firebase.auth().currentUser.getIdToken()
-        let postCommentResponse = await ky.post(`/playlists/${FBId}/comment`, {
+        const searchParams = new URLSearchParams()
+        searchParams.set('body', commentBody)
+        let postCommentResponse = await api.post(`playlists/${FBId}/comment`, {
             headers: {
-                Authorization: `Bearer ${FBIDToken}`,
-                'Content-type': 'application/json'
+                Authorization: `Bearer ${FBIDToken}`
             },
-            body: commentBody
+          body: JSON.stringify({body: commentBody})
         }).json()
+        console.log('postCommentResponse', postCommentResponse)
         dispatch({
             type: COMMENT_ON_PLAYLIST,
             payload: postCommentResponse.comment
@@ -350,6 +368,9 @@ export const commentOnPlaylist = (FBId, commentBody) => async (dispatch) => {
     }
 }
 
+
 export const clearErrors = () => (dispatch) => {
-    dispatch({ type: CLEAR_ERRORS })
+    dispatch({
+        type: CLEAR_ERRORS
+    })
 }

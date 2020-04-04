@@ -4,13 +4,19 @@ import { SET_USER,
     CLEAR_ERRORS, 
     LOADING_UI, 
     SET_AUTHENTICATED, 
-    SET_UNAUTHENTICATED, LIKE_PLAYLIST, UNLIKE_PLAYLIST } from '../types'
+    SET_UNAUTHENTICATED,
+    LIKE_PLAYLIST,
+    UNLIKE_PLAYLIST,
+    MARK_NOTIFICATIONS_READ } from '../types'
 
 const initialState = {
     authenticated: false,
-    credentials: {},
-    likes: [],
-    notifications: []
+    FBUser: {
+        credentials: {},
+        likes: [],
+        notifications: []
+    },
+    spotifyUser: {},
 }
 
 export default function(state = initialState, action) {
@@ -30,6 +36,7 @@ export default function(state = initialState, action) {
             return {
                 authenticated: true,
                 loading: false,
+                ...state,
                 ...action.payload
             }
         case LOADING_USER:
@@ -59,6 +66,14 @@ export default function(state = initialState, action) {
                 ...state,
                 FBUser: UnlikePlaylistFBUser
             }
+        case MARK_NOTIFICATIONS_READ: 
+            let FBUser = {...state.FBUser}
+            FBUser.notifications.forEach(notification => notification.read = true);
+            return {
+                ...state,
+                FBUser
+            }
+
         default: 
             return {
                 ...state

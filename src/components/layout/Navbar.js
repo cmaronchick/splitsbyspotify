@@ -1,17 +1,17 @@
-import React, { Component, Fragment} from 'react'
+import React, { Fragment} from 'react'
 import PropTypes from 'prop-types'
 import AppBar from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
 import Button from '@material-ui/core/Button'
 import AddIcon from '@material-ui/icons/Add'
 import HomeIcon from '@material-ui/icons/Home'
-import NotificationsIcon from '@material-ui/icons/Notifications'
+import Notifications from './Notifications'
 
 import MyButton from '../../util/MyButton'
 
 // Redux 
 import { connect } from 'react-redux'
-import { makeStyles, withStyles } from '@material-ui/core'
+import { withStyles } from '@material-ui/core'
 
 const Link = require('react-router-dom').Link
 
@@ -39,9 +39,7 @@ const Navbar = (props) => {
                         <Link to="/">
                             <HomeIcon color="primary"/>
                         </Link>
-                        <MyButton tip="Notifications">
-                            <NotificationsIcon />
-                        </MyButton>
+                        <Notifications />
                         <Button color="inherit" component={Link} to="/profile">Profile</Button>
                     </Fragment>
                 )}

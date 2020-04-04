@@ -22,6 +22,8 @@ import { logout, uploadImage } from '../redux/actions/userActions'
 
 import MyButton from '../util/MyButton'
 import EditDetails from '../components/profile/EditDetails'
+import PlaylistSkeleton from '../util/PlaylistSkeleton'
+import ProfileSkeleton from '../util/ProfileSkeleton'
 
 const styles = {
     profile: {
@@ -171,9 +173,7 @@ const Profile = (props) => {
             </div>
             </Paper>
         )) : (
-        <div>
-            
-        </div>
+        <ProfileSkeleton />
     )
     return profileMarkup;
 }

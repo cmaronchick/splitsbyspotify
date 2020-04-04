@@ -54,7 +54,7 @@ class PostComment extends Component {
     const { classes, authenticated } = this.props;
     const errors = this.state.errors;
     const commentFormMarkup = authenticated ? (
-        <Grid item sm={12} style={{ textAlign: 'center' }}>
+        <Grid item sm={12} style={{ textAlign: 'center', padding: 12 }}>
           <form onSubmit={this.handleSubmit}>
             <TextField
               name="body"
@@ -85,7 +85,7 @@ class PostComment extends Component {
 
 
 const mapActionsToProps = {
-    commentOnPlaylist
+    commentOnPlaylist: (FBId, body) => commentOnPlaylist(FBId, body)
 }
 const mapStateToProps = (state)  => ({
     authenticated: state.user.authenticated

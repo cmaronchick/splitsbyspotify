@@ -64,7 +64,7 @@ const getPlaylist = (req, res, next) => {
                 throw new Error(JSON.stringify({ code: 404, message: 'No playlist found' }))
             }
             playlistData = doc.data()
-            playlistData.playlistId = doc.id;
+            playlistData.FBId = doc.id;
             return db.collection('comments')
             .where('playlistId', '==', playlistId)
             .orderBy('createdAt', 'asc')
@@ -125,6 +125,7 @@ const deletePlaylist = (req, res, next) => {
 }
 
 const commentOnPlaylist = (req, res) => {
+    console.log('req.body', req.body)
     const { body } = JSON.parse(req.body)
     const { playlistId } = req.params
     const { spotifyUser, photoURL } = req.user
@@ -209,7 +210,7 @@ const likeAPlaylist = (req, res) => {
         .then(doc => {
             if (doc.exists) {
                 playlistData = doc.data()
-                playlistData.playlistId = doc.id;
+                playlistData.FBId = doc.id;
                 // Get the like by user for the playlist
                 return likeDocument.get()
             } else {
@@ -228,13 +229,12 @@ const likeAPlaylist = (req, res) => {
                 const like = {
                     playlistId,
                     spotifyUser,
-                    likedAt: new Date().toISOString()
+                    createdAt: new Date().toISOString()
                 }
                 return db.collection(`likes`).add(like)
-
             }
             // Return error message that they playlist is already liked
-            console.log({data})
+            // console.log({data})
             throw new Error(JSON.stringify({ code: 400, message: `You have already liked that playlist.`}))
         })
         .then(() => {
@@ -313,10 +313,12 @@ const unlikeAPlaylist = (req, res) => {
 }
 
 const addPlaylist = (req, res, next) => {
-    console.log('req.user', req.user)
+    console.log('req.body', req.body)
     const newPlaylist = {
-        playlistId: req.body.playlistId,
+        spotifyPlaylistId: req.body.spotifyPlaylistId,
         spotifyUser: req.user.spotifyUser,
+        playlistName: req.body.playlistName,
+        playlistImage: req.body.playlistImage,
         photoURL: req.user.photoURL,
         public: req.body.public ? req.body.public : false,
         collaborative: req.body.collaborative ? req.body.collaborative : false,
@@ -326,7 +328,7 @@ const addPlaylist = (req, res, next) => {
 
     }
     return db.collection(`playlists`)
-        .where('playlistId','==',req.body.playlistId)
+        .where('playlistId','==',req.body.spotifyPlaylistId)
         .get()
     .then(playlistDocs => {
             if (playlistDocs.docs && playlistDocs.docs.length === 0) {
@@ -335,12 +337,12 @@ const addPlaylist = (req, res, next) => {
                     .collection('playlists')
                     .add(newPlaylist)
             } else {
-                return res.json( { message: `Playlist ${playlistId} already exists`})
+                return res.json( { message: `Playlist ${req.body.spotifyPlaylistId} already exists`})
             }
         })
         .then(doc => {
             const resPlaylist = newPlaylist;
-            resPlaylist.playlistId = doc.id
+            resPlaylist.FBId = doc.id
             return res.json( { message: `document ${doc.id} created successfully`, playlist: resPlaylist})
         })
         .catch(addPlaylistError => {
@@ -349,4 +351,38 @@ const addPlaylist = (req, res, next) => {
         })
 }
 
-module.exports = { getPlaylists, getMyPlaylists, getPlaylist, addPlaylist, deletePlaylist, commentOnPlaylist, deleteCommentOnPlaylist, likeAPlaylist, unlikeAPlaylist }
+const updatePlaylist = (req, res, next) => {
+    console.log('req.body', req.body)
+    const playlist = {
+        spotifyPlaylistId: req.body.spotifyPlaylistId,
+        spotifyUser: req.user.spotifyUser,
+        playlistName: req.body.playlistName,
+        playlistImage: req.body.playlistImage,
+        public: req.body.public ? req.body.public : false,
+        collaborative: req.body.collaborative ? req.body.collaborative : false,
+        photoURL: req.user.photoURL,
+
+    }
+    return db.collection(`playlists`)
+        .where('playlistId','==',req.body.spotifyPlaylistId)
+        .get()
+    .then(playlistDocs => {
+            if (playlistDocs.docs && playlistDocs.docs.length > 0) {
+                return db
+                    .collection('playlists')
+                    .update(playlist)
+            }
+                return res.status(404).json( { message: `Playlist not found`})
+        })
+        .then(doc => {
+            const resPlaylist = newPlaylist;
+            resPlaylist.FBId = doc.id
+            return res.json( { message: `document ${doc.id} created successfully`, playlist: resPlaylist})
+        })
+        .catch(addPlaylistError => {
+            console.error(addPlaylistError)
+            return res.status(500).json({ error: 'something went wrong'})
+        })
+}
+
+module.exports = { getPlaylists, getMyPlaylists, getPlaylist, addPlaylist, deletePlaylist, updatePlaylist, commentOnPlaylist, deleteCommentOnPlaylist, likeAPlaylist, unlikeAPlaylist }

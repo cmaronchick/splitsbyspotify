@@ -29,12 +29,14 @@ const SpotifyLogin = (props) => {
     const handleSpotifyLogout = () => {
         props.logout()
     }
-    return user && user.spotifyUser ? (
+    return user && user.authenticated ? (
         <div className={classes.spotifyUser}>
             <Fragment>
-                <Link to="/Profile">
-                    <Typography variant="h3" color="primary" value={`${user.spotifyUser.id}`}>{user.spotifyUser.id}</Typography>
-                </Link>
+                {user.spotifyUser && user.spotifyUser.id && (
+                    <Link to="/Profile">
+                        <Typography variant="h3" color="primary" value={`${user.spotifyUser.id}`}>{user.spotifyUser.id}</Typography>
+                    </Link>
+                )}
                 <Button variant="contained" color="default" onClick={() => handleSpotifyLogout()}>Logout</Button>
             </Fragment>
         </div>

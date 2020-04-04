@@ -1,10 +1,10 @@
-import { green, red } from '@material-ui/core/colors'
+import { red } from '@material-ui/core/colors'
 
 export default {
   palette: {
     primary: {
       // light: will be calculated from palette.primary.main,
-      // main: green
+      // main: 'green'
       main: '#50d890',
       // dark: will be calculated from palette.primary.main,
       // contrastText: will be calculated to contrast with palette.primary.main
@@ -126,7 +126,7 @@ export default {
       marginBottom: 20,
       flexDirection: 'column'
     },
-    image: {
+    playlistImage: {
         minWidth: 200,
         minHeight: 200,
         objectFit: 'cover'
@@ -137,6 +137,42 @@ export default {
         justifyContent: 'space-evenly',
         alignItems: 'center',
         padding: 25
+    },
+    skeletonCard: {
+      display: 'flex',
+      marginBottom: 20
+    },
+    skeletonCardContent: {
+        width: '100%',
+        flexDirection: 'column',
+        padding: 25
+    },
+    skeletonCover: {
+        minWidth: 200,
+        objectFit: 'cover'
+    },
+    skeletonSpotifyUser: {
+        width: 60,
+        height: 20,
+        backgroundColor: '#50d890',
+        marginBottom: 10
+    },
+    skeletonDate: {
+        height: 14,
+        width: 100,
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+        marginBottom: 10
+    },
+    skeletonFullLine: {
+        height: 15,
+        width: '90%',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        marginBottom: 10
+    },
+    skeletonHalfLine: {
+        height: 15,
+        width: '45%',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
     }
-}
+  }
 }

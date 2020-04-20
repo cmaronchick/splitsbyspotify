@@ -29,6 +29,12 @@ a{
   padding: 5px 20px;
 }
 
+@media(max-width: 768px) {
+  .introText {
+    padding: 0 20px;
+  }
+}
+
 @keyframes anim1 {
   from { font-size: 0px;}
   to   { font-size: 10px;}
@@ -46,3 +52,15 @@ a{
   from { font-size: 10px; }
   to   { font-size: 0px; }
 } 
+
+@keyframes trackHover {
+  0% {
+    background: #effffb;
+  }
+  50% {
+    background: #50d890;
+  }
+  100% {
+    background: #4f98ca;
+  }
+}

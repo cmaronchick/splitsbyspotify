@@ -5,12 +5,16 @@ import { SET_USER,
     LOADING_UI, 
     SET_AUTHENTICATED, 
     SET_UNAUTHENTICATED,
+    SET_TOUR_COMPLETED,
     LIKE_PLAYLIST,
     UNLIKE_PLAYLIST,
+    FOLLOW_PLAYLIST,
+    UNFOLLOW_PLAYLIST,
     MARK_NOTIFICATIONS_READ } from '../types'
 
 const initialState = {
     authenticated: false,
+    tourCompleted: false,
     FBUser: {
         credentials: {},
         likes: [],
@@ -24,6 +28,7 @@ export default function(state = initialState, action) {
         case SET_AUTHENTICATED:
             return {
                 ...state,
+                tourCompleted: true,
                 loading: true,
                 authenticated: true
             }
@@ -32,12 +37,18 @@ export default function(state = initialState, action) {
                 ...initialState,
                 loading: false,
             }
+        case SET_TOUR_COMPLETED:
+            return {
+                ...state,
+                tourCompleted: true
+            }
         case SET_USER:
             return {
-                authenticated: true,
-                loading: false,
                 ...state,
-                ...action.payload
+                ...action.payload,
+                authenticated: true,
+                tourCompleted: true,
+                loading: false
             }
         case LOADING_USER:
             return {
@@ -50,7 +61,7 @@ export default function(state = initialState, action) {
                 ...state.FBUser.likes,
                 {
                     spotifyUser: state.FBUser.credentials.spotifyUser,
-                    playlistId: action.payload.playlistId
+                    firebasePlaylistId: action.payload.firebasePlaylistId
                 }
             ]
             return {
@@ -60,11 +71,30 @@ export default function(state = initialState, action) {
         case UNLIKE_PLAYLIST:
             let UnlikePlaylistFBUser = {...state.FBUser}
             UnlikePlaylistFBUser.likes = state.FBUser.likes.filter(
-                (like) => like.playlistId !== action.payload.playlistId
+                (like) => like.firebasePlaylistId !== action.payload.firebasePlaylistId
             )
             return {
                 ...state,
                 FBUser: UnlikePlaylistFBUser
+            }
+
+        case FOLLOW_PLAYLIST:
+            let FollowedPlaylistFBUser = {...state.FBUser}
+            let FollowedPlaylists = state.FBUser.credentials.followedPlaylists ? {...state.FBUser.credentials.followedPlaylists} : {}
+            FollowedPlaylists[action.payload.playlist.firebasePlaylistId] = {...action.payload.playlist}
+            FollowedPlaylistFBUser.credentials.followedPlaylists = FollowedPlaylists
+            return {
+                ...state,
+                FBUser: FollowedPlaylistFBUser
+            }
+        case UNFOLLOW_PLAYLIST:
+            let UnfollowedPlaylistFBUser = {...state.FBUser}
+            let UnfollowedPlaylists = state.FBUser.credentials.followedPlaylists ? {...state.FBUser.credentials.followedPlaylists} : {}
+            delete UnfollowedPlaylists[action.payload.playlist.firebasePlaylistId]
+            UnfollowedPlaylistFBUser.credentials.followedPlaylists = UnfollowedPlaylists
+            return {
+                ...state,
+                FBUser: UnfollowedPlaylistFBUser
             }
         case MARK_NOTIFICATIONS_READ: 
             let FBUser = {...state.FBUser}

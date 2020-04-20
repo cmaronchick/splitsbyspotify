@@ -61,7 +61,7 @@ class Notifications extends Component {
             )
         let notificationsMarkup = notifications && notifications.length > 0 ? (
             notifications.map(not => {
-                const verb = not.type === 'like' ? 'liked' : 'commented on'
+                const verb = not.type === 'like' ? 'liked' : not.type === 'comment' ? 'commented on' : 'followed'
                 const time = dayjs(not.createdAt).fromNow()
                 const iconColor = not.read ? 'primary' : 'secondary'
                 const icon = not.type === 'like' ? (
@@ -78,7 +78,7 @@ class Notifications extends Component {
                                 component={Link}
                                 color="primary"
                                 variant="body1"
-                                to={`/users/${not.recipient}/playlist/${not.playlistId}`}>
+                                to={`/users/${not.recipient}/playlist/${not.firebasePlaylistId}`}>
                                     {not.sender} {verb} your playlist {time}
                             </Typography>
                     </MenuItem>

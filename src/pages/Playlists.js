@@ -1,0 +1,115 @@
+import React from 'react'
+import PropTypes from 'prop-types'
+
+import { Link } from 'react-router-dom'
+
+//MUI Stuff
+import withStyles from '@material-ui/core/styles/withStyles'
+import Typography from '@material-ui/core/Typography'
+import GridList from '@material-ui/core/GridList'
+import GridListTile from '@material-ui/core/GridListTile'
+import GridListTileBar from '@material-ui/core/GridListTileBar';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import IconButton from '@material-ui/core/IconButton';
+import AddCircle from '@material-ui/icons/AddCircle'
+import RemoveCircle from '@material-ui/icons/RemoveCircle'
+
+import MyButton from '../util/MyButton'
+
+import {
+    addToMyPlaylists,
+    removeFromMyPlaylists,
+    confirmRemoveFromMyPlaylists,
+    cancelRemoveFromMyPlaylists,
+    likePlaylist,
+    unlikePlaylist,
+    followPlaylist,
+    unfollowPlaylist
+} from '../redux/actions/spotifyActions'
+import { connect } from 'react-redux'
+
+const styles = (theme) => ({
+    ...theme.spreadThis,
+    root: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      justifyContent: 'space-around',
+      overflow: 'hidden',
+      backgroundColor: theme.palette.background.paper,
+    },
+    gridList: {
+      width: '100%',
+    },
+    icon: {
+      color: 'rgba(255, 255, 255, 0.54)',
+    },
+    link: {
+        color: theme.palette.primary.main
+    }
+})
+
+const Playlists = props => {
+    const playlists = props.allPlaylists
+    const { classes, spotifyUser, FBUser } = props
+    console.log('spotifyUser, FBUser', spotifyUser, FBUser)
+    return (
+    <GridList cellHeight={180} className={classes.gridList} cols={(window.innerWidth < 600) ? 1 : (window.innerWidth < 800) ? 2 : 3}>
+        <GridListTile key="Subheader" cols={(window.innerWidth < 600) ? 1 : (window.innerWidth < 800) ? 2 : 3} style={{ height: 'auto' }}>
+        <ListSubheader component="div">
+            <Typography variant="h3">
+                User Playlists
+            </Typography>
+        </ListSubheader>
+        </GridListTile>
+        {Object.keys(playlists).map(playlistId => {
+            const playlist = playlists[playlistId]
+            const { firebasePlaylistId, playlistImage, playlistName } = playlist
+            return (
+                <GridListTile key={firebasePlaylistId}>
+                <img src={playlistImage} alt={playlistName} />
+                <GridListTileBar
+                title={<Link to={`/playlist/${firebasePlaylistId}`} className={classes.link}>{playlistName}</Link>}
+                subtitle={<span>by: {playlist.spotifyUser}</span>}
+                actionIcon={spotifyUser && (!playlist.followers || !playlist.followers[spotifyUser.id] ? (
+                    <MyButton tip={`Add ${playlistName} to My Playlists`} onClick={() => props.followPlaylist(FBUser, playlist)}
+                    tipPlacement='bottom' btnClassName={classes.followButton}>
+                        <AddCircle />
+                    </MyButton>
+                    ) : (
+                        <MyButton tip={`Remove ${playlistName} from My Playlists`} onClick={() => props.unfollowPlaylist(FBUser, playlist)}
+                        tipPlacement='bottom' btnClassName={classes.followButton}>
+                            <RemoveCircle />
+                        </MyButton>
+                    ))}
+                    />
+                </GridListTile>
+            )
+        })}
+    </GridList>
+    )
+}
+
+Playlists.propTypes = {
+    FBUser: PropTypes.object.isRequired,
+    spotifyUser: PropTypes.object.isRequired,
+    allPlaylists: PropTypes.object.isRequired
+}
+
+const mapActionsToProps = {
+    addToMyPlaylists,
+    removeFromMyPlaylists,
+    confirmRemoveFromMyPlaylists,
+    cancelRemoveFromMyPlaylists,
+    likePlaylist,
+    unlikePlaylist,
+    followPlaylist,
+    unfollowPlaylist
+}
+
+const mapStateToProps = (state) => ({
+    FBUser: state.user.FBUser,
+    spotifyUser: state.user.spotifyUser,
+    allPlaylists: state.spotify.allPlaylists
+})
+
+export default connect(mapStateToProps, mapActionsToProps)(withStyles(styles)(Playlists))

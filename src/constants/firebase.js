@@ -5,6 +5,7 @@ import 'firebase/analytics'
 import firebaseConfig from './splitsbyspotify-firebase-adminsdk-xkg5z.json'
 try {
     firebase.initializeApp(firebaseConfig)
+    firebase.analytics();
 } catch (firebaseConfigError) {
     console.log('Error initalizing firebase')
     console.log('firebaseConfigError', firebaseConfigError)

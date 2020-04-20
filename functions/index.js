@@ -16,7 +16,9 @@ const {
     commentOnPlaylist,
     deleteCommentOnPlaylist,
     likeAPlaylist,
-    unlikeAPlaylist} = require('./handlers/playlists')
+    unlikeAPlaylist,
+    followPlaylist,
+    unfollowPlaylist} = require('./handlers/playlists')
 const {
     signUp,
     login,
@@ -37,13 +39,15 @@ const {errors} = require('./handlers/errors')
 app.get('/playlists', getPlaylists)
 app.get('/playlists/my', FBAuth, getMyPlaylists, errors)
 app.post('/playlists', FBAuth, addPlaylist, errors)
-app.get('/playlists/:playlistId', getPlaylist, errors)
-app.post('/playlists/:playlistId', FBAuth, updatePlaylist, errors)
-app.delete('/playlists/:playlistId', FBAuth, deletePlaylist, errors)
-app.post('/playlists/:playlistId/like', FBAuth, likeAPlaylist)
-app.delete('/playlists/:playlistId/like', FBAuth, unlikeAPlaylist)
-app.post('/playlists/:playlistId/comment', FBAuth, commentOnPlaylist, errors)
-app.delete('/playlists/:playlistId/comment/:commentId', FBAuth, deleteCommentOnPlaylist)
+app.get('/playlists/:firebasePlaylistId', getPlaylist, errors)
+app.post('/playlists/:firebasePlaylistId', FBAuth, updatePlaylist, errors)
+app.post('/playlists/:firebasePlaylistId/follow', FBAuth, followPlaylist, errors)
+app.delete('/playlists/:firebasePlaylistId/follow', FBAuth, unfollowPlaylist, errors)
+app.delete('/playlists/:firebasePlaylistId', FBAuth, deletePlaylist, errors)
+app.post('/playlists/:firebasePlaylistId/like', FBAuth, likeAPlaylist)
+app.delete('/playlists/:firebasePlaylistId/like', FBAuth, unlikeAPlaylist)
+app.post('/playlists/:firebasePlaylistId/comment', FBAuth, commentOnPlaylist, errors)
+app.delete('/playlists/:firebasePlaylistId/comment/:commentId', FBAuth, deleteCommentOnPlaylist)
 
 // User Route
 app.post('/signup', signUp)
@@ -69,7 +73,7 @@ exports.deleteNotificationOnUnlike = functions.region('us-central1').firestore.d
     })
 exports.createNotificationOnLike = functions.region('us-central1').firestore.document('likes/{id}')
     .onCreate((snapshot) => {
-        return db.doc(`/playlists/${snapshot.data().playlistId}`)
+        return db.doc(`/playlists/${snapshot.data().firebasePlaylistId}`)
         .get()
         .then(doc => {
             if(doc.exists && doc.data().spotifyUser !== snapshot.data().spotifyUser) {
@@ -77,7 +81,7 @@ exports.createNotificationOnLike = functions.region('us-central1').firestore.doc
                     createdAt: new Date().toISOString(),
                     recipient: doc.data().spotifyUser,
                     sender: snapshot.data().spotifyUser,
-                    playlistId: doc.id,
+                    firebasePlaylistId: doc.id,
                     type: 'like',
                     read: false
                 })
@@ -89,7 +93,7 @@ exports.createNotificationOnLike = functions.region('us-central1').firestore.doc
 
 exports.createNotificationsOnComment = functions.region('us-central1').firestore.document('comments/{id}')
     .onCreate((snapshot) => {
-        return db.doc(`/playlists/${snapshot.data().playlistId}`)
+        return db.doc(`/playlists/${snapshot.data().firebasePlaylistId}`)
         .get()
         .then(doc => {
             if(doc.exists && doc.data().spotifyUser !== snapshot.data().spotifyUser) {
@@ -97,7 +101,7 @@ exports.createNotificationsOnComment = functions.region('us-central1').firestore
                     createdAt: new Date().toISOString(),
                     recipient: doc.data().spotifyUser,
                     sender: snapshot.data().spotifyUser,
-                    playlistId: doc.id,
+                    firebasePlaylistId: doc.id,
                     type: 'comment',
                     read: false
                 })
@@ -107,10 +111,52 @@ exports.createNotificationsOnComment = functions.region('us-central1').firestore
         .catch(error => console.error({error}))
     })
 
-exports.onUserImageChange = functions.region('us-central1').firestore.document(`/users/{userId}`)
+exports.createNotificationsOnFollow = functions.region('us-central1').firestore.document(`/playlists/{firebasePlaylistId}`)
     .onUpdate((change) => {
         console.log(change.before.data())
         console.log(change.after.data())
+        if (Object.keys(change.before.data().followers).length < Object.keys(change.after.data().followers).length) {
+            console.log('change.after.data()', change.after.data())
+            console.log('change.before.data()', change.before.data())
+            console.log('playlist has changed')
+            // Filter only new users
+            let oldFollowers = Object.keys(change.before.data().followers)
+            let newFollowers = Object.keys(change.after.data().followers)
+            console.log('oldFollowers, newFollowers', oldFollowers, newFollowers)
+            let newFollowerKeys = newFollowers.filter(key => {
+                return !oldFollowers[key]
+            })
+            console.log('newFollowerKeys', newFollowerKeys)
+
+
+            return db.collection('notifications')
+            .where('firebasePlaylistId','==',change.before.id)
+            .where('type','==','follow')
+            .where('sender','==',newFollowerKeys[0])
+            .limit(1)
+            .get()
+            .then(documents => {
+                console.log('documents', documents.empty)
+                if (documents.empty) {
+                    return db.collection(`notifications`).add({
+                        createdAt: new Date().toISOString(),
+                        recipient: change.before.data().spotifyUser,
+                        sender: newFollowerKeys[0],
+                        firebasePlaylistId: change.before.id,
+                        type: 'follow',
+                        read: false
+                    })
+                }
+                console.log('user has already followed that playlist')
+                return false
+            })
+        }
+        console.log('no new followers')
+        return false;
+    })
+
+exports.onUserImageChange = functions.region('us-central1').firestore.document(`/users/{userId}`)
+    .onUpdate((change) => {
         if (change.before.data().photoURL !== change.after.data().photoURL) {
         console.log('image has changed')
         const batch = db.batch();
@@ -133,12 +179,12 @@ exports.onUserImageChange = functions.region('us-central1').firestore.document(`
         return false;
     })
 
-exports.onPlaylistDelete = functions.region('us-central1').firestore.document(`/playlists/{playlistId}`)
+exports.onPlaylistDelete = functions.region('us-central1').firestore.document(`/playlists/{firebasePlaylistId}`)
     .onDelete((snapshot, context) => {
-        const playlistId = context.params.playlistId
+        const firebasePlaylistId = context.params.firebasePlaylistId
         const batch = db.batch();
         return db.collection('comments')
-            .where('playlistId', '==', playlistId)
+            .where('firebasePlaylistId', '==', firebasePlaylistId)
             .get()
             .then(data => {
                 if (data && data.docs && data.docs.length > 0) {
@@ -147,7 +193,7 @@ exports.onPlaylistDelete = functions.region('us-central1').firestore.document(`/
                     })
                 }
                 return db.collection('likes')
-                    .where('playlistId','==', playlistId)
+                    .where('firebasePlaylistId','==', firebasePlaylistId)
                     .get()
             })
             .then(data => {
@@ -157,7 +203,7 @@ exports.onPlaylistDelete = functions.region('us-central1').firestore.document(`/
                     })
                 }
                 return db.collection('notifications')
-                    .where('playlistId','==', playlistId)
+                    .where('firebasePlaylistId','==', firebasePlaylistId)
                     .get()
             })
             .then(data => {

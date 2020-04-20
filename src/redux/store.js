@@ -4,6 +4,7 @@ import thunk from 'redux-thunk'
 
 import userReducer from './reducers/userReducer'
 import spotifyReducer from './reducers/spotifyReducer'
+import splitsReducer from './reducers/splitsReducer'
 import uiReducer from './reducers/uiReducer'
 
 const initialState = {};
@@ -13,6 +14,7 @@ const middleware = [thunk];
 const reducers = combineReducers({
     user: userReducer,
     spotify: spotifyReducer,
+    splits: splitsReducer,
     UI: uiReducer
 })
 

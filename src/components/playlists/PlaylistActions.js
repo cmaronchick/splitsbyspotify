@@ -21,10 +21,10 @@ const PlaylistActions = props => {
     const {playlist, likeCount, commentCount, FBUser, likePlaylist, unlikePlaylist, user, handleOpenComments} = props
 
     const handleLikePlaylist = () => {
-        props.likePlaylist(playlist.FBId)
+        props.likePlaylist(playlist.firebasePlaylistId)
     }
     const handleUnlikePlaylist = () => {
-        props.unlikePlaylist(playlist.FBId)
+        props.unlikePlaylist(playlist.firebasePlaylistId)
     }
 
     const handleShowCommentsDialog = () => {
@@ -37,9 +37,9 @@ const PlaylistActions = props => {
                 FBUser={FBUser}
                 playlist={playlist}
                 handleLikePlaylist={handleLikePlaylist} handleUnlikePlaylist={handleUnlikePlaylist} handleSpotifyLogin={handleSpotifyLogin} /> {likeCount}
-            <IconButton aria-label="Share the Playlist">
+            {/* <IconButton aria-label="Share the Playlist">
                 <ShareIcon />
-            </IconButton>
+            </IconButton> */}
             <IconButton aria-label="Share the Playlist" onClick={handleShowCommentsDialog}>
                 <CommentIcon />
             </IconButton>

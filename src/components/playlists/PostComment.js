@@ -37,7 +37,7 @@ class PostComment extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            FBId: props.FBId,
+            firebasePlaylistId: props.firebasePlaylistId,
             body: ''
         }
     }
@@ -46,7 +46,7 @@ class PostComment extends Component {
     };
     handleSubmit = (event) => {
       event.preventDefault();
-      this.props.commentOnPlaylist(this.props.FBId, { body: this.state.body });
+      this.props.commentOnPlaylist(this.props.firebasePlaylistId, { body: this.state.body });
     };
 
     render() {
@@ -85,7 +85,7 @@ class PostComment extends Component {
 
 
 const mapActionsToProps = {
-    commentOnPlaylist: (FBId, body) => commentOnPlaylist(FBId, body)
+    commentOnPlaylist: (firebasePlaylistId, body) => commentOnPlaylist(firebasePlaylistId, body)
 }
 const mapStateToProps = (state)  => ({
     authenticated: state.user.authenticated

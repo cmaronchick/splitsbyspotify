@@ -4,7 +4,8 @@ import {
     CLEAR_ERRORS, 
     LOADING_UI, 
     STOP_LOADING_UI, 
-    SET_UNAUTHENTICATED, 
+    SET_UNAUTHENTICATED,
+    SET_TOUR_COMPLETED,
     LOADING_USER,
     CLEAR_PLAYLISTS,
     LOADING_PLAYLISTS_MY,
@@ -94,8 +95,8 @@ export const login = (location, history) => async (dispatch) => {
                 }
             })
             dispatch(getUserData(access_token, FBIDToken))
-            //window.history.pushState({ 'page_id': 1, 'user': 'spotifyUser'}, '', '/')
-            window.history.back()
+            window.history.replaceState({}, 'Logged in successfully', '/')
+            window.history.pushState({}, 'Logged in successfully', localStorage.loggedInPage ? localStorage.loggedInPage : '/')
 
         } else {
 
@@ -137,6 +138,7 @@ export const handleSpotifyLogin = () => {
   }
 
 export const refreshTokens = (spotifyRefreshToken) => async (dispatch) => {
+    console.log('141 calling loadingUser')
     dispatch({ type: LOADING_USER})
     dispatch({ type: LOADING_PLAYLISTS_MY})
     dispatch({ type: LOADING_PLAYLISTS_MY_FROM_SPOTIFY})
@@ -217,6 +219,7 @@ export const refreshTokens = (spotifyRefreshToken) => async (dispatch) => {
 }
 
 export const editUserDetails = (userDetails) => async (dispatch) => {
+    console.log('222 calling loadingUser')
     dispatch({ type: LOADING_USER })
     try {
         let FBIDToken = await firebase.auth().currentUser.getIdToken()
@@ -272,8 +275,16 @@ export const uploadImage = (formData) => async (dispatch) => {
     }
 }
 
+export const setTourCompleted = () => (dispatch) => {
+    localStorage.tourCompleted = true
+    dispatch({
+        type: SET_TOUR_COMPLETED
+    })
+}
+
 export const getUserData = (accessToken, IDToken) => async (dispatch) => {
-    dispatch({ type: LOADING_USER })
+    
+    //dispatch({ type: LOADING_USER })
     const spotifyAccessToken = accessToken ? accessToken : localStorage.spotifyAccessToken
     const FBIDToken = IDToken ? IDToken : localStorage.FBIDToken
 
@@ -299,14 +310,10 @@ export const getUserData = (accessToken, IDToken) => async (dispatch) => {
             }
         })
         dispatch(getAllMyPlaylistsFromSpotify(spotifyAccessToken))
-        let FBId;
+        let firebasePlaylistId;
         if (window.location.pathname.indexOf('/playlist') > -1 && window.location.pathname.split('/').length > 2) {
-            FBId = window.location.pathname.split('/')[2]
-            console.log('looking up playlist', FBId)
-            //let currentPlaylist = this.state.allPlaylists
-            //this.handleGetPlaylistFromSpotify(this.state.spotifyAccessToken, playlistId, playlistId)
-            //this.handleGetMyPlaylist(FBId)
-            dispatch(getMyPlaylist(FBId))
+            firebasePlaylistId = window.location.pathname.split('/')[2]
+            dispatch(getMyPlaylist(firebasePlaylistId))
         }
         dispatch(getMyPlaylists(FBIDToken))
 

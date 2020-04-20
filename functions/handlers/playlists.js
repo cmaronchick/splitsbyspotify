@@ -10,10 +10,11 @@ const getPlaylists = (req, res) => {
             data.docs.forEach(doc => {
                 let playlist = doc.data()
                 playlists.push({
-                    id: doc.id,
+                    firebasePlaylistId: doc.id,
                     ...playlist
                 })
             })
+            // console.log('playlists', playlists)
             return res.status(200).json(playlists)
         })
         .catch(getPlaylistsError => {
@@ -49,14 +50,14 @@ const getMyPlaylists = (req, res, next) => {
 
 const getPlaylist = (req, res, next) => {
     let playlistData = {};
-    const { playlistId } = req.params;
+    const { firebasePlaylistId } = req.params;
 
-    if (!playlistId) {
+    if (!firebasePlaylistId) {
         return res.status(500).json({ error: 'No playlist id provided'})
     }
 
     return db
-        .doc(`/playlists/${playlistId}`)
+        .doc(`/playlists/${firebasePlaylistId}`)
         .get()
         .then(doc => {
             console.log(doc.exists)
@@ -64,9 +65,9 @@ const getPlaylist = (req, res, next) => {
                 throw new Error(JSON.stringify({ code: 404, message: 'No playlist found' }))
             }
             playlistData = doc.data()
-            playlistData.FBId = doc.id;
+            playlistData.firebasePlaylistId = doc.id;
             return db.collection('comments')
-            .where('playlistId', '==', playlistId)
+            .where('firebasePlaylistId', '==', firebasePlaylistId)
             .orderBy('createdAt', 'asc')
             .get()
         })
@@ -90,10 +91,11 @@ const getPlaylist = (req, res, next) => {
 
 const deletePlaylist = (req, res, next) => {
     console.log('req.body', req.params)
-    const { playlistId } = req.params;
-    const playlistDoc = db.doc(`/playlists/${playlistId}`)
+    const { firebasePlaylistId } = req.params;
+    const playlistDoc = db.doc(`/playlists/${firebasePlaylistId}`)
+    const batch = db.batch();
 
-    if (!playlistId) {
+    if (!firebasePlaylistId) {
         throw new Error(JSON.stringify({ code: 500, message: 'No playlist id provided' }))
     }
 
@@ -127,19 +129,19 @@ const deletePlaylist = (req, res, next) => {
 const commentOnPlaylist = (req, res) => {
     console.log('req.body', req.body)
     const { body } = JSON.parse(req.body)
-    const { playlistId } = req.params
+    const { firebasePlaylistId } = req.params
     const { spotifyUser, photoURL } = req.user
-    if (!playlistId || !body || !spotifyUser) return res.status(400).json({ error: `${playlistId} || ${body} || ${spotifyUser} Must not be empty`})
+    if (!firebasePlaylistId || !body || !spotifyUser) return res.status(400).json({ error: `${firebasePlaylistId} || ${body} || ${spotifyUser} Must not be empty`})
     if (body && body.trim() === '') return res.status(400).json({ error: `Comment must not be empty.`})
     const comment = {
-        playlistId,
+        firebasePlaylistId,
         body,
         spotifyUser: spotifyUser,
         userImage: photoURL ? photoURL : `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/blank-profile-picture.png?alt=media`,
         createdAt: new Date().toISOString()
     }
 
-    return db.doc(`/playlists/${playlistId}`).get()
+    return db.doc(`/playlists/${firebasePlaylistId}`).get()
         .then(doc => {
             if (!doc.exists) {
                 throw new Error(JSON.stringify({code: 404, message: `Playlist not found`}))
@@ -161,11 +163,11 @@ const commentOnPlaylist = (req, res) => {
 }
 
 const deleteCommentOnPlaylist = (req, res) => {
-    const { playlistId, commentId } = req.params
+    const { firebasePlaylistId, commentId } = req.params
     const { spotifyUser } = req.user
-    if (!playlistId || !spotifyUser) return res.status(400).json({ error: `${playlistId} || ${body} || ${spotifyUser} Must not be empty`})
+    if (!firebasePlaylistId || !spotifyUser) return res.status(400).json({ error: `${firebasePlaylistId} || ${body} || ${spotifyUser} Must not be empty`})
 
-    return db.doc(`/playlists/${playlistId}`).get()
+    return db.doc(`/playlists/${firebasePlaylistId}`).get()
         .then(doc => {
             if (!doc.exists) {
                 throw new Error(JSON.stringify({ code: 404, message: `Playlist not found`}))
@@ -194,23 +196,23 @@ const deleteCommentOnPlaylist = (req, res) => {
 }
 
 const likeAPlaylist = (req, res) => {
-    const { playlistId } = req.params
+    const { firebasePlaylistId } = req.params
     const { spotifyUser, photoURL } = req.user
     let playlistData;
-    if (!playlistId || !spotifyUser) return res.status(400).json({ error: `${playlistId} || ${spotifyUser} Must not be empty`})
+    if (!firebasePlaylistId || !spotifyUser) return res.status(400).json({ error: `${firebasePlaylistId} || ${spotifyUser} Must not be empty`})
 
     const likeDocument = db.collection(`likes`)
-        .where('playlistId','==', playlistId)
+        .where('firebasePlaylistId','==', firebasePlaylistId)
         .where('spotifyUser','==',spotifyUser)
         .limit(1);
-    const playlistDocument = db.doc(`/playlists/${playlistId}`)
+    const playlistDocument = db.doc(`/playlists/${firebasePlaylistId}`)
 
     // Get Playlist
     return playlistDocument.get()
         .then(doc => {
             if (doc.exists) {
                 playlistData = doc.data()
-                playlistData.FBId = doc.id;
+                playlistData.firebasePlaylistId = doc.id;
                 // Get the like by user for the playlist
                 return likeDocument.get()
             } else {
@@ -227,7 +229,7 @@ const likeAPlaylist = (req, res) => {
             // If the user has not liked the playlist continue
             if (data.empty) {
                 const like = {
-                    playlistId,
+                    firebasePlaylistId,
                     spotifyUser,
                     createdAt: new Date().toISOString()
                 }
@@ -253,27 +255,25 @@ const likeAPlaylist = (req, res) => {
 }
 
 const unlikeAPlaylist = (req, res) => {
-    const { playlistId } = req.params
+    const { firebasePlaylistId } = req.params
     const { spotifyUser, photoURL } = req.user
     let playlistData;
-    if (!playlistId || !spotifyUser) return res.status(400).json({ error: `${playlistId} || ${spotifyUser} Must not be empty`})
+    if (!firebasePlaylistId || !spotifyUser) return res.status(400).json({ error: `${firebasePlaylistId} || ${spotifyUser} Must not be empty`})
 
-    
-    console.log('spotifyUser', spotifyUser);
-    console.log('playlistId', playlistId);
+
 
     const unlikeDocument = db.collection('likes')
-        .where('playlistId','==', playlistId)
+        .where('firebasePlaylistId','==', firebasePlaylistId)
         .where('spotifyUser','==',spotifyUser)
         .limit(1);
-    const playlistDocument = db.doc(`/playlists/${playlistId}`)
+    const playlistDocument = db.doc(`/playlists/${firebasePlaylistId}`)
 
     // Get Playlist
     return playlistDocument.get()
         .then(doc => {
             if (doc.exists) {
                 playlistData = doc.data()
-                playlistData.playlistId = doc.id;
+                playlistData.firebasePlaylistId = doc.id;
                 // Get the like by user for the playlist
                 return unlikeDocument.get()
             }
@@ -313,7 +313,6 @@ const unlikeAPlaylist = (req, res) => {
 }
 
 const addPlaylist = (req, res, next) => {
-    console.log('req.body', req.body)
     const newPlaylist = {
         spotifyPlaylistId: req.body.spotifyPlaylistId,
         spotifyUser: req.user.spotifyUser,
@@ -328,7 +327,7 @@ const addPlaylist = (req, res, next) => {
 
     }
     return db.collection(`playlists`)
-        .where('playlistId','==',req.body.spotifyPlaylistId)
+        .where('spotifyPlaylistId','==',req.body.spotifyPlaylistId)
         .get()
     .then(playlistDocs => {
             if (playlistDocs.docs && playlistDocs.docs.length === 0) {
@@ -342,7 +341,7 @@ const addPlaylist = (req, res, next) => {
         })
         .then(doc => {
             const resPlaylist = newPlaylist;
-            resPlaylist.FBId = doc.id
+            resPlaylist.firebasePlaylistId = doc.id
             return res.json( { message: `document ${doc.id} created successfully`, playlist: resPlaylist})
         })
         .catch(addPlaylistError => {
@@ -364,7 +363,7 @@ const updatePlaylist = (req, res, next) => {
 
     }
     return db.collection(`playlists`)
-        .where('playlistId','==',req.body.spotifyPlaylistId)
+        .where('spotifyPlaylistId','==',req.body.spotifyPlaylistId)
         .get()
     .then(playlistDocs => {
             if (playlistDocs.docs && playlistDocs.docs.length > 0) {
@@ -376,7 +375,7 @@ const updatePlaylist = (req, res, next) => {
         })
         .then(doc => {
             const resPlaylist = newPlaylist;
-            resPlaylist.FBId = doc.id
+            resPlaylist.firebasePlaylistId = doc.id
             return res.json( { message: `document ${doc.id} created successfully`, playlist: resPlaylist})
         })
         .catch(addPlaylistError => {
@@ -385,4 +384,128 @@ const updatePlaylist = (req, res, next) => {
         })
 }
 
-module.exports = { getPlaylists, getMyPlaylists, getPlaylist, addPlaylist, deletePlaylist, updatePlaylist, commentOnPlaylist, deleteCommentOnPlaylist, likeAPlaylist, unlikeAPlaylist }
+const followPlaylist = (req, res, next) => {
+    console.log('req.body', req.body)
+    const bodyJSON = req.body.firebasePlaylistId ? { body: req.body } : JSON.parse(req.body)
+    console.log('bodyJSON', bodyJSON)
+    const { spotifyPlaylistId, firebasePlaylistId, playlistName, playlistImage, collaborative } = bodyJSON.body
+    const { spotifyUser } = req.user
+    const playlist = {
+        spotifyPlaylistId: spotifyPlaylistId,
+        firebasePlaylistId: firebasePlaylistId,
+        spotifyUser: spotifyUser,
+        playlistName: playlistName,
+        playlistImage: playlistImage,
+        public: bodyJSON.body.public ? bodyJSON.body.public : false,
+        collaborative: collaborative ? collaborative : false,
+    }
+    console.log('playlist', playlist, firebasePlaylistId)
+    return db.doc(`/playlists/${firebasePlaylistId}`)
+        .get()
+        .then(doc => {
+            if (!doc.exists) {
+                throw new Error(JSON.stringify({ code: 404, message: 'Playlist not found.' }))
+            }
+            firebasePlaylist = doc.data()
+            if (firebasePlaylist.spotifyUser === spotifyUser) {
+                throw new Error(JSON.stringify({ code: 500, message: 'You cannot follow a playlist that you own.' }))
+            }
+            if (firebasePlaylist.followers && firebasePlaylist.followers[spotifyUser]) {
+                throw new Error(JSON.stringify({ code: 500, message: 'You have already followed this playlist.' }))
+            }
+
+            const followers = firebasePlaylist.followers ? {...firebasePlaylist.followers} : {}
+            followers[spotifyUser] = {
+                followedAt: new Date().toISOString(),
+                userImage: req.user.photoURL ? req.user.photoURL : `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/blank-profile-picture.png?alt=media`,
+            }
+            return db.doc(`/playlists/${firebasePlaylistId}`).update({
+                followers
+            })
+        })
+        .then(() => {
+            console.log('spotifyUser', spotifyUser)
+
+            return db.doc(`/users/${spotifyUser}`).get()
+        })
+        .then(userDoc => {
+            if (!userDoc.exists) {
+                throw new Error(JSON.stringify({ code: 500, message: 'Something went wrong.' }))
+            }
+            const user = userDoc.data()
+            let followedPlaylists = user.followedPlaylists ? {...user.followedPlaylists} : {}
+            if (followedPlaylists[firebasePlaylistId]) {
+                throw new Error(JSON.stringify({ code: 500, message: 'You already followed this playlist.' }))
+            }
+            followedPlaylists[firebasePlaylistId] = playlist
+            return db.doc(`/users/${spotifyUser}`).update({
+                followedPlaylists
+            })
+        })
+        .then(() => {
+            return res.status(200).json({ message: 'Playlist followed successfully'})
+        })
+        .catch(followPlaylistError => {
+            console.log('error', followPlaylistError)
+            req.error = followPlaylistError
+            return next()
+        })
+
+}
+
+const unfollowPlaylist = (req, res, next) => {
+    console.log('req.body', req.body)
+    const bodyJSON = req.body.firebasePlaylistId ? { body: req.body } : JSON.parse(req.body)
+    // const bodyJSON = {body: req.body}
+    const { firebasePlaylistId } = bodyJSON.body
+    const { spotifyUser } = req.user
+    return db.doc(`/playlists/${firebasePlaylistId}`)
+        .get()
+        .then(doc => {
+            if (!doc.exists) {
+                throw new Error(JSON.stringify({ code: 404, message: 'Playlist not found.' }))
+            }
+            firebasePlaylist = doc.data()
+            if (firebasePlaylist.spotifyUser === spotifyUser) {
+                throw new Error(JSON.stringify({ code: 500, message: 'You cannot unfollow a playlist that you own.' }))
+            }
+            if (firebasePlaylist.followers && !firebasePlaylist.followers[spotifyUser]) {
+                throw new Error(JSON.stringify({ code: 500, message: 'You are not following this playlist.' }))
+            }
+
+            const followers = firebasePlaylist.followers ? {...firebasePlaylist.followers} : {}
+            delete followers[spotifyUser]
+            return db.doc(`/playlists/${firebasePlaylistId}`).update({
+                followers
+            })
+        })
+        .then(() => {
+            console.log('spotifyUser', spotifyUser)
+
+            return db.doc(`/users/${spotifyUser}`).get()
+        })
+        .then(userDoc => {
+            if (!userDoc.exists) {
+                throw new Error(JSON.stringify({ code: 500, message: 'Something went wrong.' }))
+            }
+            const user = userDoc.data()
+            let followedPlaylists = {...user.followedPlaylists}
+            if (!followedPlaylists[firebasePlaylistId]) {
+                throw new Error(JSON.stringify({ code: 500, message: 'You are not following this playlist.' }))
+            }
+            delete followedPlaylists[firebasePlaylistId]
+            return db.doc(`/users/${spotifyUser}`).update({
+                followedPlaylists: {...followedPlaylists}
+            })
+        })
+        .then(() => {
+            return res.status(200).json({ message: 'Playlist unfollowed successfully'})
+        })
+        .catch(unfollowPlaylistError => {
+            console.log('error', unfollowPlaylistError)
+            req.error = unfollowPlaylistError
+            return next()
+        })
+}
+
+module.exports = { getPlaylists, getMyPlaylists, getPlaylist, addPlaylist, deletePlaylist, updatePlaylist, followPlaylist, unfollowPlaylist, commentOnPlaylist, deleteCommentOnPlaylist, likeAPlaylist, unlikeAPlaylist }

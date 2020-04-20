@@ -225,11 +225,11 @@ export const getMyUserPlaylists = async (FBIDToken) => {
     }
 }
 
-export const addToMyPlaylists = async (FBIDToken, playlistId, publicPlaylist, collaborative) => {
+export const addToMyPlaylists = async (FBIDToken, spotifyPlaylistId, publicPlaylist, collaborative) => {
   let FBUser = firebase.auth().currentUser
   console.log('FBUser', FBUser)
   const searchParams = new URLSearchParams()
-  searchParams.set('playlistId', playlistId)
+  searchParams.set('spotifyPlaylistId', spotifyPlaylistId)
   searchParams.set('public', publicPlaylist)
   searchParams.set('collaborative', collaborative)
   try {
@@ -254,9 +254,9 @@ export const addToMyPlaylists = async (FBIDToken, playlistId, publicPlaylist, co
   }
 }
 
-export const removeFromMyPlaylists = async (FBIDToken, playlistId) => {
+export const removeFromMyPlaylists = async (FBIDToken, firebasePlaylistId) => {
   try {
-    let removePlaylistResponse = await ky.delete(`/playlists/${playlistId}`, {
+    let removePlaylistResponse = await ky.delete(`/playlists/${firebasePlaylistId}`, {
       headers: {
         Authorization: `Bearer ${FBIDToken}`
       }
@@ -276,10 +276,10 @@ export const removeFromMyPlaylists = async (FBIDToken, playlistId) => {
 
 }
 
-export const getPlaylistFromSpotify = async (spotifyAccessToken, playlistId) => {
+export const getPlaylistFromSpotify = async (spotifyAccessToken, spotifyPlaylistId) => {
   console.log('spotifyAccessToken', spotifyAccessToken)
   try {
-    let spotifyPlaylistResponse = await ky.get(`https://api.spotify.com/v1/playlists/${playlistId}`, {
+    let spotifyPlaylistResponse = await ky.get(`https://api.spotify.com/v1/playlists/${spotifyPlaylistId}`, {
       headers: {
         Authorization: `Bearer ${spotifyAccessToken}`
       }

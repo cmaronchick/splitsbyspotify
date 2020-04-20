@@ -25,24 +25,22 @@ const Navbar = (props) => {
     return (
         <AppBar>
             <Toolbar className="nav-container">
-                <Button color="inherit" component={Link} to="/">Home</Button>
+                <Button color="inherit" component={Link} to="/">My Playlists</Button>
                 {!authenticated ? (
                     <Fragment>
-                        <Button color="inherit" component={Link} to="/login">Login</Button>
-                        <Button color="inherit" component={Link} to="/signup">Sign Up</Button>
+                        <Button color="inherit" onClick={() => props.handleSpotifyLogin()}>Login</Button>
+                        {/* <Button color="inherit" component={Link} to="/signup">Sign Up</Button> */}
                     </Fragment>
                 ) : (
                     <Fragment>
-                        <MyButton tip="Add a Playlist">
+                        {/* <MyButton tip="Add a Playlist">
                             <AddIcon />
-                        </MyButton>
-                        <Link to="/">
-                            <HomeIcon color="primary"/>
-                        </Link>
+                        </MyButton> */}
                         <Notifications />
                         <Button color="inherit" component={Link} to="/profile">Profile</Button>
                     </Fragment>
                 )}
+                <Button color="inherit" component={Link} to="/Playlists">Browse Playlists</Button>
             </Toolbar>
         </AppBar>
     )

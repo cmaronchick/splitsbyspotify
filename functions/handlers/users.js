@@ -110,7 +110,7 @@ const login = (req, res) => {
 
 createFirebaseAccount = (req, res) => {
     const {spotifyID, display_name, photoURL, email, accessToken} = req.body
-    console.log('spotifyID, display_name, photoURL, email, accessToken:', spotifyID, display_name, photoURL, email, accessToken)
+    console.log({spotifyID, display_name, photoURL, email, accessToken})
     // The UID we'll assign to the user.
     const uid = `spotify:${spotifyID}`;
   
@@ -124,6 +124,17 @@ createFirebaseAccount = (req, res) => {
         email: email,
         emailVerified: true,
         spotifyUser: spotifyID
+    })
+    .then(() => {
+        const userCredentials = {
+            spotifyUser: spotifyID,
+            display_name: display_name,
+            email: email,
+            createdAt: new Date().toISOString(),
+            photoURL: photoURL,
+            userId: uid
+        }
+        return db.doc(`/users/${spotifyID}`).set(userCredentials);
     })
     .catch((error) => {
       // If user does not exists we create it.
@@ -220,7 +231,7 @@ const getAuthenticatedUser = (req, res, next) => {
             if (data && data.docs && data.docs.length > 0) {
                 data.forEach(doc => {
                     userData.playlists.push({
-                        FBId: doc.id,
+                        firebasePlaylistId: doc.id,
                         ...doc.data()
                     })
                 })
@@ -305,7 +316,7 @@ const getUserDetails = (req, res, next) => {
                     const playlist = playlistObj.data()
                     console.log({playlist})
                     playlists.push({
-                        playlistId: playlistObj.id,
+                        firebasePlaylistId: playlistObj.id,
                         ...playlist
                     })
                 })

@@ -15,11 +15,16 @@ import Typography from '@material-ui/core/Typography'
 
 import distanceSplits from '../../constants/distanceSplits'
 
+import { setTargetPace, setSelectedDistance, calculateSplits } from '../../redux/actions/splitsActions'
+
+import { connect } from 'react-redux'
+
 const styles = {
     formDiv: {
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center'
+        alignItems: 'center',
+        padding: 15
     },
     form: {
         display: 'flex',
@@ -33,16 +38,16 @@ const styles = {
 }
 
 const DistancePaceCalculator = (props) => {
-    const { selectedDistance, targetPace, classes } = props
+    const { selectedDistance, targetPace, classes, splitsObj } = props
 
     const handleSelectDistance = (event) => {
-        props.handleSelectDistance(event.target.value)
+        props.setSelectedDistance(event.target.value)
     }
     const handleTextInput = (event) => {
-        props.handleTextInput(event)
+        props.setTargetPace(event.target.value)
     }
     const handleCalculateButtonClick = () => {
-        props.handleCalculateButtonClick()
+        props.calculateSplits(splitsObj.selectedDistance, splitsObj.targetPace)
     }
     return (
         <div className={classes.formDiv}>
@@ -62,7 +67,7 @@ const DistancePaceCalculator = (props) => {
         </Select>
         </FormControl>
         <FormControl className={classes.formControl}>
-            <TextField id="pace" label="Pace (min/mile)" name="targetPace" onChange={(event) => handleTextInput(event)}/>
+            <TextField id="pace" value={splitsObj.targetPace} label="Pace (min/mile)" name="targetPace" onChange={(event) => handleTextInput(event)}/>
         </FormControl>
         </Container>
             <Button onClick={() => handleCalculateButtonClick()} color="primary" variant="outlined">
@@ -72,4 +77,14 @@ const DistancePaceCalculator = (props) => {
     )
 }
 
-export default withStyles(styles)(DistancePaceCalculator)
+const mapStateToProps = (state) => ({
+    splitsObj: state.splits
+})
+
+const mapActionsToProps = {
+    setSelectedDistance,
+    setTargetPace,
+    calculateSplits
+}
+
+export default connect(mapStateToProps, mapActionsToProps)(withStyles(styles)(DistancePaceCalculator))

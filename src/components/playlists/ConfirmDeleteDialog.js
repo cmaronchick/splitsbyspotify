@@ -11,11 +11,11 @@ import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import { blue } from '@material-ui/core/colors';
 
+import { confirmRemoveFromMyPlaylists } from '../../redux/actions/spotifyActions'
+
+import { connect } from 'react-redux'
+
 const styles = {
-  avatar: {
-    backgroundColor: blue[100],
-    color: blue[600],
-  },
   dialog: {
       padding: 10
   },
@@ -31,16 +31,18 @@ const styles = {
 };
 
 const ConfirmDeleteDialog = (props) => {
-  const classes = props.classes;
-  const { onClose, playlistId, FBId, open } = props;
+  const { classes, onClose, spotify, open } = props;
+  console.log('spotify', spotify)
+  const { removeSpotifyPlaylistId, removeFirebasePlaylistId, removePlaylistName } = spotify
+
 
   const handleClose = () => {
     onClose();
   };
 
-  const handleConfirmDeleteButtonClick = (playlistId, FBId) => {
-    console.log('playlistId, FBId', playlistId, FBId)
-    props.handleConfirmDeletePlaylist(playlistId, FBId);
+  const handleConfirmDeleteButtonClick = (spotifyPlaylistId, firebasePlaylistId) => {
+    console.log('spotifyPlaylistId, firebasePlaylistId', spotifyPlaylistId, firebasePlaylistId)
+    props.handleConfirmDeletePlaylist(spotifyPlaylistId, firebasePlaylistId);
   };
 
   return (
@@ -54,7 +56,7 @@ const ConfirmDeleteDialog = (props) => {
                 NOTE: You will lose any Splits Playlists that you have previously saved.
             </DialogContentText>
         <DialogActions>
-            <Button onClick={() => handleConfirmDeleteButtonClick(playlistId, FBId)} className={classes.alertButton} color="secondary" variant="contained">
+            <Button onClick={() => handleConfirmDeleteButtonClick(removeSpotifyPlaylistId, removeFirebasePlaylistId)} className={classes.alertButton} color="secondary" variant="contained">
                 Delete
             </Button>
             <Button onClick={() => handleClose()}>
@@ -71,4 +73,12 @@ ConfirmDeleteDialog.propTypes = {
   open: PropTypes.bool.isRequired,
 };
 
-export default withStyles(styles)(ConfirmDeleteDialog)
+const mapStateToProps = (state) => ({
+  spotify: state.spotify
+})
+
+const mapActionsToProps = {
+  confirmRemoveFromMyPlaylists
+}
+
+export default connect(mapStateToProps, mapActionsToProps)(withStyles(styles)(ConfirmDeleteDialog))

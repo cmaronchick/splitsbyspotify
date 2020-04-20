@@ -9,7 +9,7 @@ const LikeButton = (props) => {
     const likedPlaylist = () => {
         if (props.user.FBUser.likes && 
             props.user.FBUser.likes.find(
-            (like) => like.playlistId === props.playlist.FBId)
+            (like) => like.firebasePlaylistId === props.playlist.firebasePlaylistId)
             ) {
             return true
         }

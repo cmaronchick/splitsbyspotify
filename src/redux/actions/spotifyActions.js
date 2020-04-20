@@ -9,6 +9,8 @@ import {
     CANCEL_REMOVE_FROM_MY_PLAYLISTS,
     ADD_TO_MY_PLAYLISTS,
     REMOVE_FROM_MY_PLAYLISTS,
+    FOLLOW_PLAYLIST,
+    UNFOLLOW_PLAYLIST,
     LOADING_PLAYLISTS_ALL, 
     LOADING_PLAYLISTS_MY, 
     LIKE_PLAYLIST, 
@@ -31,10 +33,9 @@ export const getAllPlaylists = () => async (dispatch) => {
     dispatch({ type: LOADING_PLAYLISTS_ALL })
     try {
         let getPlaylistsResponse = await api.get('playlists').json()
-        console.log('getPlaylistsResponse', getPlaylistsResponse)
         let allPlaylists = {}
         getPlaylistsResponse.forEach(playlist => {
-            allPlaylists[playlist.id] = playlist
+            allPlaylists[playlist.firebasePlaylistId] = playlist
         })
         dispatch({
             type: SET_PLAYLISTS_ALL,
@@ -66,6 +67,9 @@ export const getAllMyPlaylistsFromSpotify = (access_token) => async (dispatch) =
         
             console.log('allMyPlaylistsResponse', allMyPlaylistsResponse)
             let myPlaylistsFromSpotify = {}
+            allMyPlaylistsResponse.items.sort((a,b) => {
+                return a.name > b.name ? 1 : -1
+            })
             allMyPlaylistsResponse.items.forEach(playlist => {
                 myPlaylistsFromSpotify[playlist.id] = playlist
             })
@@ -94,7 +98,7 @@ export const getPlaylistsFromSpotify = (spotifyAccessToken, playlists) => async 
             Authorization: `Bearer ${spotifyAccessToken}`
         }
         }).json()
-        spotifyPlaylistResponse.FBId = id
+        spotifyPlaylistResponse.firebasePlaylistId = id
         spotifyPlaylistResponse.inMyPlaylists = true
         dispatch({
             type: UPDATE_PLAYLIST_FROM_SPOTIFY,
@@ -109,9 +113,9 @@ export const getPlaylistsFromSpotify = (spotifyAccessToken, playlists) => async 
   }
 }
 
-export const getSinglePlaylistFromSpotify = (spotifyAccessToken, playlistId) => async (dispatch) => {
+export const getSinglePlaylistFromSpotify = (spotifyAccessToken, spotifyPlaylistId) => async (dispatch) => {
   try {
-    let spotifyPlaylistResponse = await ky.get(`https://api.spotify.com/v1/playlists/${playlistId}`, {
+    let spotifyPlaylistResponse = await ky.get(`https://api.spotify.com/v1/playlists/${spotifyPlaylistId}`, {
     headers: {
         Authorization: `Bearer ${spotifyAccessToken}`
     }
@@ -140,6 +144,7 @@ export const getMyPlaylists = (FBIDToken) => async (dispatch) => {
         let myPlaylists = {}
         getPlaylistsResponse.forEach(playlist => {
             myPlaylists[playlist.id] = {...playlist}
+            myPlaylists[playlist.id].firebasePlaylistId = playlist.id
             myPlaylists[playlist.id].inMyPlaylists = true
         })
         dispatch({
@@ -164,23 +169,24 @@ export const getMyPlaylists = (FBIDToken) => async (dispatch) => {
 
 // GET SINGLE PLAYLISTS
 
-export const getMyPlaylist = (FBId) => async (dispatch) => {
+export const getMyPlaylist = (firebasePlaylistId) => async (dispatch) => {
     dispatch({ type: LOADING_PLAYLIST })
     try {
         let FBIDToken = await firebase.auth().currentUser.getIdToken()
-        let getPlaylistResponse = await api.get(`playlists/${FBId}`, {
-            headers: {
-                Authorization: `Bearer ${FBIDToken}`
-            }
-        }).json()
-        console.log('store.getState().user.spotifyAccessToken', store.getState().user.spotifyAccessToken)
+        let getPlaylistResponse = await api.get(`playlists/${firebasePlaylistId}`, {
+                headers: {
+                    Authorization: `Bearer ${FBIDToken}`
+                }
+            }).json()
+        // console.log('store.getState().user.spotifyAccessToken', store.getState().user.spotifyAccessToken)
         let playlist = {...getPlaylistResponse.playlistData}
         console.log('playlist', playlist)
+        
         let spotifyPlaylistResponse = await ky.get(`https://api.spotify.com/v1/playlists/${playlist.spotifyPlaylistId}`, {
             headers: {
                 Authorization: `Bearer ${store.getState().user.spotifyAccessToken}`
             }
-            }).json()
+        }).json()
         playlist = {
             ...playlist,
             ...spotifyPlaylistResponse
@@ -190,7 +196,7 @@ export const getMyPlaylist = (FBId) => async (dispatch) => {
             payload: playlist
         })
     }catch (getPlaylistsResponseError) {
-        console.log('getPlaylistsResponseError', getPlaylistsResponseError)
+        console.log('getPlaylistsResponseError', await getPlaylistsResponseError.response.json())
         dispatch({
             type: SET_PLAYLIST,
             payload: {}
@@ -239,11 +245,11 @@ export const addToMyPlaylists = (playlist) => async (dispatch) => {
   }
 }
 
-export const removeFromMyPlaylists = (playlistId, FBId) => async (dispatch) => {
+export const removeFromMyPlaylists = (spotifyPlaylistId, firebasePlaylistId) => async (dispatch) => {
   try {
     let FBIDToken = await firebase.auth().currentUser.getIdToken()
     console.log('FBIDToken', FBIDToken)
-    let removePlaylistResponse = await api.delete(`playlists/${FBId}`, {
+    let removePlaylistResponse = await api.delete(`playlists/${firebasePlaylistId}`, {
       headers: {
         Authorization: `Bearer ${FBIDToken}`
       }
@@ -252,8 +258,8 @@ export const removeFromMyPlaylists = (playlistId, FBId) => async (dispatch) => {
     dispatch({
         type: REMOVE_FROM_MY_PLAYLISTS,
         payload: {
-            playlistId,
-            FBId,
+            spotifyPlaylistId,
+            firebasePlaylistId,
             FBIDToken
         }
     })
@@ -270,12 +276,13 @@ export const removeFromMyPlaylists = (playlistId, FBId) => async (dispatch) => {
   }
 }
 
-export const confirmRemoveFromMyPlaylists = (playlistId, FBId, playlistName) => (dispatch) => {
+export const confirmRemoveFromMyPlaylists = (spotifyPlaylistId, firebasePlaylistId, playlistName) => (dispatch) => {
+    console.log('{object}', {spotifyPlaylistId, firebasePlaylistId, playlistName})
     dispatch({
         type: CONFIRM_REMOVE_FROM_MY_PLAYLISTS,
         payload: {
-            playlistId,
-            FBId,
+            spotifyPlaylistId,
+            firebasePlaylistId,
             playlistName
         }
     })
@@ -286,9 +293,59 @@ export const cancelRemoveFromMyPlaylists = () => (dispatch) => {
     })
 }
 
+export const followPlaylist = (FBUser, playlist) => async (dispatch) => {
+    try {
+        let FBIDToken = await firebase.auth().currentUser.getIdToken()
+        let followResponse = await api.post(`playlists/${playlist.firebasePlaylistId}/follow`, {
+            headers: {
+                Authorization: `Bearer ${FBIDToken}`
+            },
+            body: JSON.stringify({body: playlist})
+        }).json()
+        dispatch({
+            type: FOLLOW_PLAYLIST,
+            payload: {
+                FBUser,
+                playlist
+            }
+        })
+    } catch (followError) {
+        console.log('followError', followError)
+        dispatch({
+            type: SET_ERRORS,
+            errors: followError
+        })
+    }
+}
+export const unfollowPlaylist = (FBUser, playlist) => async (dispatch) => {
+    console.log('playlist', playlist)
+    try {
+        let FBIDToken = await firebase.auth().currentUser.getIdToken()
+        let unfollowResponse = await api.delete(`playlists/${playlist.firebasePlaylistId}/follow`, {
+            headers: {
+                Authorization: `Bearer ${FBIDToken}`
+            },
+            body: JSON.stringify({body: playlist})
+        }).json()
+        dispatch({
+            type: UNFOLLOW_PLAYLIST,
+            payload: {
+                FBUser,
+                playlist,
+            }
+        })
+    } catch (followError) {
+        console.log('followError', followError)
+        dispatch({
+            type: SET_ERRORS,
+            errors: followError
+        })
+    }
+}
+
 // Like a playlist
 
-export const likePlaylist = (playlistId) => async (dispatch) => {
+export const likePlaylist = (firebasePlaylistId) => async (dispatch) => {
     try {
         let FBIDToken = await firebase.auth().currentUser.getIdToken()
         let FBUser = await ky.get('/user', {
@@ -297,7 +354,7 @@ export const likePlaylist = (playlistId) => async (dispatch) => {
             }
         }).json()
         console.log('FBUser', FBUser)
-        let likeResponse = await api.post(`playlists/${playlistId}/like`, {
+        let likeResponse = await api.post(`playlists/${firebasePlaylistId}/like`, {
             headers: {
                 Authorization: `Bearer ${FBIDToken}`
             }
@@ -313,10 +370,10 @@ export const likePlaylist = (playlistId) => async (dispatch) => {
 
 // Unlike a playlist
 
-export const unlikePlaylist = (playlistId) => async (dispatch) => {
+export const unlikePlaylist = (firebasePlaylistId) => async (dispatch) => {
     try {
         let FBIDToken = await firebase.auth().currentUser.getIdToken()
-        let unlikeResponse = await api.delete(`playlists/${playlistId}/like`, {
+        let unlikeResponse = await api.delete(`playlists/${firebasePlaylistId}/like`, {
             headers: {
                 Authorization: `Bearer ${FBIDToken}`
             }
@@ -330,14 +387,12 @@ export const unlikePlaylist = (playlistId) => async (dispatch) => {
     }
 }
 
-export const commentOnPlaylist = (FBId, commentBody) => async (dispatch) => {
-    console.log('commentBody', commentBody)
-    console.log('FBId', FBId)
+export const commentOnPlaylist = (firebasePlaylistId, commentBody) => async (dispatch) => {
     try {
         let FBIDToken = await firebase.auth().currentUser.getIdToken()
         const searchParams = new URLSearchParams()
         searchParams.set('body', commentBody)
-        let postCommentResponse = await api.post(`playlists/${FBId}/comment`, {
+        let postCommentResponse = await api.post(`playlists/${firebasePlaylistId}/comment`, {
             headers: {
                 Authorization: `Bearer ${FBIDToken}`
             },

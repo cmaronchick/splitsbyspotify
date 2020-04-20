@@ -44,10 +44,14 @@ export default {
       margin: '20px auto 20px auto'
     },
     pageTitle: {
-      margin: '10px auto 10px auto'
+      margin: '10px auto 10px auto',
+      textAlign: 'center'
     },
     textField: {
       margin: '10px auto 10px auto'
+    },
+    introText: {
+      textAlign: 'center',
     },
     button: {
       marginTop: 20,
@@ -59,7 +63,11 @@ export default {
       marginTop: 10
     },
     progress: {
-      position: 'absolute'
+      position: 'absolute',
+      color: '#fff'
+    },
+    spotifyLoginButton: {
+      height: 40
     },
     invisibleSeparator: {
       border: 'none',
@@ -115,10 +123,19 @@ export default {
         margin: '20px 10px'
       }
     },
+    followButton: {
+      color: '#fff'
+    },
     split: {
-        borderWidth: 1,
-        borderColor: '#4f98ca',
-        borderStyle: 'solid'
+      borderWidth: 1,
+      borderColor: '#4f98ca',
+      borderStyle: 'solid',
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+      paddingRight: 10,
+      borderRightWidth: 0
     },
     card: {
       display: 'flex',
@@ -127,13 +144,32 @@ export default {
       flexDirection: 'column'
     },
     playlistImage: {
-        minWidth: 200,
-        minHeight: 200,
-        objectFit: 'cover'
+        minWidth: 100,
+        minHeight: 100,
+        objectFit: 'cover',
+        position: 'relative',
+        left: 0,
+        flex: 1
     },
     content: {
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 10,
+        position: 'relative'
+    },
+    details: {
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'flex-start',
+      padding: 10,
+      flex: 2
+    },
+    actions: {
+        display: 'flex',
+        flexDirection: 'row',
         justifyContent: 'space-evenly',
         alignItems: 'center',
         padding: 25

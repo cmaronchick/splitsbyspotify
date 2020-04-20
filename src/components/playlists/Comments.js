@@ -47,7 +47,7 @@ const Comments = (props) => {
         props.onClose()
     }
 
-    const { open, playlistName, playlistId, FBId, classes, user, playlistLoading } = props
+    const { open, playlistName, spotifyPlaylistId, firebasePlaylistId, classes, user, playlistLoading } = props
     const {comments} = props.playlist
         return (
         <Dialog open={open}>
@@ -60,7 +60,7 @@ const Comments = (props) => {
                     ) : (
                         <Fragment>
                             {user.authenticated && (
-                                <PostComment FBId={FBId}  />
+                                <PostComment firebasePlaylistId={firebasePlaylistId}  />
                             )}
                             {comments && comments.length > 0 && comments.map((comment, index) => {
                                 const { body, createdAt, userImage, spotifyUser } = comment

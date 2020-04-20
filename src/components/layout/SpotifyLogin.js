@@ -32,7 +32,9 @@ const SpotifyLogin = (props) => {
     return user && user.authenticated ? (
         <div className={classes.spotifyUser}>
             <Fragment>
-                {user.spotifyUser && user.spotifyUser.id && (
+                {loading ? (
+                    <CircularProgress size={30} className={classes.progress} />
+                ) : user.spotifyUser && user.spotifyUser.id && (
                     <Link to="/Profile">
                         <Typography variant="h3" color="primary" value={`${user.spotifyUser.id}`}>{user.spotifyUser.id}</Typography>
                     </Link>
@@ -40,7 +42,7 @@ const SpotifyLogin = (props) => {
                 <Button variant="contained" color="default" onClick={() => handleSpotifyLogout()}>Logout</Button>
             </Fragment>
         </div>
-    ) : (
+    ) : user.tourCompleted && (
         <div className={classes.spotifyUser}>
             <Button className={classes.spotifyLoginButton} variant="contained" color="primary" onClick={() => handleSpotifyLogin()}>
             {loading ? (

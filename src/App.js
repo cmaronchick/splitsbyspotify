@@ -27,6 +27,7 @@ import Signup from './pages/Signup'
 import Login from './pages/Login'
 import Profile from './pages/Profile'
 import Playlist from './pages/Playlist'
+import Playlists from './pages/Playlists'
 import SpotifyLogin from './components/layout/SpotifyLogin'
 import AuthRoute from './components/util/AuthRoute'
 import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom'
@@ -35,7 +36,9 @@ const theme = createMuiTheme(themeFile)
 const FBIDToken = localStorage.FBIDToken
 const spotifyAccessToken = localStorage.spotifyAccessToken
 const spotifyRefreshToken = localStorage.spotifyRefreshToken
+const tourCompleted = localStorage.tourCompleted
 if (FBIDToken && spotifyAccessToken) {
+  if (tourCompleted !== 'true') localStorage.tourCompleted = 'true'
   const decodedToken = jwtDecode(FBIDToken);
   if (decodedToken.exp * 1000 > Date.now()) {
     //window.location.href = '/login'
@@ -44,6 +47,10 @@ if (FBIDToken && spotifyAccessToken) {
   } else {
     console.log('old token', decodedToken.exp * 1000 > Date.now())
     store.dispatch(logout())
+  }
+} else {
+  if (tourCompleted !== 'true') {
+
   }
 }
 var stateKey = 'spotify_auth_state';
@@ -77,6 +84,7 @@ class App extends Component {
     let state = generateRandomString(16)
     localStorage[stateKey] = state
     let currentOrigin = window.location.origin
+    localStorage.loggedInPage = window.location.pathname
     window.location.href = `https://accounts.spotify.com/authorize?response_type=code&client_id=${spotifyConfig.client_id}&scope=${spotifyConfig.scope}&redirect_uri=${currentOrigin}/spotifyCallback&state=${state}`
   }
   handleSpotifyLogout = () => {
@@ -94,16 +102,6 @@ class App extends Component {
 
   handleSpotifyRefreshToken = (refresh_token) => {
     store.dispatch(refreshTokens(refresh_token))
-    //try {
-      //let spotifyData = store.dispatch(refreshTokens(refresh_token))
-      // console.log('spotifyRefreshData', spotifyData)
-      // this.setState({
-      //   ...spotifyData
-      // })
-    // }catch(refreshTokenError) {
-    //   console.log('refreshTokenError', refreshTokenError)
-    // }
-
   }
   handleSpotifyCallback = async (location, access_token) => {
     store.dispatch({
@@ -118,21 +116,6 @@ class App extends Component {
   }
   handleGetAllPlaylists = async (access_token) => {
     store.dispatch(getAllPlaylists())
-    // try {
-    //   let allPlaylistsResponse = await getAllUserPlaylists(access_token)
-    //   let allPlaylists = {}
-    //   allPlaylistsResponse.playlists.forEach(playlist => {
-    //     allPlaylists[playlist.id] = {...playlist}
-    //   })
-    //   this.setState({ allPlaylists })
-    //   if (window.location.pathname.indexOf('/playlist') > -1 && window.location.pathname.split('/').length > 2) {
-    //     let playlistId = window.location.pathname.split('/')[2]
-    //     this.handleGetPlaylistTracks(this.state.allPlaylists[playlistId])
-    //   }
-    // } catch (getAllPlaylistsError) {
-    //   console.log('getAllPlaylistsError', getAllPlaylistsError)
-    // }
-
   }
   handleGetMyPlaylists = async () => {
     let FBIDToken
@@ -143,44 +126,26 @@ class App extends Component {
       console.log('getTokenError120', getTokenError)
     }
     try {
-      
       store.dispatch(getMyPlaylists(FBIDToken))
-      // Object.keys(myPlaylists).forEach(id => {
-      //   this.handleGetPlaylistFromSpotify(this.state.spotifyAccessToken, id, myPlaylists[id].playlistId)
-      // })
     } catch (getMyUserPlaylistsError) {
       console.log('getMyUserPlaylistsError', getMyUserPlaylistsError)
     }
 
   }
 
-  handleGetMyPlaylist = (FBId) => {
-    console.log('handleGetMyPlaylist FBId', FBId)
-    store.dispatch(getMyPlaylist(FBId))
+  handleGetMyPlaylist = (firebasePlaylistId) => {
+    console.log('handleGetMyPlaylist firebasePlaylistId', firebasePlaylistId)
+    store.dispatch(getMyPlaylist(firebasePlaylistId))
   }
-  // handleGetPlaylistFromSpotify = async(spotifyAccessToken, id, playlistId) => {
-  //   try {
-  //     let playlistResponse = await getPlaylistFromSpotify(spotifyAccessToken, playlistId)
-  //     let myPlaylists = {...this.state.myPlaylists}
-  //     myPlaylists[id] = playlistResponse
-  //     myPlaylists[id].inMyPlaylists = true
-  //     this.setState({
-  //       myPlaylists
-  //     })
-  //     this.checkSpotifyPlaylistInMyPlaylists()
-  //   } catch (getPlaylistFromSpotifyError) {
-  //     console.log('getPlaylistFromSpotifyError', getPlaylistFromSpotifyError)
-  //   }
-  // }
 
   checkSpotifyPlaylistInMyPlaylists = () => {
     
     const { myPlaylists } = this.state
     let allPlaylists = {...this.state.allPlaylists}
     if (myPlaylists && Object.keys(myPlaylists).length > 0 && allPlaylists && Object.keys(allPlaylists).length > 0) {
-      Object.keys(myPlaylists).forEach(playlistId => {
-        if (allPlaylists[myPlaylists[playlistId].id]) {
-          allPlaylists[myPlaylists[playlistId].id].inMyPlaylists = true
+      Object.keys(myPlaylists).forEach(firebasePlaylistId => {
+        if (allPlaylists[myPlaylists[firebasePlaylistId].id]) {
+          allPlaylists[myPlaylists[firebasePlaylistId].id].inMyPlaylists = true
         }
       })
       this.setState({
@@ -189,50 +154,15 @@ class App extends Component {
     }
   }
 
-
-  // handleAddPlaylist = async (playlistId, publicPlaylist, collaborative) => {
-  //   try {
-  //     let addPlaylistResponse = await addToMyPlaylists(this.state.FBIDToken, playlistId, publicPlaylist, collaborative)
-  //     console.log('addPlaylistResponse', addPlaylistResponse)
-  //     this.handleGetMyPlaylists(this.state.FBIDToken)
-  //   } catch (addPlaylistError) {
-  //     console.log('addPlaylistError', addPlaylistError)
-  //   }
-  // }
-  // handleRemovePlaylist = async (playlistId) => {
-  //   try {
-  //     let removePlaylistResponse = await removeFromMyPlaylists(this.state.FBIDToken, playlistId)
-  //     this.handleGetMyPlaylists(this.state.FBIDToken)
-  //   } catch (removePlaylistError) {
-  //     console.log('removePlaylistError', removePlaylistError)
-  //   }
-  // }
-  // handleGetPlaylistTracks = async ({id, href}) => {
-  //   store.dispatch({
-  //     type: LOADING_PLAYLIST
-  //   })
-  //   try {
-  //     let currentPlaylistResponse = await getPlaylistTracks(this.state.spotifyAccessToken, href)
-  //     console.log('currentPlaylistResponse', currentPlaylistResponse)
-  //     this.setState({
-  //       currentPlaylist: currentPlaylistResponse.currentPlaylist,
-  //       currentPlaylistLoading: false
-
-  //     })
-  //   } catch (getPlaylistTracksError) {
-  //     console.log('getPlaylistTracksError', getPlaylistTracksError)
-
-  //   }
-  // }
-  handleShowConfirmDeleteDialog = (playlistId, playlistName) => {
+  handleShowConfirmDeleteDialog = (firebasePlaylistId, playlistName) => {
       this.setState({
-          confirmDeletePlaylistId: playlistId,
+          confirmDeletePlaylistId: firebasePlaylistId,
           confirmDeletePlaylistName: playlistName,
           showConfirmDeleteDialog: true
       })
   }
-  handleConfirmDeletePlaylist = (playlistId) => {
-      this.handleRemovePlaylist(playlistId)
+  handleConfirmDeletePlaylist = (firebasePlaylistId) => {
+      this.handleRemovePlaylist(firebasePlaylistId)
       this.setState({
           confirmDeletePlaylistId: null,
           confirmDeletePlaylistName: null,
@@ -302,24 +232,10 @@ class App extends Component {
       this.handleSpotifyCallback(window.location)
     }
     if (window.location.pathname.indexOf('/playlist') > -1 && window.location.pathname.split('/').length > 2) {
-      let FBId = window.location.pathname.split('/')[2]
-      console.log('looking up playlist', FBId)
-      //let currentPlaylist = this.state.allPlaylists
-      //this.handleGetPlaylistFromSpotify(this.state.spotifyAccessToken, playlistId, playlistId)
-      //this.handleGetMyPlaylist(FBId)
+      let firebasePlaylistId = window.location.pathname.split('/')[2]
+      console.log('looking up playlist', firebasePlaylistId)
     }
     store.dispatch(getAllPlaylists())
-  }
-  componentDidUpdate(prevProps, prevState) {
-    // if (prevState.spotifyAccessToken !== this.state.spotifyAccessToken && this.state.spotifyAccessToken) {
-    //   this.handleGetAllPlaylists(this.state.spotifyAccessToken)
-    // }
-    // if (this.state.FBUser && this.state.FBUser !== prevState.FBUser) {
-    //   this.handleGetMyPlaylists()
-    // }
-    // if (prevState.myPlaylists !== this.state.myPlaylists && this.state.myPlaylists.length > 0) {
-    //   this.checkSpotifyPlaylistInMyPlaylists()
-    // }
   }
 
   
@@ -334,7 +250,7 @@ class App extends Component {
           </header>
             <Router>
               <div className="nav-container">
-                <Navbar color="primary.main" />
+                <Navbar handleSpotifyLogin={this.handleSpotifyLogin} color="primary.main" />
               </div>
               <div className="container">
                 <SpotifyLogin handleSpotifyLogin={this.handleSpotifyLogin} handleSpotifyLogout={this.handleSpotifyLogout} />
@@ -342,8 +258,9 @@ class App extends Component {
                   <AuthRoute path='/signup' component={Signup}/>
                   <AuthRoute path='/login' component={Login}/>
                   <Route path={['/profile','/profile/:spotifyUser']} component={Profile} />
-                  <Route path={['/playlist/:playlistId', '/playlist']} render={({match}) => {
-                    return <Playlist
+                  <Route path={['/playlist/:firebasePlaylistId', '/playlist']} render={({match}) => {
+                    console.log('match', match)
+                    return <Playlist firebasePlaylistId={match.params.firebasePlaylistId}
                     // selectedDistance={this.state.selectedDistance}
                     // targetPace={this.state.targetPace}
                     // splits={this.state.splits}
@@ -353,26 +270,26 @@ class App extends Component {
                     // handleCalculateButtonClick={this.handleCalculateButtonClick}
                     // checkForPlaylist={this.checkForPlaylist}
                     // playlistObj={this.state.currentPlaylist}
-                    // playlistId={match.params.playlistId}
                     // playlistLoading={this.state.currentPlaylistLoading}
                     />
                     }
                   } />
+                  <Route path='/Playlists' component={Playlists} />
                   <Route path='/' render={({match}) => {
                     return (
                       <Home 
                         // spotifyUser={this.state.spotifyUser} 
                         // allPlaylists={this.state.allPlaylists} 
                         // myPlaylists={this.state.myPlaylists}
-                        handleAddPlaylistClick={this.handleAddPlaylist}
-                        handleRemovePlaylistClick={this.handleRemovePlaylist}
-                        handleGetPlaylistTracks={this.handleGetPlaylistTracks}
-                        handleShowConfirmDeleteDialog={this.handleShowConfirmDeleteDialog}
-                        handleHideConfirmDeleteDialog={this.handleHideConfirmDeleteDialog}
-                        handleConfirmDeletePlaylist={this.handleConfirmDeletePlaylist}
-                        showConfirmDeleteDialog={this.state.showConfirmDeleteDialog}
-                        confirmDeletePlaylistId={this.state.confirmDeletePlaylistId}
-                        confirmDeletePlaylistName={this.state.confirmDeletePlaylistName} />
+                        handleSpotifyLogin={this.handleSpotifyLogin}
+                        // handleGetPlaylistTracks={this.handleGetPlaylistTracks}
+                        // handleShowConfirmDeleteDialog={this.handleShowConfirmDeleteDialog}
+                        // handleHideConfirmDeleteDialog={this.handleHideConfirmDeleteDialog}
+                        // handleConfirmDeletePlaylist={this.handleConfirmDeletePlaylist}
+                        // showConfirmDeleteDialog={this.state.showConfirmDeleteDialog}
+                        // confirmDeletePlaylistId={this.state.confirmDeletePlaylistId}
+                        // confirmDeletePlaylistName={this.state.confirmDeletePlaylistName}
+                        />
                     )
                   }} />
                 </Switch>

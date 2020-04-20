@@ -39,54 +39,68 @@ const PlaylistPreview = (props) => {
     const handleAddToMyPlaylistsClick = () => {
         props.addToMyPlaylists(props.playlist)
     }
-    const handleShowConfirmDeleteDialog = (playlistId, FBId, playlistName) => {
-        props.confirmRemoveFromMyPlaylists(playlistId, FBId, playlistName)
+    const handleShowConfirmDeleteDialog = (spotifyPlaylistId, firebasePlaylistId, playlistName) => {
+        console.log('(spotifyPlaylistId, firebasePlaylistId, playlistName)', {spotifyPlaylistId, firebasePlaylistId, playlistName})
+        props.confirmRemoveFromMyPlaylists(spotifyPlaylistId, firebasePlaylistId, playlistName)
     }
-    // const handleOpenComments = (FBId) => {
-    //     props.openCommentsDialog(FBId)
-    // }
     dayjs.extend(relativeTime)
     if (!props.playlist) {
         return (<div></div>)
     }
-    const { classes, playlist : { name, images, id, owner, collaborative, inMyPlaylists, href, likeCount, commentCount, comments } } = props
-    const FBId = props.playlist.FBId
+    const { classes, listType, playlist : { name, images, id, spotifyUser, owner, collaborative, inMyPlaylists, href, likeCount, commentCount, comments, tracks } } = props
+    const playlistName = name ? name : props.playlist.playlistName
+    const firebasePlaylistId = props.playlist.firebasePlaylistId
+    const playlistImage = images && images[0] ? images[0].url : props.playlist.playlistImage
     const handleShowCommentsDialog = () => {
-        props.handleShowCommentsDialog(name, id, FBId, comments)
+        props.handleShowCommentsDialog(name, id, firebasePlaylistId, comments)
     }
     const publicPlaylist = props.playlist.public
     return (
         <Card className={classes.card}>
-            
-            <CardHeader
-            title={<Link className={classes.playlistLink} to={`/playlist/${FBId}`} onClick={() => props.getMyPlaylist(FBId)}>{name}</Link>}
-            action={ inMyPlaylists ? (
-                <IconButton aria-label="settings"  onClick={() => handleShowConfirmDeleteDialog(id, FBId, name)}>
-                    <RemoveCircle/>
-                </IconButton>
-                ) : (
-                <IconButton aria-label="settings"  onClick={handleAddToMyPlaylistsClick}>
-                    <AddCircle/>
-                </IconButton>
-                )
-            }
-            />
-            <CardContent className={classes.content}>
-                
-                {images && images.length > 0 ? (
+            <CardContent className={classes.content} style={{position: 'relative'}}>
+                <div style={{position:'absolute', right: -5, top: -10}}>   
+                { inMyPlaylists ? (
+                    <IconButton aria-label="settings"  onClick={() => handleShowConfirmDeleteDialog(id, firebasePlaylistId, name)}>
+                        <RemoveCircle/>
+                    </IconButton>
+                    ) : (
+                    <IconButton aria-label="settings"  onClick={handleAddToMyPlaylistsClick}>
+                        <AddCircle/>
+                    </IconButton>
+                    )
+                }
+                </div>
+                {playlistImage ? (
                 <CardMedia
-                image={`${images[0].url}`}
+                image={`${playlistImage}`}
                 title={`${name}`}
                 className={classes.playlistImage}
                 />
                 ) : null}
+                
                 {/* <Typography variant="h5" color="primary" value={id} component={Link} to={`/playlist/${id}`}>{owner ? owner.id : null}</Typography> */}
                 {/* <Typography variant="body2" value={createdAt}>{dayjs(createdAt).fromNow()}</Typography> */}
-                <Typography variant="body1" value={name}>{name}</Typography>
+                <div className={classes.details}>
+                    {firebasePlaylistId ? (
+                        <Link className={classes.playlistLink} to={`/playlist/${firebasePlaylistId}`} onClick={() => props.getMyPlaylist(firebasePlaylistId)}>
+                            <Typography variant="h5">{playlistName}</Typography>
+                        </Link>
+                    ) : (
+                        <Typography variant="h5">{playlistName}</Typography>
+                    )}
+                    {(listType === 'all' && spotifyUser) || (owner && (owner.id !== props.spotifyUser.id)) && (
+                        <Typography variant="body1" value={spotifyUser}>Owner: {owner.id}</Typography>
+                    )}
+                    {tracks && (
+                        <Typography variant="body1" value={tracks.total}>Total Tracks: {tracks.total}</Typography>
+                    )}
+                    {firebasePlaylistId && (
+                        <PlaylistActions playlist={props.playlist} likePlaylist={props.likePlaylist} unlikePlaylist={props.unlikePlaylist} likeCount={likeCount} commentCount={commentCount} handleShowCommentsDialog={handleShowCommentsDialog}/>
+                    )}
+                </div>
             </CardContent>
-            <PlaylistActions playlist={props.playlist} likePlaylist={props.likePlaylist} unlikePlaylist={props.unlikePlaylist} likeCount={likeCount} commentCount={commentCount} handleShowCommentsDialog={handleShowCommentsDialog}/>
             {/* {comments && comments.length > 0 && (
-            <Comments comments={comments} FBId={props.playlist.FBId} openCommentsDialog />
+            <Comments comments={comments} firebasePlaylistId={props.playlist.firebasePlaylistId} openCommentsDialog />
             )} */}
         </Card>
     )

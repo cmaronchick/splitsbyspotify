@@ -53,7 +53,7 @@ const ConfirmDeleteDialog = (props) => {
                 Are you sure you want to delete this playlist?
             </DialogContentText>
             <DialogContentText id="confirm-delete-text" color="error">
-                NOTE: You will lose any Splits Playlists that you have previously saved.
+                NOTE: All comments, likes, and follows for this playlist will be lost PERMANENTLY.
             </DialogContentText>
         <DialogActions>
             <Button onClick={() => handleConfirmDeleteButtonClick(removeSpotifyPlaylistId, removeFirebasePlaylistId)} className={classes.alertButton} color="secondary" variant="contained">

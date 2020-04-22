@@ -11,7 +11,11 @@ import { login, logout, refreshTokens } from './redux/actions/userActions'
 import { getAllPlaylists,
   getMyPlaylists,
   getMyPlaylist, } from './redux/actions/spotifyActions'
-import { SET_AUTHENTICATED, LOADING_USER, LOADING_PLAYLIST } from './redux/types'
+import { SET_AUTHENTICATED,
+  LOADING_USER,
+  LOADING_PLAYLIST,
+  LOADING_PLAYLISTS_MY,
+  LOADING_PLAYLISTS_MY_FROM_SPOTIFY } from './redux/types'
 
 import './App.css';
 import { ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
@@ -28,6 +32,7 @@ import Login from './pages/Login'
 import Profile from './pages/Profile'
 import Playlist from './pages/Playlist'
 import Playlists from './pages/Playlists'
+import Cookies from './pages/Cookies'
 import SpotifyLogin from './components/layout/SpotifyLogin'
 import AuthRoute from './components/util/AuthRoute'
 import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom'
@@ -54,7 +59,6 @@ if (FBIDToken && spotifyAccessToken) {
   }
 }
 var stateKey = 'spotify_auth_state';
-console.log('process.env.NODE_ENV', process.env.NODE_ENV)
 ky.create({ 
     prefixUrl: process.env.NODE_ENV === 'development' ? 'http://localhost:5000/api' : 'https://us-central1-splitsbyspotify.cloudfunctions.net/api'
 })
@@ -107,6 +111,12 @@ class App extends Component {
     store.dispatch({
       type: LOADING_USER
     })
+    store.dispatch({
+      type: LOADING_PLAYLISTS_MY
+    })
+    store.dispatch({
+      type: LOADING_PLAYLISTS_MY_FROM_SPOTIFY
+    })
     let state = getUrlParameters(location.href, 'state')
     let storedState = localStorage[stateKey];
     if (state === null || storedState !== state) {
@@ -154,71 +164,10 @@ class App extends Component {
     }
   }
 
-  handleShowConfirmDeleteDialog = (firebasePlaylistId, playlistName) => {
-      this.setState({
-          confirmDeletePlaylistId: firebasePlaylistId,
-          confirmDeletePlaylistName: playlistName,
-          showConfirmDeleteDialog: true
-      })
-  }
-  handleConfirmDeletePlaylist = (firebasePlaylistId) => {
-      this.handleRemovePlaylist(firebasePlaylistId)
-      this.setState({
-          confirmDeletePlaylistId: null,
-          confirmDeletePlaylistName: null,
-          showConfirmDeleteDialog: false
-      })
-  }
-  handleHideConfirmDeleteDialog = () => {
-      this.setState({
-          confirmDeletePlaylistId: null,
-          confirmDeletePlaylistName: null,
-          showConfirmDeleteDialog: false
-      })
-  }
-
-  handleSelectDistance = (distance) => {
-    this.setState({
-      selectedDistance: distance
-    })
-  }
   handleTextInput = (event) => {
     this.setState({
       [event.target.name]: event.target.value
     })
-  }
-  handleCalculateButtonClick = () => {
-    const { selectedDistance, targetPace } = this.state
-    const minPerMile = targetPace.split(':')[0]
-    const secPerMile = targetPace.split(':')[1]
-    let splits = []
-    let remainingDistance = selectedDistance
-    let elapsedMinutes = 0;
-    let elapsedSeconds = 0;
-    let split = ""
-    let i = 1
-    while (remainingDistance > 0) {
-      elapsedMinutes = (i * minPerMile)
-      elapsedSeconds = (i * secPerMile)
-      if (remainingDistance > 0 && remainingDistance < 1) {
-        elapsedMinutes = ((i-1) * minPerMile)
-        elapsedSeconds = (((remainingDistance * minPerMile) + (remainingDistance * secPerMile)) * 60).toFixed(0)
-
-      }
-      if (elapsedSeconds >= 60) {
-        elapsedMinutes += elapsedSeconds%60
-        elapsedSeconds = elapsedSeconds - (elapsedMinutes*60)
-        elapsedSeconds = elapsedSeconds < 10 ? "0" + elapsedSeconds : elapsedSeconds
-      }
-      split = `${elapsedMinutes}:${elapsedSeconds}`
-      splits.push(split)
-      remainingDistance = selectedDistance - i
-      i++
-    }
-    this.setState({
-      splits
-    })
-
   }
 
   componentDidMount() {
@@ -233,7 +182,6 @@ class App extends Component {
     }
     if (window.location.pathname.indexOf('/playlist') > -1 && window.location.pathname.split('/').length > 2) {
       let firebasePlaylistId = window.location.pathname.split('/')[2]
-      console.log('looking up playlist', firebasePlaylistId)
     }
     store.dispatch(getAllPlaylists())
   }
@@ -257,9 +205,10 @@ class App extends Component {
                 <Switch>
                   <AuthRoute path='/signup' component={Signup}/>
                   <AuthRoute path='/login' component={Login}/>
-                  <Route path={['/profile','/profile/:spotifyUser']} component={Profile} />
+                  <Route path={['/profile','/profile/:spotifyUser']} render={({match}) => 
+                    <Profile handleSpotifyLogin={this.handleSpotifyLogin} />
+                  } />
                   <Route path={['/playlist/:firebasePlaylistId', '/playlist']} render={({match}) => {
-                    console.log('match', match)
                     return <Playlist firebasePlaylistId={match.params.firebasePlaylistId}
                     // selectedDistance={this.state.selectedDistance}
                     // targetPace={this.state.targetPace}
@@ -275,6 +224,7 @@ class App extends Component {
                     }
                   } />
                   <Route path='/Playlists' component={Playlists} />
+                  <Route path="/Cookies" component={Cookies} />
                   <Route path='/' render={({match}) => {
                     return (
                       <Home 

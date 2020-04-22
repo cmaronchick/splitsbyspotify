@@ -16,8 +16,8 @@ import {
     LIKE_PLAYLIST, 
     UNLIKE_PLAYLIST, 
     COMMENT_ON_PLAYLIST,
-    DELETE_COMMENT_ON_PLAYLIST,
-    LOADING_PLAYLISTS_MY_FROM_SPOTIFY, 
+    SHOW_COMMENT_DIALOG,
+    HIDE_COMMENT_DIALOG,
     SET_ERRORS,
     CLEAR_ERRORS,
     LOADING_PLAYLIST} from '../types'
@@ -65,7 +65,6 @@ export const getAllMyPlaylistsFromSpotify = (access_token) => async (dispatch) =
                 }
             }).json()
         
-            console.log('allMyPlaylistsResponse', allMyPlaylistsResponse)
             let myPlaylistsFromSpotify = {}
             allMyPlaylistsResponse.items.sort((a,b) => {
                 return a.name > b.name ? 1 : -1
@@ -196,7 +195,7 @@ export const getMyPlaylist = (firebasePlaylistId) => async (dispatch) => {
             payload: playlist
         })
     }catch (getPlaylistsResponseError) {
-        console.log('getPlaylistsResponseError', await getPlaylistsResponseError.response.json())
+        console.log('getPlaylistsResponseError', getPlaylistsResponseError.response ? await getPlaylistsResponseError.response.json() : getPlaylistsResponseError)
         dispatch({
             type: SET_PLAYLIST,
             payload: {}
@@ -396,7 +395,7 @@ export const commentOnPlaylist = (firebasePlaylistId, commentBody) => async (dis
             headers: {
                 Authorization: `Bearer ${FBIDToken}`
             },
-          body: JSON.stringify({body: commentBody})
+          body: JSON.stringify(commentBody)
         }).json()
         console.log('postCommentResponse', postCommentResponse)
         dispatch({
@@ -420,6 +419,19 @@ export const commentOnPlaylist = (firebasePlaylistId, commentBody) => async (dis
                 payload: postCommentErrors
             })
         }
+    }
+}
+
+export const toggleCommentsDialog = (showCommentsDialog, firebasePlaylistId) => (dispatch) => {
+    dispatch({
+        type: showCommentsDialog ? HIDE_COMMENT_DIALOG : SHOW_COMMENT_DIALOG
+    })
+
+    // get a playlist from the browse playlists views to load in comments
+    // calls getMyPlaylist if the firebasePlaylistId exists
+
+    if (showCommentsDialog === false && firebasePlaylistId) {
+        dispatch(getMyPlaylist(firebasePlaylistId))
     }
 }
 

@@ -130,11 +130,10 @@ createFirebaseAccount = (req, res) => {
             spotifyUser: spotifyID,
             display_name: display_name,
             email: email,
-            createdAt: new Date().toISOString(),
             photoURL: photoURL,
             userId: uid
         }
-        return db.doc(`/users/${spotifyID}`).set(userCredentials);
+        return db.doc(`/users/${spotifyID}`).update(userCredentials);
     })
     .catch((error) => {
       // If user does not exists we create it.

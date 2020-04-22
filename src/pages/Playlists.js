@@ -10,7 +10,6 @@ import GridList from '@material-ui/core/GridList'
 import GridListTile from '@material-ui/core/GridListTile'
 import GridListTileBar from '@material-ui/core/GridListTileBar';
 import ListSubheader from '@material-ui/core/ListSubheader';
-import IconButton from '@material-ui/core/IconButton';
 import AddCircle from '@material-ui/icons/AddCircle'
 import RemoveCircle from '@material-ui/icons/RemoveCircle'
 

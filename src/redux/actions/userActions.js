@@ -138,7 +138,6 @@ export const handleSpotifyLogin = () => {
   }
 
 export const refreshTokens = (spotifyRefreshToken) => async (dispatch) => {
-    console.log('141 calling loadingUser')
     dispatch({ type: LOADING_USER})
     dispatch({ type: LOADING_PLAYLISTS_MY})
     dispatch({ type: LOADING_PLAYLISTS_MY_FROM_SPOTIFY})
@@ -299,7 +298,6 @@ export const getUserData = (accessToken, IDToken) => async (dispatch) => {
                 Authorization: `Bearer ${FBIDToken}`
             }
         }).json()
-        console.log('FBUser', FBUser)
         dispatch({
             type: SET_USER,
             payload: {

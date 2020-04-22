@@ -19,6 +19,8 @@ import {
     UNLIKE_PLAYLIST,
     FOLLOW_PLAYLIST,
     UNFOLLOW_PLAYLIST,
+    SHOW_COMMENT_DIALOG,
+    HIDE_COMMENT_DIALOG,
     SET_ERRORS,
     CLEAR_ERRORS } from '../types'
 
@@ -33,7 +35,8 @@ const initialState = {
     allPlaylistsLoading: false,
     myPlaylistsLoading: false,
     myPlaylistsFromSpotifyLoading: false,
-    playlistLoading: false
+    playlistLoading: false,
+    showCommentsDialog: false
 }
 
 export default function(state = initialState, action) {
@@ -45,11 +48,19 @@ export default function(state = initialState, action) {
                 allPlaylistsLoading: false
             }
         case SET_PLAYLISTS_MY:
+
+            // Check the Spotify Playlists - they will have a different ID
+            // for presence in your Splits Playlists
+            // Set to "InMyPlaylists = true" if the spotifyPlaylistId is present
+            // This enables the add/remove feature and UI correctly
+
             let myPlaylistsFromSpotify = {...state.myPlaylistsFromSpotify}
+            //Iterate through your firebase playlists
             Object.keys(action.payload.myPlaylists).forEach(firebasePlaylistId => {
-                if (myPlaylistsFromSpotify[action.payload.myPlaylists[firebasePlaylistId].firebasePlaylistId]) {
-                    myPlaylistsFromSpotify[action.payload.myPlaylists[firebasePlaylistId].firebasePlaylistId] = {
-                        ...myPlaylistsFromSpotify[action.payload.myPlaylists[firebasePlaylistId].firebasePlaylistId],
+                // Check the Firebase Playlist against the Spotify Playlists
+                if (myPlaylistsFromSpotify[action.payload.myPlaylists[firebasePlaylistId].spotifyPlaylistId]) {
+                    myPlaylistsFromSpotify[action.payload.myPlaylists[firebasePlaylistId].spotifyPlaylistId] = {
+                        ...myPlaylistsFromSpotify[action.payload.myPlaylists[firebasePlaylistId].spotifyPlaylistId],
                         firebasePlaylistId: firebasePlaylistId,
                         inMyPlaylists: true
                     }
@@ -63,9 +74,17 @@ export default function(state = initialState, action) {
                 myPlaylistsLoading: false,
             }
         case SET_PLAYLISTS_MY_FROM_SPOTIFY:
+            let setPlaylistsFromSpotify = {...state.myPlaylistsFromSpotify}
+            // merge the previous updates to the spotify playlists with the latest updates
+            Object.keys(action.payload.myPlaylistsFromSpotify).forEach(spotifyPlaylistId => {
+                setPlaylistsFromSpotify[spotifyPlaylistId] = {
+                    ...setPlaylistsFromSpotify[spotifyPlaylistId],
+                    ...action.payload.myPlaylistsFromSpotify[spotifyPlaylistId]
+                }
+            })
             return {
                 ...state,
-                ...action.payload,
+                myPlaylistsFromSpotify: setPlaylistsFromSpotify,
                 myPlaylistsFromSpotifyLoading: false,
             }
         case SET_PLAYLIST:
@@ -112,6 +131,7 @@ export default function(state = initialState, action) {
             let addToAllMySpotifyPlaylists = {...state.myPlaylistsFromSpotify}
             addToMyPlaylists[action.payload.firebasePlaylistId] = {...action.payload, inMyPlaylists: true}
             addToAllMySpotifyPlaylists[action.payload.id].inMyPlaylists = true
+            addToAllMySpotifyPlaylists[action.payload.id].firebasePlaylistId = action.payload.firebasePlaylistId
             return {
                 ...state,
                 myPlaylists: addToMyPlaylists
@@ -206,6 +226,16 @@ export default function(state = initialState, action) {
                 ...state,
                 allPlaylists: likeAllPlaylists,
                 myPlaylists: likeMyPlaylists
+            }
+        case SHOW_COMMENT_DIALOG:
+            return {
+                ...state,
+                showCommentsDialog: true
+            }
+        case HIDE_COMMENT_DIALOG:
+            return {
+                ...state,
+                showCommentsDialog: false
             }
         case COMMENT_ON_PLAYLIST:
             let myPlaylists = {...state.myPlaylists}

@@ -410,17 +410,17 @@ const followPlaylist = (req, res, next) => {
             if (firebasePlaylist.spotifyUser === spotifyUser) {
                 throw new Error(JSON.stringify({ code: 500, message: 'You cannot follow a playlist that you own.' }))
             }
-            if (firebasePlaylist.followers && firebasePlaylist.followers[spotifyUser]) {
+            if (firebasePlaylist.firebaseFollowers && firebasePlaylist.firebaseFollowers[spotifyUser]) {
                 throw new Error(JSON.stringify({ code: 500, message: 'You have already followed this playlist.' }))
             }
 
-            const followers = firebasePlaylist.followers ? {...firebasePlaylist.followers} : {}
-            followers[spotifyUser] = {
+            const firebaseFollowers = firebasePlaylist.firebaseFollowers ? {...firebasePlaylist.firebaseFollowers} : {}
+            firebaseFollowers[spotifyUser] = {
                 followedAt: new Date().toISOString(),
                 userImage: req.user.photoURL ? req.user.photoURL : `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/blank-profile-picture.png?alt=media`,
             }
             return db.doc(`/playlists/${firebasePlaylistId}`).update({
-                followers
+                firebaseFollowers
             })
         })
         .then(() => {
@@ -469,14 +469,14 @@ const unfollowPlaylist = (req, res, next) => {
             if (firebasePlaylist.spotifyUser === spotifyUser) {
                 throw new Error(JSON.stringify({ code: 500, message: 'You cannot unfollow a playlist that you own.' }))
             }
-            if (firebasePlaylist.followers && !firebasePlaylist.followers[spotifyUser]) {
+            if (firebasePlaylist.firebaseFollowers && !firebasePlaylist.firebaseFollowers[spotifyUser]) {
                 throw new Error(JSON.stringify({ code: 500, message: 'You are not following this playlist.' }))
             }
 
-            const followers = firebasePlaylist.followers ? {...firebasePlaylist.followers} : {}
-            delete followers[spotifyUser]
+            const firebaseFollowers = firebasePlaylist.firebaseFollowers ? {...firebasePlaylist.firebaseFollowers} : {}
+            delete firebaseFollowers[spotifyUser]
             return db.doc(`/playlists/${firebasePlaylistId}`).update({
-                followers
+                firebaseFollowers
             })
         })
         .then(() => {

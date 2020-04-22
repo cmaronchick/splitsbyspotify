@@ -25,7 +25,9 @@ const Navbar = (props) => {
     return (
         <AppBar>
             <Toolbar className="nav-container">
-                <Button color="inherit" component={Link} to="/">My Playlists</Button>
+                <Button color="inherit" component={Link} to="/">My {window.innerWidth > 500 ? `Playlists` : `Lists`}</Button>
+
+                {/* show Login button only if user is not authenticated */}
                 {!authenticated ? (
                     <Fragment>
                         <Button color="inherit" onClick={() => props.handleSpotifyLogin()}>Login</Button>
@@ -37,10 +39,10 @@ const Navbar = (props) => {
                             <AddIcon />
                         </MyButton> */}
                         <Notifications />
-                        <Button color="inherit" component={Link} to="/profile">Profile</Button>
+                        <Button color="inherit" component={Link} to="/Profile">Profile</Button>
                     </Fragment>
                 )}
-                <Button color="inherit" component={Link} to="/Playlists">Browse Playlists</Button>
+                <Button color="inherit" component={Link} to="/Playlists">Browse {window.innerWidth > 500 ? `Playlists` : `All`}</Button>
             </Toolbar>
         </AppBar>
     )

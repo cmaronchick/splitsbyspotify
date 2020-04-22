@@ -44,14 +44,14 @@ const styles = (theme) => ({
 const Comments = (props) => {
     
     const handleClose = () => {
-        props.onClose()
+        props.onClose(props.showCommentsDialog, props.firebasePlaylistId)
     }
 
     const { open, playlistName, spotifyPlaylistId, firebasePlaylistId, classes, user, playlistLoading } = props
     const {comments} = props.playlist
         return (
         <Dialog open={open}>
-            <DialogTitle title={`${playlistName} Comments`} />
+            <DialogTitle bgcolor="secondary.dark" title={`${playlistName} Comments`}>{playlistName} Comments</DialogTitle>
             <DialogContent>
                 <Grid container className={classes.commentsContainer}>
                     <CloseIcon className={classes.closeIcon} onClick={handleClose} />
@@ -115,7 +115,8 @@ const mapStateToProps = (state) => ({
     user: state.user,
     playlist: state.spotify.playlist,
     comments: state.spotify.playlist ? state.spotify.playlist.comments : [],
-    playlistLoading: state.spotify.playlistLoading
+    playlistLoading: state.spotify.playlistLoading,
+    showCommentsDialog: state.spotify.showCommentsDialog
 })
 
 export default connect(mapStateToProps, null)(withStyles(styles)(Comments))

@@ -9,17 +9,19 @@ import Button from '@material-ui/core/Button'
 import Typography from '@material-ui/core/Typography'
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-const styles = {
+const styles = (theme) => ({
+    ...theme.spreadThis,
     spotifyUser: {
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        padding: '0 15px'
+        padding: '0 15px',
+        paddingBottom: 10
     },
     progress: {
         color: '#fff'
     }
-}
+})
 
 const SpotifyLogin = (props) => {
     const { classes, user, user: {loading} } = props
@@ -42,7 +44,7 @@ const SpotifyLogin = (props) => {
                 <Button variant="contained" color="default" onClick={() => handleSpotifyLogout()}>Logout</Button>
             </Fragment>
         </div>
-    ) : user.tourCompleted && (
+    ) : props.tourCompleted || user.tourCompleted && (
         <div className={classes.spotifyUser}>
             <Button className={classes.spotifyLoginButton} variant="contained" color="primary" onClick={() => handleSpotifyLogin()}>
             {loading ? (

@@ -8,7 +8,7 @@ import {
 const initialState = {
     splits: [],
     targetPace: '',
-    selectedDistance: ''
+    selectedDistance: 0
 }
 
 export default function(state = initialState, action) {
@@ -16,7 +16,8 @@ export default function(state = initialState, action) {
         case SET_SPLITS: 
             return {
                 ...state,
-                splits: action.payload
+                splits: action.payload.splits,
+                elapsedTime: action.payload.elapsedTime
             }
         case SET_TARGET_PACE:
             return {

@@ -28,6 +28,31 @@ a{
 .splits-container {
   padding: 5px 20px;
 }
+.finish {
+  position: absolute;
+  height: 30px;
+  width: 100%;
+  background-color: #fff;
+  opacity: 0.5;
+  
+  background-image:
+  -moz-linear-gradient(45deg, #000 25%, transparent 25%), 
+  -moz-linear-gradient(-45deg, #000 25%, transparent 25%),
+  -moz-linear-gradient(45deg, transparent 75%, #000 75%),
+  -moz-linear-gradient(-45deg, transparent 75%, #000 75%);
+  background-image:
+    -webkit-gradient(linear, 0 100%, 100% 0, color-stop(.25, #000), color-stop(.25, transparent)), 
+    -webkit-gradient(linear, 0 0, 100% 100%, color-stop(.25, #000), color-stop(.25, transparent)),
+    -webkit-gradient(linear, 0 100%, 100% 0, color-stop(.75, transparent), color-stop(.75, #000)),
+    -webkit-gradient(linear, 0 0, 100% 100%, color-stop(.75, transparent), color-stop(.75, #000));
+
+  -moz-background-size:30px 30px;
+  background-size:30px 30px;
+  -webkit-background-size:30px 30px; /* override value for shitty webkit */
+
+  background-position:0 0, 15px 0, 15px -15px, 0px 15px;
+  z-index: 9999;
+}
 
 @media(max-width: 768px) {
   .introText {

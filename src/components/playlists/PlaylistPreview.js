@@ -15,6 +15,9 @@ import IconButton from '@material-ui/core/IconButton';
 import AddCircle from '@material-ui/icons/AddCircle'
 import RemoveCircle from '@material-ui/icons/RemoveCircle'
 
+import Comments from './Comments'
+import ConfirmDeleteDialog from './ConfirmDeleteDialog'
+
 import { connect } from 'react-redux'
 import { 
     getMyPlaylist,
@@ -23,7 +26,8 @@ import {
     confirmRemoveFromMyPlaylists,
     cancelRemoveFromMyPlaylists,
     likePlaylist,
-    unlikePlaylist } from '../../redux/actions/spotifyActions'
+    unlikePlaylist,
+    toggleCommentsDialog } from '../../redux/actions/spotifyActions'
 
 import PlaylistActions from './PlaylistActions'
 
@@ -36,6 +40,12 @@ const styles = (theme) => ({
 
 
 const PlaylistPreview = (props) => {
+
+    const { classes, listType, playlist : { name, images, id, spotifyUser, owner, collaborative, inMyPlaylists, href, likeCount, commentCount, comments, tracks, spotifyPlaylistId } } = props
+    const playlistName = name ? name : props.playlist.playlistName
+    const firebasePlaylistId = props.playlist.firebasePlaylistId
+    const playlistImage = images && images[0] ? images[0].url : props.playlist.playlistImage
+
     const handleAddToMyPlaylistsClick = () => {
         props.addToMyPlaylists(props.playlist)
     }
@@ -47,12 +57,8 @@ const PlaylistPreview = (props) => {
     if (!props.playlist) {
         return (<div></div>)
     }
-    const { classes, listType, playlist : { name, images, id, spotifyUser, owner, collaborative, inMyPlaylists, href, likeCount, commentCount, comments, tracks } } = props
-    const playlistName = name ? name : props.playlist.playlistName
-    const firebasePlaylistId = props.playlist.firebasePlaylistId
-    const playlistImage = images && images[0] ? images[0].url : props.playlist.playlistImage
     const handleShowCommentsDialog = () => {
-        props.handleShowCommentsDialog(name, id, firebasePlaylistId, comments)
+        props.handleShowCommentsDialog(props.showCommentsDialog, firebasePlaylistId)
     }
     const publicPlaylist = props.playlist.public
     return (
@@ -102,6 +108,21 @@ const PlaylistPreview = (props) => {
             {/* {comments && comments.length > 0 && (
             <Comments comments={comments} firebasePlaylistId={props.playlist.firebasePlaylistId} openCommentsDialog />
             )} */}
+            <ConfirmDeleteDialog
+                open={props.showConfirmRemoveDialog}
+                playlistName={playlistName}
+                spotifyPlaylistId={spotifyPlaylistId}
+                firebasePlaylistId={firebasePlaylistId}
+                handleConfirmDeletePlaylist={props.removeFromMyPlaylists}
+                onClose={props.cancelRemoveFromMyPlaylists}/>
+            <Comments
+                open={props.showCommentsDialog}
+                playlistName={playlistName}
+                spotifyPlaylistId={spotifyPlaylistId}
+                firebasePlaylistId={firebasePlaylistId}
+                comments={comments}
+                onClose={props.toggleCommentsDialog}
+                user={props.user} />
         </Card>
     )
 }
@@ -112,13 +133,16 @@ PlaylistPreview.propTypes = {
     likePlaylist: PropTypes.func.isRequired,
     unlikePlaylist: PropTypes.func.isRequired,
     playlist: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired
+    classes: PropTypes.object.isRequired,
+    showCommentsDialog: PropTypes.bool.isRequired
 }
 
 const mapStateToProps = (state) => ({
     spotifyUser: state.user.spotifyUser,
     FBUser: state.user.FBUser,
-    user: state.user
+    user: state.user,
+    showCommentsDialog: state.spotify.showCommentsDialog,
+    showConfirmRemoveDialog: state.spotify.showConfirmRemoveDialog
 })
 
 const mapActionsToProps = {
@@ -128,7 +152,8 @@ const mapActionsToProps = {
     confirmRemoveFromMyPlaylists,
     cancelRemoveFromMyPlaylists,
     likePlaylist,
-    unlikePlaylist
+    unlikePlaylist,
+    toggleCommentsDialog
 }
 
 export default connect(mapStateToProps, mapActionsToProps)(withStyles(styles)(PlaylistPreview))

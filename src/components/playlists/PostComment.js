@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react'
+import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
 import withStyles from '@material-ui/core/styles/withStyles'
@@ -76,11 +76,17 @@ class PostComment extends Component {
               Submit
             </Button>
           </form>
-          <hr className={classes.visibleSeparator} />
+          <hr className={classes.invisibleSeparator} />
         </Grid>
       ) : null;
       return commentFormMarkup;
     }
+}
+
+PostComment.propTypes = {
+  classes: PropTypes.object.isRequired,
+  authenticated: PropTypes.bool.isRequired,
+  firebasePlaylistId: PropTypes.string.isRequired
 }
 
 

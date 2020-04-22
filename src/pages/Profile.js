@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react'
+import React, { Fragment } from 'react'
 import PropTypes from 'prop-types'
 import withStyles from '@material-ui/core/styles/withStyles'
 import { Link } from 'react-router-dom'
@@ -9,66 +9,37 @@ import Paper from '@material-ui/core/Paper'
 import Button from '@material-ui/core/Button'
 import Typography from '@material-ui/core/Typography'
 import MuiLink from '@material-ui/core/Link'
+import CircularProgress from '@material-ui/core/CircularProgress'
 //Icons
 import LocationOn from '@material-ui/icons/LocationOn'
 import CalendarToday from '@material-ui/icons/CalendarToday'
 import EditIcon from '@material-ui/icons/Edit'
-import KeyboardReturn from '@material-ui/icons/KeyboardReturn'
 import LinkIcon from '@material-ui/icons/Link'
 
 // Redux stuff
 import {connect} from 'react-redux'
-import { logout, uploadImage } from '../redux/actions/userActions'
+import { logout, uploadImage, login } from '../redux/actions/userActions'
 
 import MyButton from '../util/MyButton'
 import EditDetails from '../components/profile/EditDetails'
-import PlaylistSkeleton from '../util/PlaylistSkeleton'
 import ProfileSkeleton from '../util/ProfileSkeleton'
 
-const styles = {
-    profile: {
-        '& .image-wrapper': {
-            textAlign: 'center',
-            position: 'relative',
-            '& button': {
-            position: 'absolute',
-            top: '80%',
-            left: '70%'
-            }
-        },
-        '& .profile-image': {
-            width: 200,
-            height: 200,
-            objectFit: 'cover',
-            maxWidth: '100%',
-            borderRadius: '50%'
-        },
-        '& .profile-details': {
-            textAlign: 'center',
-            '& span, svg': {
-            verticalAlign: 'middle'
-            },
-            '& a': {
-            color: '#00bcd4'
-            }
-        },
-        '& hr': {
-            border: 'none',
-            margin: '0 0 10px 0'
-        },
-        '& svg.button': {
-            '&:hover': {
-            cursor: 'pointer'
-            }
-        }
-    },
+const styles = (theme) => ({
+    ...theme.spreadThis,
     paper: {
-        padding: 20
+        padding: 20,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
     },
     button: {
-        float: 'right'
+        float: 'right',
+    },
+    spotifyLoginButton: {
+        margin: '0 auto'
     }
-}
+})
 
 
 const Profile = (props) => {
@@ -81,6 +52,7 @@ const Profile = (props) => {
             <div>Please log in again.</div>
         )
     }
+
     const handleImageChange = (event) => {
         const image = event.target.files[0]
         let formData = new FormData()
@@ -92,9 +64,6 @@ const Profile = (props) => {
         fileInput.click();
     }
 
-    const handleLogout = () => {
-        this.props.logout()
-    }
     const { photoURL, imageURL, stravaProfile, bio, location, createdAt } = FBUser.credentials ? FBUser.credentials : FBUser.user ? FBUser.user : { photoURL: null}
     const { display_name, id } = spotifyUser
     let profileMarkup = !loading ? (authenticated ? (
@@ -127,54 +96,43 @@ const Profile = (props) => {
                     )}
                     {stravaProfile && (
                         <Fragment>
-                        <LinkIcon color="primary" />
                         <a href={stravaProfile} target="_blank" rel="noopener noreferrer">
+                        <LinkIcon color="primary" />
                             {' '}
                             Strava Profile
                         </a>
                         <hr />
                         </Fragment>
                     )}
-                    <CalendarToday color="primary" />{' '}
-                    <span>Joined {dayjs(createdAt).format('MMM YYYY')}</span>
+                    <Fragment>
+                        <CalendarToday color="primary" /> {' '}
+                        <span>Joined {dayjs(createdAt).format('MMM YYYY')}</span>
+                    </Fragment>
+                    <hr />
+                    <EditDetails />
                 </div>
-                <MyButton tip="Logout" 
-                    placement="top"
-                    onClick={handleLogout}
-                    btnClassName='button'>
-                        <KeyboardReturn color="primary" />
-                </MyButton>
-                <EditDetails />
             </div>
 
 
         </Paper>) : (
             <Paper className={classes.paper}>
+            <Typography variant="h3" align="center">
+                User Profile
+            </Typography>
             <Typography variant="body2" align="center">
                 No profile found, please login again
             </Typography>
-            <div className={classes.buttons}>
-                <Button
-                variant="contained"
-                color="primary"
-                component={Link}
-                to="/login"
-                >
-                Login
-                </Button>
-                <Button
-                variant="contained"
-                color="secondary"
-                component={Link}
-                to="/signup"
-                >
-                Signup
-                </Button>
-            </div>
+            <Button className={classes.spotifyLoginButton} variant="contained" color="primary" onClick={() => props.handleSpotifyLogin()}>
+            {loading ? (
+                    <CircularProgress size={30} className={classes.progress} />
+                ) : (
+                    <span>Login to Spotify</span>
+                )}
+            </Button>
             </Paper>
         )) : (
-        <ProfileSkeleton />
-    )
+            <ProfileSkeleton />
+        )
     return profileMarkup;
 }
 
@@ -184,6 +142,7 @@ const mapStateToProps = (state) => ({
 
 const mapActionsToProps = {
     uploadImage,
+    login,
     logout
 }
 

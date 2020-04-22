@@ -8,18 +8,13 @@ import PlaylistPreview from '../components/playlists/PlaylistPreview'
 import Introduction from '../components/util/Introduction'
 
 import Typography from '@material-ui/core/Typography'
-import Button from '@material-ui/core/Button'
 import ConfirmDeleteDialog from '../components/playlists/ConfirmDeleteDialog'
-import CircularProgress from '@material-ui/core/CircularProgress'
 import Comments from '../components/playlists/Comments'
 import PlaylistSkeleton from '../util/PlaylistSkeleton'
-import LockOpen from '@material-ui/icons/LockOpen'
-import AddCircle from '@material-ui/icons/AddCircle'
-import Timer from '@material-ui/icons/Timer'
-import List from '@material-ui/core/List'
-import ListItem from '@material-ui/core/ListItem'
-import ListItemIcon from '@material-ui/core/ListItemIcon'
-import ListItemText from '@material-ui/core/ListItemText'
+import AppBar from '@material-ui/core/AppBar';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import Box from '@material-ui/core/Box'
 
 // Redux
 import { connect } from 'react-redux'
@@ -33,13 +28,31 @@ import { getAllPlaylists,
     confirmRemoveFromMyPlaylists,
     cancelRemoveFromMyPlaylists,
     likePlaylist, 
-    unlikePlaylist
+    unlikePlaylist,
+    toggleCommentsDialog
 } from '../redux/actions/spotifyActions'
 import { Icon } from '@material-ui/core'
 
 const styles = (theme) => ({
     ...theme.spreadThis
 })
+
+function TabPanel(props) {
+    const { children, value, index, ...other } = props;
+  
+    return (
+      <Typography
+        component="div"
+        role="tabpanel"
+        hidden={value !== index}
+        id={`simple-tabpanel-${index}`}
+        aria-labelledby={`simple-tab-${index}`}
+        {...other}
+      >
+        {value === index && <Box p={3}>{children}</Box>}
+      </Typography>
+    );
+  }
 
 class Home extends Component {
     constructor(props) {
@@ -57,7 +70,8 @@ class Home extends Component {
             showConfirmDeleteDialog: props.showConfirmDeleteDialog,
             confirmDeletePlaylistName: props.confirmDeletePlaylistName,
             confirmDeletePlaylistId: props.confirmDeletePlaylistId,
-            showCommentsDialog: false
+            showCommentsDialog: false,
+            selectedTab: 0
         }
     }
     componentDidMount() {
@@ -71,26 +85,26 @@ class Home extends Component {
         }
     }
 
-    handleShowCommentsDialog = (playlistName, spotifyPlaylistId, firebasePlaylistId, comments) => {
-        this.setState({
-            showCommentsDialog: true,
-            commentsPlaylistName: playlistName,
-            commentsSpotifyPlaylistId: spotifyPlaylistId,
-            commentsPlaylistFirebasePlaylistId: firebasePlaylistId,
-            commentsPlaylistCommentsArray: comments
-        })
-        this.props.getMyPlaylist(firebasePlaylistId)
+    // handleShowCommentsDialog = (playlistName, spotifyPlaylistId, firebasePlaylistId, comments) => {
+    //     this.setState({
+    //         showCommentsDialog: true,
+    //         commentsPlaylistName: playlistName,
+    //         commentsSpotifyPlaylistId: spotifyPlaylistId,
+    //         commentsPlaylistFirebasePlaylistId: firebasePlaylistId,
+    //         commentsPlaylistCommentsArray: comments
+    //     })
+    //     // this.props.getMyPlaylist(firebasePlaylistId)
 
-    }
-    handleHideCommentsDialog = () => {
-        this.setState({
-            showCommentsDialog: false,
-            commentsPlaylistName: null,
-            commentsSpotifyPlaylistId: null,
-            commentsPlaylistfirebasePlaylistId: null,
-            commentsPlaylistCommentsArray: null
-        })
-    }
+    // }
+    // handleHideCommentsDialog = () => {
+    //     this.setState({
+    //         showCommentsDialog: false,
+    //         commentsPlaylistName: null,
+    //         commentsSpotifyPlaylistId: null,
+    //         commentsPlaylistfirebasePlaylistId: null,
+    //         commentsPlaylistCommentsArray: null
+    //     })
+    // }
 
     playlistsMarkup = (playlists) => playlists && Object.keys(playlists).length > 0 ? (
         Object.keys(playlists).map(playlistId => {
@@ -105,22 +119,71 @@ class Home extends Component {
                  handleHideConfirmDeleteDialog={this.state.handleHideConfirmDeleteDialog}
                  handleLikePlaylist={this.props.likePlaylist}
                  handleUnlikePlaylist={this.props.unlikePlaylist}
-                 handleShowCommentsDialog={this.handleShowCommentsDialog}/>
+                 handleShowCommentsDialog={this.props.toggleCommentsDialog}/>
             )
         })
     ) : (
         <Typography variant="body1" color="inherit">You have no playlists yet. Add some of yours from Spotify or browse other users' playlists.</Typography>
     )
 
+    handleChange = (event, newValue) => {
+        this.setState({
+            selectedTab: newValue
+        });
+    };
+
+    a11yProps = (index) => {
+        return {
+          id: `simple-tab-${index}`,
+          'aria-controls': `simple-tabpanel-${index}`,
+        };
+    };
+
     render() {
         const { classes, user } = this.props
-        return (
+        const { selectedTab } = this.state
+        return window.innerWidth < 800 ? (
+            <div className={classes.root}>
+                <AppBar position="static">
+                <Tabs
+                    value={this.state.selectedTab}
+                    onChange={this.handleChange}
+                    aria-label="simple tabs example"
+                    indicatorColor="secondary"
+                    textColor="inherit">
+
+                    <Tab label="My Spotify Playlists" {...this.a11yProps(0)} />
+                    <Tab label="My Splits Playlists" {...this.a11yProps(1)} />
+                </Tabs>
+                </AppBar>
+                <TabPanel value={selectedTab} index={0}>
+                    <div className="playlist-container">
+                        {!this.props.myPlaylistsFromSpotifyLoading ? (
+                            this.playlistsMarkup(this.props.myPlaylistsFromSpotify)
+                        ) : (
+                            <PlaylistSkeleton />
+                        )}
+
+                    </div>
+                </TabPanel>
+                <TabPanel value={selectedTab} index={1}>
+                    <div className="playlist-container">
+                        {!this.props.myPlaylistsLoading ? (
+                            this.playlistsMarkup(this.props.myPlaylists)
+                        ) : (
+                            <PlaylistSkeleton />
+                        )}
+                    </div>
+                </TabPanel>
+            </div>
+        ) : (
             <Grid container spacing={2} className={classes.container}>
                 {user.tourCompleted ? (
                     <Fragment>
                     <Grid item sm={6} xs={12}>
                         <div className="playlist-container">
-                        <Typography variant="h4" value="My Spotify Playlists">My Spotify Playlists</Typography>
+                        <Typography variant="h4" value="My Spotify Playlists">
+                        My Spotify Playlists</Typography>
                             {!this.props.myPlaylistsFromSpotifyLoading ? (
                                 this.playlistsMarkup(this.props.myPlaylistsFromSpotify)
                             ) : (
@@ -141,21 +204,21 @@ class Home extends Component {
                         </div>
                     </Grid>
 
-                    <ConfirmDeleteDialog
+                    {/* <ConfirmDeleteDialog
                     open={this.props.showConfirmRemoveDialog}
                     playlistName={this.props.removePlaylistName}
                     spotifyPlaylistId={this.props.removeSpotifyPlaylistId}
                     firebasePlaylistId={this.props.removeFirebasePlaylistId}
                     handleConfirmDeletePlaylist={this.props.removeFromMyPlaylists}
-                    onClose={this.props.cancelRemoveFromMyPlaylists}/>
-                    <Comments
-                        open={this.state.showCommentsDialog}
+                    onClose={this.props.cancelRemoveFromMyPlaylists}/> */}
+                    {/* <Comments
+                        open={this.props.showCommentsDialog}
                         playlistName={this.state.commentsPlaylistName}
                         spotifyPlaylistId={this.state.commentsSpotifyPlaylistId}
                         firebasePlaylistId={this.state.commentsPlaylistFirebasePlaylistId}
                         comments={this.state.commentsPlaylistCommentsArray}
-                        onClose={this.handleHideCommentsDialog}
-                        user={this.props.user} />
+                        onClose={this.props.toggleCommentsDialog}
+                        user={this.props.user} /> */}
                 </Fragment>
                 ) : (
                     <Introduction handleSpotifyLogin={this.props.handleSpotifyLogin} />
@@ -174,13 +237,13 @@ Home.propTypes = {
     myPlaylistsFromSpotifyLoading: PropTypes.bool,
     spotifyUser: PropTypes.object,
     spotifyAccessToken: PropTypes.string,
-    addToMyPlaylist: PropTypes.func.isRequired,
-    removeFromMyPlaylist: PropTypes.func.isRequired,
+    addToMyPlaylists: PropTypes.func.isRequired,
+    removeFromMyPlaylists: PropTypes.func.isRequired,
     confirmRemoveFromMyPlaylists: PropTypes.func.isRequired,
     cancelRemoveFromMyPlaylists: PropTypes.func.isRequired,
     likePlaylist: PropTypes.func.isRequired,
     unlikePlaylist: PropTypes.func.isRequired,
-    showConfirmDeleteDialog: PropTypes.bool.isRequired,
+    showConfirmDeleteDialog: PropTypes.bool,
     confirmDeletePlaylistName: PropTypes.string,
     confirmDeletePlaylistId: PropTypes.number,
     user: PropTypes.object.isRequired,
@@ -202,6 +265,7 @@ const mapStateToProps = (state) => ({
     removeSpotifyPlaylistId: state.spotify.removeSpotifyPlaylistId,
     removeFirebasePlaylistId: state.spotify.removeFirebasePlaylistId,
     removePlaylistName: state.spotify.removePlaylistName,
+    showCommentsDialog: state.spotify.showCommentsDialog
 })
 
 const mapActionsToProps = {
@@ -215,7 +279,8 @@ const mapActionsToProps = {
     confirmRemoveFromMyPlaylists,
     cancelRemoveFromMyPlaylists,
     likePlaylist,
-    unlikePlaylist
+    unlikePlaylist,
+    toggleCommentsDialog
 }
 
 

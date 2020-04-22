@@ -78,7 +78,7 @@ class Notifications extends Component {
                                 component={Link}
                                 color="primary"
                                 variant="body1"
-                                to={`/users/${not.recipient}/playlist/${not.firebasePlaylistId}`}>
+                                to={`/playlist/${not.firebasePlaylistId}`}>
                                     {not.sender} {verb} your playlist {time}
                             </Typography>
                     </MenuItem>

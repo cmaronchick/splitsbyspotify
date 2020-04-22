@@ -2,6 +2,13 @@ import { SET_SPLITS, SET_TARGET_PACE, SET_SELECTED_DISTANCE } from '../types'
 
 export const calculateSplits = (selectedDistance, targetPace) => (dispatch) => {
 
+    if (targetPace.indexOf(':') === -1) {
+      targetPace = `${targetPace}:00`
+    }
+    dispatch({
+      type: SET_TARGET_PACE,
+      payload: targetPace
+    })
     const minPerMile = parseInt(targetPace.split(':')[0])
     const secPerMile = targetPace.split(':').length > 1 ? parseFloat(targetPace.split(':')[1]/60) : 0
     const splitPace = minPerMile + secPerMile
@@ -27,6 +34,8 @@ export const calculateSplits = (selectedDistance, targetPace) => (dispatch) => {
         } else {
           elapsedSeconds = Math.round(((elapsedSeconds - Math.floor(elapsedSeconds))*60)).toFixed(0)
         }
+        elapsedTime = elapsedMinutes + elapsedSeconds / 60
+        console.log('elapsedTime', elapsedTime)
       }
       if (elapsedSeconds >= 60) {
         elapsedMinutes += elapsedSeconds%60
@@ -40,15 +49,15 @@ export const calculateSplits = (selectedDistance, targetPace) => (dispatch) => {
     }
     dispatch({
         type: SET_SPLITS,
-        payload: splits
+        payload: {
+          splits,
+          elapsedTime
+        }
     })
 
 }
 
 export const setTargetPace = (targetPace) => (dispatch) => {
-  if (targetPace.indexOf(':') === -1) {
-    targetPace = `${targetPace}:00`
-  }
     dispatch({
         type: SET_TARGET_PACE,
         payload: targetPace

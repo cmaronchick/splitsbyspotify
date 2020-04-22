@@ -4,6 +4,7 @@ import { withStyles } from '@material-ui/core/styles'
 import theme from '../../constants/theme'
 import Grid from '@material-ui/core/Grid'
 import Typography from '@material-ui/core/Typography'
+import Box from '@material-ui/core/Box'
 
 import Splits from '../splits/Splits'
 
@@ -93,7 +94,14 @@ const Tracks = props => {
     const { tracks, classes, splitsObj } = props
     const { targetPace, selectedDistance, splits } = splitsObj
     const { items } = tracks
+
+    const targetPaceMin = parseInt(targetPace.split(':')[0])
+    const targetPaceSec = parseInt(targetPace.split(':')[1])
+    const targetPace_ms = ((targetPaceMin*60) + targetPaceSec) * 1000
+    const finishTop = splits.length && targetPace_ms ? (splits.length * (targetPace_ms / 10000)) + Math.floor(((splits.length * (targetPace_ms / 10000))/10)/2) : 0;
+
     return (
+        <div style={{position: 'relative'}}>
         <div style={{display: 'flex', flexDirection: 'row'}}>
             {splits && (
                 <Splits splits={splits} targetPace={targetPace} selectedDistance={selectedDistance} />
@@ -101,18 +109,23 @@ const Tracks = props => {
 
         <Grid container className={classes.tracksContainer}>
         {items && items.length > 0 ? (
-            items.map((trackObj, index) => {
+            <Fragment>
+            {items.map((trackObj, index) => {
+                const height = trackObj.track.duration_ms / 10000
                 return (
                     <Grid item key={index} className={classes.track}
                         style={{
-                        height: trackObj.track.duration_ms / 10000
+                        height: height
                     }} data={` - ${Math.floor((trackObj.track.duration_ms/1000)/60)}:${Math.round((trackObj.track.duration_ms/1000)%60) < 10 ? '0' : ''}${Math.round((trackObj.track.duration_ms/1000)%60)}`}>
                         <Typography variant="body2">{trackObj.track.name}</Typography>
                     </Grid>
                 )
-            })
+            })}
+            </Fragment>
         ) : null}
         </Grid>
+        </div>
+        <Box style={{top: finishTop, display: finishTop > 0 ? 'block' : 'none'}} className="finish"></Box>
         </div>
     )
 }

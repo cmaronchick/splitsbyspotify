@@ -9,6 +9,7 @@ import IconButton from '@material-ui/core/IconButton'
 
 import ShareIcon from '@material-ui/icons/Share'
 import CommentIcon from '@material-ui/icons/Comment'
+import PeopleIcon from '@material-ui/icons/People'
 
 import LikeButton from './LikeButton'
 import { handleSpotifyLogin } from '../../redux/actions/userActions'
@@ -18,7 +19,7 @@ const styles = (theme) => ({
 })
 
 const PlaylistActions = props => {
-    const {playlist, likeCount, commentCount, FBUser, likePlaylist, unlikePlaylist, user, handleOpenComments} = props
+    const {playlist, likeCount, commentCount, firebaseFollowers, FBUser, user} = props
 
     const handleLikePlaylist = () => {
         props.likePlaylist(playlist.firebasePlaylistId)
@@ -31,7 +32,9 @@ const PlaylistActions = props => {
         props.handleShowCommentsDialog()
     }
     return (
-        <CardActions disableSpacing>
+        <CardActions disableSpacing style={{justifyContent: 'center'}}>
+            <PeopleIcon />
+            {firebaseFollowers ? Object.keys(firebaseFollowers).length : 0}
             <LikeButton
                 user={user}
                 FBUser={FBUser}
@@ -40,7 +43,7 @@ const PlaylistActions = props => {
             {/* <IconButton aria-label="Share the Playlist">
                 <ShareIcon />
             </IconButton> */}
-            <IconButton aria-label="Share the Playlist" onClick={handleShowCommentsDialog}>
+            <IconButton aria-label="Comment on the Playlist" onClick={handleShowCommentsDialog}>
                 <CommentIcon />
             </IconButton>
             {commentCount}

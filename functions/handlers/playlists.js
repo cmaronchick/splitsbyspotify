@@ -231,7 +231,7 @@ const likeAPlaylist = (req, res) => {
                 const like = {
                     firebasePlaylistId,
                     spotifyUser,
-                    createdAt: new Date().toISOString()
+                    likedAt: new Date().toISOString()
                 }
                 return db.collection(`likes`).add(like)
             }

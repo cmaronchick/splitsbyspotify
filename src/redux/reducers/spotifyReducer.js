@@ -62,6 +62,8 @@ export default function(state = initialState, action) {
                     myPlaylistsFromSpotify[action.payload.myPlaylists[firebasePlaylistId].spotifyPlaylistId] = {
                         ...myPlaylistsFromSpotify[action.payload.myPlaylists[firebasePlaylistId].spotifyPlaylistId],
                         firebasePlaylistId: firebasePlaylistId,
+                        likeCount: action.payload.myPlaylists[firebasePlaylistId].likeCount ? action.payload.myPlaylists[firebasePlaylistId].likeCount : 0,
+                        commentCount: action.payload.myPlaylists[firebasePlaylistId].commentCount ? action.payload.myPlaylists[firebasePlaylistId].commentCount : 0,
                         inMyPlaylists: true
                     }
                 }
@@ -176,13 +178,13 @@ export default function(state = initialState, action) {
             const followedPlaylist = action.payload.playlist
             let followAllPlaylists = {...state.allPlaylists}
             let followMyPlaylists = {...state.myPlaylists}
-            if (followAllPlaylists[followedPlaylist.firebasePlaylistId].followers) {
-                followAllPlaylists[followedPlaylist.firebasePlaylistId].followers[followedPlaylistFBUser.credentials.spotifyUser] = {
+            if (followAllPlaylists[followedPlaylist.firebasePlaylistId].firebaseFollowers) {
+                followAllPlaylists[followedPlaylist.firebasePlaylistId].firebaseFollowers[followedPlaylistFBUser.credentials.spotifyUser] = {
                     userImage: followedPlaylistFBUser.credentials.photoURL,
                     followedAt: new Date().toISOString()
                 }
             } else {
-                followAllPlaylists[followedPlaylist.firebasePlaylistId].followers = {
+                followAllPlaylists[followedPlaylist.firebasePlaylistId].firebaseFollowers = {
                     [followedPlaylistFBUser.credentials.spotifyUser]: {
                         userImage: followedPlaylistFBUser.credentials.photoURL,
                         followedAt: new Date().toISOString()
@@ -202,7 +204,7 @@ export default function(state = initialState, action) {
             let unfollowAllPlaylists = {...state.allPlaylists}
             let unfollowMyPlaylists = {...state.myPlaylists}
             console.log('unfollowPlaylistFBUser', unfollowPlaylistFBUser)
-            delete unfollowAllPlaylists[unfollowedPlaylist.firebasePlaylistId].followers[unfollowPlaylistFBUser.credentials.spotifyUser]
+            delete unfollowAllPlaylists[unfollowedPlaylist.firebasePlaylistId].firebaseFollowers[unfollowPlaylistFBUser.credentials.spotifyUser]
             delete unfollowMyPlaylists[unfollowedPlaylist.firebasePlaylistId]
             return {
                 ...state,
@@ -222,10 +224,15 @@ export default function(state = initialState, action) {
                 ...likeMyPlaylists[action.payload.firebasePlaylistId],
                 ...action.payload
             }
+            likeMySpotifyPlaylists[likeMyPlaylists[action.payload.firebasePlaylistId].spotifyPlaylistId] = {
+                ...likeMySpotifyPlaylists[likeMyPlaylists[action.payload.firebasePlaylistId].spotifyPlaylistId],
+                ...action.payload
+            }
             return {
                 ...state,
                 allPlaylists: likeAllPlaylists,
-                myPlaylists: likeMyPlaylists
+                myPlaylists: likeMyPlaylists,
+                myPlaylistsFromSpotify: likeMySpotifyPlaylists
             }
         case SHOW_COMMENT_DIALOG:
             return {

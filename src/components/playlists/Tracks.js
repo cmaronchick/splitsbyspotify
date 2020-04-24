@@ -98,7 +98,11 @@ const Tracks = props => {
     const targetPaceMin = parseInt(targetPace.split(':')[0])
     const targetPaceSec = parseInt(targetPace.split(':')[1])
     const targetPace_ms = ((targetPaceMin*60) + targetPaceSec) * 1000
-    const finishTop = splits.length && targetPace_ms ? (splits.length * (targetPace_ms / 10000)) + Math.floor(((splits.length * (targetPace_ms / 10000))/10)/2) : 0;
+    let splitTop = 0;
+    if (splits && splits.length > 0) {
+        console.log('parseInt(splits[splits.length-1].split(\':\')[0]) + parseInt(splits[splits.length-1].split(\':\')[1])', parseInt(splits[splits.length-1].split(':')[0]), parseInt(splits[splits.length-1].split(':')[1]))
+    }
+    const finishTop = splits && splits.length > 0 ? ((parseInt(splits[splits.length-1].split(':')[0])*6) + parseInt(splits[splits.length-1].split(':')[1])) : 0
 
     return (
         <div style={{position: 'relative'}}>
@@ -125,6 +129,12 @@ const Tracks = props => {
         ) : null}
         </Grid>
         </div>
+        {splits && splits.length > 0 && splits.map(split => {
+            let splitMin = parseInt(split.split(':')[0])*6
+            let splitSec = parseInt(split.split(':')[1])
+            splitTop = splitMin + splitSec
+            return <Box style={{top: splitTop, display: splitTop > 0 ? 'block' : 'none'}} className="splitMarker"></Box>
+        })}
         <Box style={{top: finishTop, display: finishTop > 0 ? 'block' : 'none'}} className="finish"></Box>
         </div>
     )

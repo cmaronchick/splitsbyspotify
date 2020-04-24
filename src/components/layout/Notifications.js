@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from 'react'
+import firebase from '../../constants/firebase'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import dayjs from 'dayjs'
@@ -20,6 +21,7 @@ import ChatIcon from '@material-ui/icons/Chat'
 
 import { connect } from 'react-redux'
 import { markNotificationsRead } from '../../redux/actions/userActions'
+import { getMyPlaylist } from '../../redux/actions/spotifyActions'
 
 class Notifications extends Component {
     state = {
@@ -78,7 +80,12 @@ class Notifications extends Component {
                                 component={Link}
                                 color="primary"
                                 variant="body1"
-                                to={`/playlist/${not.firebasePlaylistId}`}>
+                                onClick={() => {
+                                    
+                                    firebase.analytics().logEvent('notifications', { action: 'read' })
+                                    return this.props.getMyPlaylist(not.firebasePlaylistId)
+                                }}
+                                to={`/Playlist/${not.firebasePlaylistId}`}>
                                     {not.sender} {verb} your playlist {time}
                             </Typography>
                     </MenuItem>
@@ -115,8 +122,13 @@ Notifications.propTypes = {
     notifications: PropTypes.array.isRequired
 }
 
+const mapActionsToProps = {
+    markNotificationsRead,
+    getMyPlaylist
+}
+
 const mapStateToProps = (state) => ({
     notifications: state.user.FBUser ? state.user.FBUser.notifications : []
 })
 
-export default connect(mapStateToProps, { markNotificationsRead })(Notifications)
+export default connect(mapStateToProps, mapActionsToProps)(Notifications)

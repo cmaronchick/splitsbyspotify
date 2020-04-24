@@ -1,5 +1,6 @@
 import { 
     SET_USER, 
+    UPDATE_TOKENS,
     SET_ERRORS, 
     CLEAR_ERRORS, 
     LOADING_UI, 
@@ -94,6 +95,8 @@ export const login = (location, history) => async (dispatch) => {
                     FBIDToken
                 }
             })
+
+            firebase.analytics().logEvent('login', { step: 3, name: 'Success'})
             dispatch(getUserData(access_token, FBIDToken))
             window.history.replaceState({}, 'Logged in successfully', '/')
             window.history.pushState({}, 'Logged in successfully', localStorage.loggedInPage ? localStorage.loggedInPage : '/')
@@ -217,6 +220,67 @@ export const refreshTokens = (spotifyRefreshToken) => async (dispatch) => {
   }
 }
 
+export const updateTokens = (refreshToken) => async (dispatch) => {
+    console.log('updatingTokens')
+    let FBIDToken = localStorage.FBIDToken
+    const searchParams = new URLSearchParams();
+    searchParams.set('grant_type', 'refresh_token')
+    searchParams.set('refresh_token', refreshToken)
+    let authOptions = { 
+        body: searchParams,
+        headers: {
+            'Authorization': 'Basic ' + (new Buffer(spotifyConfig.client_id + ':' + spotifyConfig.client_secret).toString('base64')),
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    };
+    try {
+        let spotifyTokenResponse = await ky.post('https://accounts.spotify.com/api/token', authOptions).json()
+        const { access_token, refresh_token, error} = spotifyTokenResponse;
+
+        if (access_token) {
+            localStorage.spotifyAccessToken = access_token;
+            let spotifyResponse = await ky.get('https://api.spotify.com/v1/me',{
+                headers: {
+                    'Authorization': 'Bearer ' + access_token
+                }
+            }).json()
+
+            const spotifyID = spotifyResponse.id,
+            display_name = spotifyResponse.display_name,
+            photoURL = spotifyResponse.images && spotifyResponse.images.length > 0 ? spotifyResponse.images[0].url : '',
+            email = spotifyResponse.email;
+            let body = new URLSearchParams()
+            body.set('spotifyID', spotifyID)
+            body.set('display_name', display_name)
+            body.set('photoURL', photoURL)
+            body.set('email', email)
+            body.set('accessToken', access_token)
+            let firebaseResponse = await api.post('spotifyLogin', {
+              body: body
+            }).json()
+            FBIDToken = firebaseResponse.token
+            let FBUser = await firebase.auth().signInWithCustomToken(FBIDToken)
+            FBIDToken = await firebase.auth().currentUser.getIdToken()
+            localStorage.FBIDToken = FBIDToken
+            dispatch({
+                type: UPDATE_TOKENS,
+                payload: {
+                    spotifyAccessToken: access_token,
+                    spotifyRefreshToken: refresh_token,
+                    FBIDToken
+                }
+            })
+        }
+    } catch (updateTokensError) {
+        if (updateTokensError.response) {
+            let updateTokensErrorJSON = await updateTokensError.response.json()
+
+            console.log('updateTokensErrorJSON', updateTokensErrorJSON)
+        } else {
+            console.log('updateTokensError', updateTokensError)
+        }
+    }
+}
 export const editUserDetails = (userDetails) => async (dispatch) => {
     console.log('222 calling loadingUser')
     dispatch({ type: LOADING_USER })
@@ -238,7 +302,7 @@ export const editUserDetails = (userDetails) => async (dispatch) => {
 }
 
 export const markNotificationsRead = (notificationIds) => async (dispatch) => {
-    console.log('notificationIds', notificationIds)
+    firebase.analytics().logEvent('notifications', { action: 'read' })
     try {
         let FBIDToken = await firebase.auth().currentUser.getIdToken()
         let notificationsResponse = await api.post('notifications', {

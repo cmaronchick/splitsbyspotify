@@ -1,5 +1,6 @@
 import { SET_USER, 
     LOADING_USER, 
+    UPDATE_TOKENS,
     SET_ERRORS, 
     CLEAR_ERRORS, 
     LOADING_UI, 
@@ -43,6 +44,14 @@ export default function(state = initialState, action) {
                 tourCompleted: true
             }
         case SET_USER:
+            return {
+                ...state,
+                ...action.payload,
+                authenticated: true,
+                tourCompleted: true,
+                loading: false
+            }
+        case UPDATE_TOKENS:
             return {
                 ...state,
                 ...action.payload,

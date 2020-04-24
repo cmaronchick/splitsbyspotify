@@ -58,7 +58,7 @@ const DistancePaceCalculator = (props) => {
             labelId={`distance-label`}
             value={props.selectedDistance ? props.selectedDistance : 'Select'}
             onChange={handleSelectDistance}>
-                <MenuItem value={'Select'}>Select</MenuItem>
+                <MenuItem value={'Select'}>Select Distance</MenuItem>
                 {Object.keys(distanceSplits).map(distance => {
                     return (
                         <MenuItem key={distance} value={distanceSplits[distance]}>{distance}</MenuItem>
@@ -70,7 +70,7 @@ const DistancePaceCalculator = (props) => {
             <TextField id="pace" value={splitsObj.targetPace} label="Pace (min/mile)" name="targetPace" onChange={(event) => handleTextInput(event)}/>
         </FormControl>
         </Container>
-            <Button onClick={() => handleCalculateButtonClick()} color="primary" variant="outlined">
+            <Button disabled={(!splitsObj.selectedDistance || splitsObj.selectedDistance === 'Select') || !splitsObj.targetPace} onClick={() => handleCalculateButtonClick()} color="primary" variant="outlined">
                 Calculate!
             </Button>
         </div>

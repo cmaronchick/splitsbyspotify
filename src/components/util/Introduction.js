@@ -32,8 +32,12 @@ const Introduction = props => {
             </Typography>
 
             <div className={`${classes.textField} ${classes.introText} introText`}>
-            <Typography variant="h5">
-            </Typography>
+            <div className="introBox">
+                <Typography variant="h5">
+                    Ever wanted to know what song should be playing when you hit a certain mile marker? Then <span className="bold-text">Splits By Spotify</span> is the app for you.
+                </Typography>
+            </div>
+            <div>
                 <List>
                     <ListItem>
                         <ListItemIcon>
@@ -55,7 +59,7 @@ const Introduction = props => {
                         </ListItemIcon>
                         <ListItemText>
                             <Typography variant="body1">
-                                Add your Spotify playlists to Your Playlists
+                                Add your Spotify playlists to Your Splits Playlists
                             </Typography>
                         </ListItemText>
                     </ListItem>
@@ -67,7 +71,7 @@ const Introduction = props => {
                         </ListItemIcon>
                         <ListItemText>
                             <Typography variant="body1">
-                                Set your target distance and pace to see which song is playing at each mile marker
+                                Select your distance and target pace to see which song is playing at each mile marker
                             </Typography>
                         </ListItemText>
                     </ListItem>
@@ -82,6 +86,7 @@ const Introduction = props => {
                 )}
             </Button>
             </div>
+        </div>
         </Fragment>
     )
 }

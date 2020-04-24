@@ -13,6 +13,8 @@ import CardContent from '@material-ui/core/CardContent'
 import CircularProgress from '@material-ui/core/CircularProgress'
 import NavigateBefore from '@material-ui/icons/NavigateBefore'
 
+import SpotifyImage from '../images/Spotify_Icon_RGB_Green.png'
+
 import DistancePaceCalculator from '../components/splits/DistancePaceCalculator'
 import Splits from '../components/splits/Splits'
 import Tracks from '../components/playlists/Tracks'
@@ -49,10 +51,8 @@ const Playlist = (props) => {
 
     const { playlistName, likeCount, commentCount, comments, firebasePlaylistId, spotifyPlaylistId } = playlistObj
     const tracks = playlistObj ? playlistObj.tracks : []
-    if (spotifyPlaylistId && !playlistObj && !playlistLoading) {
-        console.log('spotifyUser', spotifyUser)
-        props.getSinglePlaylistFromSpotify({id: spotifyPlaylistId, href:null})
-    }
+    
+    
 
     const handleShowCommentsDialog = () => {
         props.toggleCommentsDialog(props.showCommentsDialog)
@@ -61,12 +61,19 @@ const Playlist = (props) => {
     return authenticated ? ((
         <Grid container spacing={2}> 
                 <Grid item xs={12}>
-                    <Typography variant="h3">
+                    <div className={classes.playlistHeader}>
                         <Link className={classes.link} to="/">
                             <NavigateBefore style={{fontSize: '3rem'}} color="inherit"/>
                         </Link>
-                        Playlist: {playlistObj.name}
+                    <Typography variant="h4">
+                        {playlistObj.name}
                     </Typography>
+                        {playlistObj.external_urls && playlistObj.external_urls.spotify && (
+                            <a href={playlistObj.external_urls.spotify} rel="noopener noreferrer" target="_blank">
+                            <img src={SpotifyImage} alt="Open in Spotify" className={classes.spotifyIcon}/>
+                            </a>
+                        )}
+                    </div>
                     <Card>
                         <DistancePaceCalculator
                         selectedDistance={selectedDistance}
@@ -127,6 +134,7 @@ const mapActionsToProps = {
     setSelectedDistance,
     setTargetPace,
     calculateSplits,
+    getMyPlaylist,
     getSinglePlaylistFromSpotify,
     likePlaylist,
     unlikePlaylist,

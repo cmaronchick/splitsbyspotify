@@ -47,5 +47,6 @@
       "last 1 safari version"
     ]
   },
+  "homepage": "https://splitsbyspotify.firebaseapp.com",
   "proxy": "https://us-central1-splitsbyspotify.cloudfunctions.net/api"
 }

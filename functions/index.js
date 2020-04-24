@@ -73,6 +73,7 @@ exports.deleteNotificationOnUnlike = functions.region('us-central1').firestore.d
     })
 exports.createNotificationOnLike = functions.region('us-central1').firestore.document('likes/{id}')
     .onCreate((snapshot) => {
+        console.log('snapshot.data().firebasePlaylistId', snapshot.data())
         return db.doc(`/playlists/${snapshot.data().firebasePlaylistId}`)
         .get()
         .then(doc => {
@@ -115,13 +116,10 @@ exports.createNotificationsOnFollow = functions.region('us-central1').firestore.
     .onUpdate((change) => {
         console.log(change.before.data())
         console.log(change.after.data())
-        if (Object.keys(change.before.data().followers).length < Object.keys(change.after.data().followers).length) {
-            console.log('change.after.data()', change.after.data())
-            console.log('change.before.data()', change.before.data())
-            console.log('playlist has changed')
+        if (!change.before.data().firebaseFollowers || (Object.keys(change.before.data().firebaseFollowers).length < Object.keys(change.after.data().firebaseFollowers).length)) {
             // Filter only new users
-            let oldFollowers = Object.keys(change.before.data().followers)
-            let newFollowers = Object.keys(change.after.data().followers)
+            let oldFollowers = Object.keys(change.before.data().firebaseFollowers)
+            let newFollowers = Object.keys(change.after.data().firebaseFollowers)
             console.log('oldFollowers, newFollowers', oldFollowers, newFollowers)
             let newFollowerKeys = newFollowers.filter(key => {
                 return !oldFollowers[key]

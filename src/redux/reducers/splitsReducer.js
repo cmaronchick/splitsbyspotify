@@ -2,13 +2,15 @@ import {
     SET_SPLITS,
     SET_TARGET_PACE,
     SET_SELECTED_DISTANCE,
+    SET_SELECTED_MEASUREMENT,
     SET_ERRORS,
     CLEAR_ERRORS } from '../types'
 
 const initialState = {
     splits: [],
     targetPace: '',
-    selectedDistance: 0
+    selectedDistance: 0,
+    selectedMeasurement: localStorage.selectedMeasurement ? localStorage.selectedMeasurement : 'mi'
 }
 
 export default function(state = initialState, action) {
@@ -28,6 +30,11 @@ export default function(state = initialState, action) {
             return {
                 ...state,
                 selectedDistance: action.payload
+            }
+        case SET_SELECTED_MEASUREMENT:
+            return {
+                ...state,
+                selectedMeasurement: action.payload
             }
         default:
             return {

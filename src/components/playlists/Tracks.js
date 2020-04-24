@@ -99,9 +99,6 @@ const Tracks = props => {
     const targetPaceSec = parseInt(targetPace.split(':')[1])
     const targetPace_ms = ((targetPaceMin*60) + targetPaceSec) * 1000
     let splitTop = 0;
-    if (splits && splits.length > 0) {
-        console.log('parseInt(splits[splits.length-1].split(\':\')[0]) + parseInt(splits[splits.length-1].split(\':\')[1])', parseInt(splits[splits.length-1].split(':')[0]), parseInt(splits[splits.length-1].split(':')[1]))
-    }
     const finishTop = splits && splits.length > 0 ? ((parseInt(splits[splits.length-1].split(':')[0])*6) + parseInt(splits[splits.length-1].split(':')[1])) : 0
 
     return (
@@ -133,7 +130,7 @@ const Tracks = props => {
             let splitMin = parseInt(split.split(':')[0])*6
             let splitSec = parseInt(split.split(':')[1])
             splitTop = splitMin + splitSec
-            return <Box style={{top: splitTop, display: splitTop > 0 ? 'block' : 'none'}} className="splitMarker"></Box>
+            return <Box key={splitTop} style={{top: splitTop, display: splitTop > 0 ? 'block' : 'none'}} className="splitMarker"></Box>
         })}
         <Box style={{top: finishTop, display: finishTop > 0 ? 'block' : 'none'}} className="finish"></Box>
         </div>

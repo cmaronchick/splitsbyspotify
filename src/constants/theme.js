@@ -126,6 +126,10 @@ export default {
     followButton: {
       color: '#fff'
     },
+    selectDistanceForm: {
+      display: 'flex',
+      flexDirection: 'column'
+    },
     split: {
       display: 'flex',
       flexDirection: 'row',

@@ -47,7 +47,7 @@ const Comments = (props) => {
         props.onClose(props.showCommentsDialog, props.firebasePlaylistId)
     }
 
-    const { open, playlistName, spotifyPlaylistId, firebasePlaylistId, classes, user, playlistLoading } = props
+    const { open, playlist: {playlistName, spotifyPlaylistId, firebasePlaylistId}, classes, user, playlistLoading } = props
     const {comments} = props.playlist
         return (
         <Dialog open={open}>

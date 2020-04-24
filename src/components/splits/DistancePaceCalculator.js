@@ -15,11 +15,12 @@ import Typography from '@material-ui/core/Typography'
 
 import distanceSplits from '../../constants/distanceSplits'
 
-import { setTargetPace, setSelectedDistance, calculateSplits } from '../../redux/actions/splitsActions'
+import { setTargetPace, setSelectedDistance, setSelectedMeasurement, calculateSplits } from '../../redux/actions/splitsActions'
 
 import { connect } from 'react-redux'
 
-const styles = {
+const styles = (theme) => ({
+    ...theme.spreadThis,
     formDiv: {
         display: 'flex',
         flexDirection: 'column',
@@ -35,13 +36,17 @@ const styles = {
     formControl: {
         minWidth: 120,
     },
-}
+})
 
 const DistancePaceCalculator = (props) => {
     const { selectedDistance, targetPace, classes, splitsObj } = props
+    const {selectedMeasurement} = props.splitsObj
 
     const handleSelectDistance = (event) => {
         props.setSelectedDistance(event.target.value)
+    }
+    const handleSelectMeasurement = (event) => {
+        props.setSelectedMeasurement(event.target.value)
     }
     const handleTextInput = (event) => {
         props.setTargetPace(event.target.value)
@@ -49,25 +54,44 @@ const DistancePaceCalculator = (props) => {
     const handleCalculateButtonClick = () => {
         props.calculateSplits(splitsObj.selectedDistance, splitsObj.targetPace)
     }
+    const splitChoices = () => {
+        for (var i=1; i < 51; i++) {
+            console.log('i', i)
+            return (
+                <MenuItem key={i} value={i}>{i}</MenuItem>
+            )
+        }
+    }
     return (
         <div className={classes.formDiv}>
         <Container className={classes.form}>
+        <div className={classes.selectDistanceForm}>
+            <FormControl className={classes.formControl}>
+            <InputLabel id="distance-select-label">Distance</InputLabel>
+            <Select
+                labelId={`distance-label`}
+                value={props.selectedDistance ? props.selectedDistance : 'Select'}
+                onChange={handleSelectDistance}>
+                    <MenuItem value={'Select'}>Select Distance</MenuItem>
+                    {Object.keys(distanceSplits[selectedMeasurement]).map(distance => {
+                        return (
+                            <MenuItem key={distance} value={distanceSplits[selectedMeasurement][distance]}>{distance}</MenuItem>
+                        )
+                    })}
+                    {[...Array(50)].map((x, i) => <MenuItem key={`selectedMeasurement${i+1}`} value={i+1}>{i+1}</MenuItem>)}
+            </Select>
+            </FormControl>
+            <FormControl className={classes.formControl}>
+            <Select
+                value={selectedMeasurement ? selectedMeasurement : 'mi'}
+                onChange={handleSelectMeasurement}>
+                    <MenuItem value={'mi'}>mi</MenuItem>
+                    <MenuItem value={'km'}>km</MenuItem>
+                </Select>
+            </FormControl>
+        </div>
         <FormControl className={classes.formControl}>
-        <InputLabel id="distance-select-label">Distance</InputLabel>
-        <Select
-            labelId={`distance-label`}
-            value={props.selectedDistance ? props.selectedDistance : 'Select'}
-            onChange={handleSelectDistance}>
-                <MenuItem value={'Select'}>Select Distance</MenuItem>
-                {Object.keys(distanceSplits).map(distance => {
-                    return (
-                        <MenuItem key={distance} value={distanceSplits[distance]}>{distance}</MenuItem>
-                    )
-                })}
-        </Select>
-        </FormControl>
-        <FormControl className={classes.formControl}>
-            <TextField id="pace" value={splitsObj.targetPace} label="Pace (min/mile)" name="targetPace" onChange={(event) => handleTextInput(event)}/>
+            <TextField id="pace" value={splitsObj.targetPace} label={`Pace (min/${selectedMeasurement})`} name="targetPace" onChange={(event) => handleTextInput(event)}/>
         </FormControl>
         </Container>
             <Button disabled={(!splitsObj.selectedDistance || splitsObj.selectedDistance === 'Select') || !splitsObj.targetPace} onClick={() => handleCalculateButtonClick()} color="primary" variant="outlined">
@@ -83,6 +107,7 @@ const mapStateToProps = (state) => ({
 
 const mapActionsToProps = {
     setSelectedDistance,
+    setSelectedMeasurement,
     setTargetPace,
     calculateSplits
 }

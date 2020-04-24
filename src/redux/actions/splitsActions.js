@@ -1,4 +1,4 @@
-import { SET_SPLITS, SET_TARGET_PACE, SET_SELECTED_DISTANCE } from '../types'
+import { SET_SPLITS, SET_TARGET_PACE, SET_SELECTED_DISTANCE, SET_SELECTED_MEASUREMENT } from '../types'
 import firebase from '../../constants/firebase'
 
 export const calculateSplits = (selectedDistance, targetPace) => (dispatch) => {
@@ -70,5 +70,13 @@ export const setSelectedDistance = (selectedDistance) => (dispatch) => {
     dispatch({
         type: SET_SELECTED_DISTANCE,
         payload: selectedDistance
+    })
+}
+
+export const setSelectedMeasurement = (selectedMeasurement) => (dispatch) => {
+  localStorage.selectedMeasurement = selectedMeasurement
+    dispatch({
+        type: SET_SELECTED_MEASUREMENT,
+        payload: selectedMeasurement
     })
 }

@@ -25,7 +25,7 @@ const Splits = props => {
             {splits.map((split, index) => {
                 return (
                     // <Grid style={{height: targetPace_ms / 10000}} item key={split} className={classes.split}>
-                    <Box component="div" style={{height: targetPace_ms / 10000}} bgcolor="secondary.dark" key={split} className={classes.split}>
+                    <Box component="div" style={{height: parseInt(targetPace_ms) ? (parseInt(targetPace_ms) / 10000) : 0}} bgcolor="secondary.dark" key={split} className={classes.split}>
                         <Typography variant="body1">
                             {split}
                         </Typography>

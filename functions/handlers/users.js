@@ -109,14 +109,24 @@ const login = (req, res) => {
 }
 
 createFirebaseAccount = (req, res) => {
-    const {spotifyID, display_name, photoURL, email, accessToken} = req.body
-    console.log({spotifyID, display_name, photoURL, email, accessToken})
+    const {spotifyID, display_name, email, accessToken} = req.body
+    console.log({spotifyID, display_name, email, accessToken})
     // The UID we'll assign to the user.
     const uid = `spotify:${spotifyID}`;
   
     // Save the access token to the Firebase Realtime Database.
     const databaseTask = admin.database().ref(`/spotifyAccessToken/${uid}`).set(accessToken);
-  
+    let photoURL = req.body.photoURL === '' || !req.body.photoURL ? `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/blank-profile-picture.png?alt=media` : req.body.photoURL
+    // const userImage = 'blank-profile-picture.png';
+    // token = IdToken;
+    // const userCredentials = {
+    //     spotifyUser: newUser.spotifyUser,
+    //     display_name: `${firstname} ${lastname}`,
+    //     email: newUser.email,
+    //     createdAt: new Date().toISOString(),
+    //     photoURL: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${userImage}?alt=media`,
+    //     userId: user.uid
+    // }
     // Create or update the user account.
     const userCreationTask = admin.auth().updateUser(uid, {
         displayName: display_name,
@@ -171,7 +181,7 @@ createFirebaseAccount = (req, res) => {
         return admin.auth().createCustomToken(uid);
     })
     .then(data => {
-        console.log('data', data)
+        //console.log('data', data)
         return admin.auth().createCustomToken(uid)
     })
     .then(token => {
@@ -250,6 +260,7 @@ const getAuthenticatedUser = (req, res, next) => {
                     })
                 })
             }
+            console.log('req.user.spotifyUser', req.user.spotifyUser)
             return db.collection('likes')
                 .where('spotifyUser','==',req.user.spotifyUser)
                 .orderBy('likedAt', 'desc')
@@ -260,6 +271,7 @@ const getAuthenticatedUser = (req, res, next) => {
             if (likes && likes.docs && likes.docs.length > 0) {
                 likes.docs.forEach(likesObj => {
                     const like = likesObj.data()
+                    console.log('like', like)
                     userData.likes.push({likeId: like.id, ...like})
                 })
             }

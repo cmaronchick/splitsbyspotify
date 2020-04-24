@@ -50,7 +50,6 @@ const styles = (theme) => ({
 const Playlists = props => {
     const playlists = props.allPlaylists
     const { classes, spotifyUser, FBUser } = props
-    console.log('spotifyUser, FBUser', spotifyUser, FBUser)
     return (
     <GridList cellHeight={180} className={classes.gridList} cols={(window.innerWidth < 600) ? 1 : (window.innerWidth < 800) ? 2 : 3}>
         <GridListTile key="Subheader" cols={(window.innerWidth < 600) ? 1 : (window.innerWidth < 800) ? 2 : 3} style={{ height: 'auto' }}>
@@ -69,7 +68,7 @@ const Playlists = props => {
                 <GridListTileBar
                 title={<Link to={`/playlist/${firebasePlaylistId}`} className={classes.link}>{playlistName}</Link>}
                 subtitle={<span>by: {playlist.spotifyUser}</span>}
-                actionIcon={spotifyUser && (!playlist.followers || !playlist.followers[spotifyUser.id] ? (
+                actionIcon={spotifyUser && (!playlist.firebaseFollowers || !playlist.firebaseFollowers[spotifyUser.id] ? (
                     <MyButton tip={`Add ${playlistName} to My Playlists`} onClick={() => props.followPlaylist(FBUser, playlist)}
                     tipPlacement='bottom' btnClassName={classes.followButton}>
                         <AddCircle />

@@ -7,7 +7,7 @@ import ky from 'ky/umd'
 import {Provider} from 'react-redux'
 import store from './redux/store'
 
-import { login, logout, refreshTokens } from './redux/actions/userActions'
+import { login, logout, refreshTokens, updateTokens } from './redux/actions/userActions'
 import { getAllPlaylists,
   getMyPlaylists,
   getMyPlaylist, } from './redux/actions/spotifyActions'
@@ -51,7 +51,14 @@ if (FBIDToken && spotifyAccessToken) {
     store.dispatch(refreshTokens(spotifyRefreshToken));
   } else {
     console.log('old token', decodedToken.exp * 1000 > Date.now())
-    store.dispatch(logout())
+    if (spotifyRefreshToken) {
+      //const decodedRefreshToken = jwtDecode(spotifyRefreshToken);
+      store.dispatch(updateTokens(spotifyRefreshToken))
+      //if (decodedRefreshToken.exp * 1000 > Date.now()) {
+
+    } else {
+      store.dispatch(logout())
+    }
   }
 } else {
   if (tourCompleted !== 'true') {
@@ -85,6 +92,8 @@ class App extends Component {
   }
 
   handleSpotifyLogin = () => {
+
+    firebase.analytics().logEvent('login', {step: 1, name: 'Login'})
     let state = generateRandomString(16)
     localStorage[stateKey] = state
     let currentOrigin = window.location.origin
@@ -93,6 +102,7 @@ class App extends Component {
   }
   handleSpotifyLogout = () => {
     let logoutResponse = store.dispatch(logout());
+    firebase.analytics().logEvent('logout')
     if (logoutResponse) {
       this.setState({
         spotifyUser: null,
@@ -108,6 +118,7 @@ class App extends Component {
     store.dispatch(refreshTokens(refresh_token))
   }
   handleSpotifyCallback = async (location, access_token) => {
+    firebase.analytics().logEvent('login', { step: 2, name: 'spotifyCallback' })
     store.dispatch({
       type: LOADING_USER
     })
@@ -131,21 +142,21 @@ class App extends Component {
     let FBIDToken
     try {
       FBIDToken = await firebase.auth().currentUser.getIdToken()
+      store.dispatch(getMyPlaylists(FBIDToken))
       console.log('FBIDToken', FBIDToken)
     } catch(getTokenError) {
       console.log('getTokenError120', getTokenError)
     }
-    try {
-      store.dispatch(getMyPlaylists(FBIDToken))
-    } catch (getMyUserPlaylistsError) {
-      console.log('getMyUserPlaylistsError', getMyUserPlaylistsError)
-    }
-
   }
 
-  handleGetMyPlaylist = (firebasePlaylistId) => {
+  handleGetMyPlaylist = async (firebasePlaylistId) => {
     console.log('handleGetMyPlaylist firebasePlaylistId', firebasePlaylistId)
-    store.dispatch(getMyPlaylist(firebasePlaylistId))
+    try {
+      let FBIDToken = await firebase.auth().currentUser.getIdToken()
+      store.dispatch(getMyPlaylist(firebasePlaylistId))
+    } catch (getMyPlaylistError) {
+      console.log('getMyPlaylistError', getMyPlaylistError)
+    }
   }
 
   checkSpotifyPlaylistInMyPlaylists = () => {
@@ -180,8 +191,9 @@ class App extends Component {
       console.log('starting spotify login', window.location)
       this.handleSpotifyCallback(window.location)
     }
-    if (window.location.pathname.indexOf('/playlist') > -1 && window.location.pathname.split('/').length > 2) {
+    if (window.location.pathname.indexOf('/Playlist') > -1 && window.location.pathname.split('/').length > 2) {
       let firebasePlaylistId = window.location.pathname.split('/')[2]
+      this.handleGetMyPlaylist(firebasePlaylistId)
     }
     store.dispatch(getAllPlaylists())
   }

@@ -127,14 +127,11 @@ export default {
       color: '#fff'
     },
     split: {
-      borderWidth: 1,
-      borderColor: '#4f98ca',
-      borderStyle: 'solid',
       display: 'flex',
       flexDirection: 'row',
       justifyContent: 'flex-end',
       alignItems: 'center',
-      paddingRight: 10,
+      padding: '0 5px',
       borderRightWidth: 0
     },
     card: {
@@ -142,6 +139,12 @@ export default {
       paddingHorizontal: 5,
       marginBottom: 20,
       flexDirection: 'column'
+    },
+    playlistHeader: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between'
     },
     playlistImage: {
         minWidth: 100,
@@ -151,9 +154,14 @@ export default {
         left: 0,
         flex: 1
     },
+    spotifyIcon: {
+      width: 30,
+      height: 30,
+      marginRight: 5
+    },
     content: {
         display: 'flex',
-        flexDirection: 'row',
+        flexDirection: 'column',
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: 10,
@@ -161,11 +169,10 @@ export default {
     },
     details: {
       display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
+      flexDirection: 'row',
+      justifyContent: 'space-evenly',
       alignItems: 'flex-start',
-      padding: 10,
-      flex: 2
+      width: '100%'
     },
     actions: {
         display: 'flex',

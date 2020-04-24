@@ -142,90 +142,87 @@ class Home extends Component {
     render() {
         const { classes, user } = this.props
         const { selectedTab } = this.state
-        return window.innerWidth < 800 ? (
-            <div className={classes.root}>
-                <AppBar position="static">
-                <Tabs
-                    value={this.state.selectedTab}
-                    onChange={this.handleChange}
-                    aria-label="simple tabs example"
-                    indicatorColor="secondary"
-                    textColor="inherit">
+        return (
+            <Fragment>
+                {user.authenticated ? (
+                    window.innerWidth < 800 ? (
+                    <div className={classes.root}>
+                        <AppBar position="static">
+                        <Tabs
+                            value={this.state.selectedTab}
+                            onChange={this.handleChange}
+                            aria-label="simple tabs example"
+                            indicatorColor="secondary"
+                            textColor="inherit">
 
-                    <Tab label="My Spotify Playlists" {...this.a11yProps(0)} />
-                    <Tab label="My Splits Playlists" {...this.a11yProps(1)} />
-                </Tabs>
-                </AppBar>
-                <TabPanel value={selectedTab} index={0}>
-                    <div className="playlist-container">
-                        {!this.props.myPlaylistsFromSpotifyLoading ? (
-                            this.playlistsMarkup(this.props.myPlaylistsFromSpotify)
-                        ) : (
-                            <PlaylistSkeleton />
-                        )}
+                            <Tab label="My Spotify Playlists" {...this.a11yProps(0)} />
+                            <Tab label="My Splits Playlists" {...this.a11yProps(1)} />
+                        </Tabs>
+                        </AppBar>
+                        <TabPanel value={selectedTab} index={0}>
+                            <div className="playlist-container">
+                                {!this.props.myPlaylistsFromSpotifyLoading ? (
+                                    this.playlistsMarkup(this.props.myPlaylistsFromSpotify)
+                                ) : (
+                                    <PlaylistSkeleton />
+                                )}
 
+                            </div>
+                        </TabPanel>
+                        <TabPanel value={selectedTab} index={1}>
+                            <div className="playlist-container">
+                                {!this.props.myPlaylistsLoading ? (
+                                    this.playlistsMarkup(this.props.myPlaylists)
+                                ) : (
+                                    <PlaylistSkeleton />
+                                )}
+                            </div>
+                        </TabPanel>
                     </div>
-                </TabPanel>
-                <TabPanel value={selectedTab} index={1}>
-                    <div className="playlist-container">
-                        {!this.props.myPlaylistsLoading ? (
-                            this.playlistsMarkup(this.props.myPlaylists)
-                        ) : (
-                            <PlaylistSkeleton />
-                        )}
-                    </div>
-                </TabPanel>
-            </div>
-        ) : (
-            <Grid container spacing={2} className={classes.container}>
-                {user.tourCompleted ? (
-                    <Fragment>
-                    <Grid item sm={6} xs={12}>
-                        <div className="playlist-container">
-                        <Typography variant="h4" value="My Spotify Playlists">
-                        My Spotify Playlists</Typography>
-                            {!this.props.myPlaylistsFromSpotifyLoading ? (
-                                this.playlistsMarkup(this.props.myPlaylistsFromSpotify)
-                            ) : (
-                                <PlaylistSkeleton />
-                            )}
+                    ) : (
+                    <Grid container spacing={2} className={classes.container}>
+                            <Fragment>
+                            <Grid item sm={6} xs={12}>
+                                <div className="playlist-container">
+                                <Typography variant="h4" value="My Spotify Playlists">
+                                My Spotify Playlists</Typography>
+                                    {!this.props.myPlaylistsFromSpotifyLoading ? (
+                                        this.playlistsMarkup(this.props.myPlaylistsFromSpotify)
+                                    ) : (
+                                        <PlaylistSkeleton />
+                                    )}
 
-                        </div>
+                                </div>
+                            </Grid>
+                            <Grid item sm={6} xs={12}>
+                                <div className="playlist-container">
+                                <Typography variant="h4" value="My Workout Playlists">My Splits Playlists</Typography>
+
+                                    {!this.props.myPlaylistsLoading ? (
+                                        this.playlistsMarkup(this.props.myPlaylists)
+                                    ) : (
+                                        <PlaylistSkeleton />
+                                    )}
+                                </div>
+                            </Grid>
+                        </Fragment>
                     </Grid>
-                    <Grid item sm={6} xs={12}>
-                        <div className="playlist-container">
-                        <Typography variant="h4" value="My Workout Playlists">My Splits Playlists</Typography>
-
-                            {!this.props.myPlaylistsLoading ? (
-                                this.playlistsMarkup(this.props.myPlaylists)
-                            ) : (
-                                <PlaylistSkeleton />
-                            )}
-                        </div>
-                    </Grid>
-
-                    {/* <ConfirmDeleteDialog
-                    open={this.props.showConfirmRemoveDialog}
-                    playlistName={this.props.removePlaylistName}
-                    spotifyPlaylistId={this.props.removeSpotifyPlaylistId}
-                    firebasePlaylistId={this.props.removeFirebasePlaylistId}
-                    handleConfirmDeletePlaylist={this.props.removeFromMyPlaylists}
-                    onClose={this.props.cancelRemoveFromMyPlaylists}/> */}
-                    {/* <Comments
-                        open={this.props.showCommentsDialog}
-                        playlistName={this.state.commentsPlaylistName}
-                        spotifyPlaylistId={this.state.commentsSpotifyPlaylistId}
-                        firebasePlaylistId={this.state.commentsPlaylistFirebasePlaylistId}
-                        comments={this.state.commentsPlaylistCommentsArray}
-                        onClose={this.props.toggleCommentsDialog}
-                        user={this.props.user} /> */}
-                </Fragment>
+                    )
                 ) : (
                     <Introduction handleSpotifyLogin={this.props.handleSpotifyLogin} />
                 )}
-            </Grid>
-        )
-    }
+
+
+                <ConfirmDeleteDialog
+                open={this.props.showConfirmRemoveDialog}
+                handleConfirmDeletePlaylist={this.props.removeFromMyPlaylists}
+                onClose={this.props.cancelRemoveFromMyPlaylists}/>
+            <Comments
+                open={this.props.showCommentsDialog}
+                onClose={this.props.toggleCommentsDialog}
+                user={this.props.user} />
+        </Fragment>
+    )}
 }
 
 Home.propTypes = {

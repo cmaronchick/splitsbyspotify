@@ -54,6 +54,31 @@ a{
   z-index: 9999;
 }
 
+.splitMarker {
+  border-top-width: 1px;
+  border-top-style: dashed;
+  border-top-color: #231f20;
+  position: absolute;
+  width: 100%;
+  z-index: 9999;
+  opacity: 0.5;
+}
+
+.introBox {
+  box-shadow: 0 4px 6px 0 hsla(0, 0%, 0%, 0.2);
+  margin-bottom: 10px;
+  border-bottom-color: #50d890;
+  border-bottom-width: 2px;
+  border-bottom-style: solid;
+}
+.introText{
+  box-shadow: 0 4px 6px 0 hsla(0, 0%, 0%, 0.2);
+}
+
+.bold-text{
+  font-weight: 700;
+}
+
 @media(max-width: 768px) {
   .introText {
     padding: 0 20px;

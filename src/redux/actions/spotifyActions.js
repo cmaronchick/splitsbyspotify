@@ -171,6 +171,7 @@ export const getMyPlaylists = (FBIDToken) => async (dispatch) => {
 export const getMyPlaylist = (firebasePlaylistId) => async (dispatch) => {
     dispatch({ type: LOADING_PLAYLIST })
     try {
+        // let FBUser = await firebase.auth().signInWithCustomToken(store.getState().user.FBIDToken)
         let FBIDToken = await firebase.auth().currentUser.getIdToken()
         let getPlaylistResponse = await api.get(`playlists/${firebasePlaylistId}`, {
                 headers: {
@@ -190,6 +191,7 @@ export const getMyPlaylist = (firebasePlaylistId) => async (dispatch) => {
             ...playlist,
             ...spotifyPlaylistResponse
         }
+        firebase.analytics().logEvent('getPlaylist', { firebasePlaylistId })
         dispatch({
             type: SET_PLAYLIST,
             payload: playlist

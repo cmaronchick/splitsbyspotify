@@ -1,6 +1,8 @@
 import { SET_SPLITS, SET_TARGET_PACE, SET_SELECTED_DISTANCE } from '../types'
+import firebase from '../../constants/firebase'
 
 export const calculateSplits = (selectedDistance, targetPace) => (dispatch) => {
+    firebase.analytics().logEvent( 'splits', { action: 'calculated', selectedDistance, targetPace})
 
     if (targetPace.indexOf(':') === -1) {
       targetPace = `${targetPace}:00`

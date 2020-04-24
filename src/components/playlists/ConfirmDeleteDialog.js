@@ -32,7 +32,6 @@ const styles = {
 
 const ConfirmDeleteDialog = (props) => {
   const { classes, onClose, spotify, open } = props;
-  console.log('spotify', spotify)
   const { removeSpotifyPlaylistId, removeFirebasePlaylistId, removePlaylistName } = spotify
 
 
@@ -47,7 +46,7 @@ const ConfirmDeleteDialog = (props) => {
 
   return (
     <Dialog onClose={handleClose} aria-labelledby="simple-dialog-title" open={open}>
-        <DialogTitle id="simple-dialog-title">Confirm Delete</DialogTitle>
+        <DialogTitle id="simple-dialog-title">Confirm {removePlaylistName} Delete</DialogTitle>
         <DialogContent>
             <DialogContentText id="confirm-delete-text">
                 Are you sure you want to delete this playlist?

@@ -60,7 +60,7 @@ const getPlaylist = (req, res, next) => {
         .doc(`/playlists/${firebasePlaylistId}`)
         .get()
         .then(doc => {
-            console.log(doc.exists)
+            //console.log(doc.exists)
             if (!doc.exists) {
                 throw new Error(JSON.stringify({ code: 404, message: 'No playlist found' }))
             }
@@ -90,7 +90,7 @@ const getPlaylist = (req, res, next) => {
 }
 
 const deletePlaylist = (req, res, next) => {
-    console.log('req.body', req.params)
+    //console.log('req.body', req.params)
     const { firebasePlaylistId } = req.params;
     const playlistDoc = db.doc(`/playlists/${firebasePlaylistId}`)
     const batch = db.batch();
@@ -111,7 +111,7 @@ const deletePlaylist = (req, res, next) => {
             return playlistDoc.delete()
         })
         .then(doc => {
-            console.log({doc})
+            //console.log({doc})
             if (doc) {
                 return res.status(200).json({message: 'Playlist deleted successfully'})
             } else {
@@ -127,7 +127,7 @@ const deletePlaylist = (req, res, next) => {
 }
 
 const commentOnPlaylist = (req, res) => {
-    console.log('req.body', req.body)
+    //console.log('req.body', req.body)
     const { body } = JSON.parse(req.body)
     const { firebasePlaylistId } = req.params
     const { spotifyUser, photoURL } = req.user
@@ -331,7 +331,7 @@ const addPlaylist = (req, res, next) => {
         .get()
     .then(playlistDocs => {
             if (playlistDocs.docs && playlistDocs.docs.length === 0) {
-                console.log('newPlaylist', newPlaylist)
+                //console.log('newPlaylist', newPlaylist)
                 return db
                     .collection('playlists')
                     .add(newPlaylist)
@@ -351,43 +351,52 @@ const addPlaylist = (req, res, next) => {
 }
 
 const updatePlaylist = (req, res, next) => {
-    console.log('req.body', req.body)
-    const playlist = {
+    const { firebasePlaylistId } = req.params
+    //console.log('req.body', req.body)
+    const updatedPlaylist = {
         spotifyPlaylistId: req.body.spotifyPlaylistId,
-        spotifyUser: req.user.spotifyUser,
         playlistName: req.body.playlistName,
         playlistImage: req.body.playlistImage,
         public: req.body.public ? req.body.public : false,
         collaborative: req.body.collaborative ? req.body.collaborative : false,
-        photoURL: req.user.photoURL,
-
+        photoURL: req.user.photoURL
     }
-    return db.collection(`playlists`)
-        .where('spotifyPlaylistId','==',req.body.spotifyPlaylistId)
+
+    if (req.body.avgBPM) {
+        updatedPlaylist.avgBPM = parseFloat(req.body.avgBPM)
+    }
+    if (req.body.minBPM) {
+        updatedPlaylist.minBPM = parseFloat(req.body.minBPM)
+    }
+    if (req.body.maxBPM) {
+        updatedPlaylist.maxBPM = parseFloat(req.body.maxBPM)
+    }
+
+    return db.doc(`/playlists/${firebasePlaylistId}`)
         .get()
-    .then(playlistDocs => {
-            if (playlistDocs.docs && playlistDocs.docs.length > 0) {
+    .then(playlistDoc => {
+            if (playlistDoc.exists) {
                 return db
-                    .collection('playlists')
-                    .update(playlist)
+                    .doc(`/playlists/${firebasePlaylistId}`)
+                    .update(updatedPlaylist)
             }
                 return res.status(404).json( { message: `Playlist not found`})
         })
         .then(doc => {
-            const resPlaylist = newPlaylist;
+            const resPlaylist = updatedPlaylist;
             resPlaylist.firebasePlaylistId = doc.id
             return res.json( { message: `document ${doc.id} created successfully`, playlist: resPlaylist})
         })
-        .catch(addPlaylistError => {
-            console.error(addPlaylistError)
+        .catch(updatePlaylistError => {
+            console.error(updatePlaylistError)
             return res.status(500).json({ error: 'something went wrong'})
         })
 }
 
 const followPlaylist = (req, res, next) => {
-    console.log('req.body', req.body)
+    //console.log('req.body', req.body)
     const bodyJSON = req.body.firebasePlaylistId ? { body: req.body } : JSON.parse(req.body)
-    console.log('bodyJSON', bodyJSON)
+    //console.log('bodyJSON', bodyJSON)
     const { spotifyPlaylistId, firebasePlaylistId, playlistName, playlistImage, collaborative } = bodyJSON.body
     const { spotifyUser } = req.user
     const playlist = {
@@ -399,7 +408,7 @@ const followPlaylist = (req, res, next) => {
         public: bodyJSON.body.public ? bodyJSON.body.public : false,
         collaborative: collaborative ? collaborative : false,
     }
-    console.log('playlist', playlist, firebasePlaylistId)
+    //console.log('playlist', playlist, firebasePlaylistId)
     return db.doc(`/playlists/${firebasePlaylistId}`)
         .get()
         .then(doc => {
@@ -424,7 +433,7 @@ const followPlaylist = (req, res, next) => {
             })
         })
         .then(() => {
-            console.log('spotifyUser', spotifyUser)
+            //console.log('spotifyUser', spotifyUser)
 
             return db.doc(`/users/${spotifyUser}`).get()
         })
@@ -454,7 +463,7 @@ const followPlaylist = (req, res, next) => {
 }
 
 const unfollowPlaylist = (req, res, next) => {
-    console.log('req.body', req.body)
+    //console.log('req.body', req.body)
     const bodyJSON = req.body.firebasePlaylistId ? { body: req.body } : JSON.parse(req.body)
     // const bodyJSON = {body: req.body}
     const { firebasePlaylistId } = bodyJSON.body
@@ -480,7 +489,7 @@ const unfollowPlaylist = (req, res, next) => {
             })
         })
         .then(() => {
-            console.log('spotifyUser', spotifyUser)
+            //console.log('spotifyUser', spotifyUser)
 
             return db.doc(`/users/${spotifyUser}`).get()
         })

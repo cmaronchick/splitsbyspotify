@@ -70,6 +70,7 @@ a{
   border-bottom-color: #50d890;
   border-bottom-width: 2px;
   border-bottom-style: solid;
+  padding: 0 20px;
 }
 .introText{
   box-shadow: 0 4px 6px 0 hsla(0, 0%, 0%, 0.2);
@@ -81,6 +82,10 @@ a{
 
 @media(max-width: 768px) {
   .introText {
+    padding: 0 20px;
+  }
+  .introBox {
+    margin: 0 -20px;
     padding: 0 20px;
   }
 }

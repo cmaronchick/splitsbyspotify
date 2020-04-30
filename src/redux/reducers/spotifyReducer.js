@@ -4,6 +4,7 @@ import {
     SET_PLAYLISTS_MY_FROM_SPOTIFY, 
     SET_PLAYLIST,
     UPDATE_PLAYLIST_FROM_SPOTIFY,
+    GET_PLAYLIST_AUDIO_FEATURES,
     ADD_TO_MY_PLAYLISTS,
     REMOVE_FROM_MY_PLAYLISTS,
     CONFIRM_REMOVE_FROM_MY_PLAYLISTS,
@@ -171,6 +172,13 @@ export default function(state = initialState, action) {
                 removeFirebasePlaylistId: null,
                 removePlaylistName: null,
                 showConfirmRemoveDialog: false
+            }
+
+        case GET_PLAYLIST_AUDIO_FEATURES:
+            console.log('action.payload.playlist', action.payload.playlist)
+            return {
+                ...state,
+                playlist: action.payload.playlist
             }
         case FOLLOW_PLAYLIST:
             const followedPlaylistFBUser = action.payload.FBUser

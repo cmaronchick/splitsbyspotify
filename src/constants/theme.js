@@ -67,7 +67,8 @@ export default {
       color: '#fff'
     },
     spotifyLoginButton: {
-      height: 40
+      height: 40,
+      marginBottom: 10
     },
     invisibleSeparator: {
       border: 'none',
@@ -143,6 +144,14 @@ export default {
       paddingHorizontal: 5,
       marginBottom: 20,
       flexDirection: 'column'
+    },
+    playlistLoading: {
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: '100%',
+      padding: 20
     },
     playlistHeader: {
       display: 'flex',

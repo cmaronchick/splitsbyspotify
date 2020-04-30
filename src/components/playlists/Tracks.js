@@ -24,8 +24,9 @@ const styles = {
         overflow: 'hidden',
         width: '100%',
         paddingLeft: 10,
+        paddingRight: 10,
         display: 'flex',
-        justifyContent: 'flex-start',
+        justifyContent: 'space-between',
         alignItems: 'center',
 
         // '&[data]:after': {
@@ -119,6 +120,9 @@ const Tracks = props => {
                         height: height
                     }} data={` - ${Math.floor((trackObj.track.duration_ms/1000)/60)}:${Math.round((trackObj.track.duration_ms/1000)%60) < 10 ? '0' : ''}${Math.round((trackObj.track.duration_ms/1000)%60)}`}>
                         <Typography variant="body2">{trackObj.track.name}</Typography>
+                        { trackObj.audioFeatures && (
+                            <Typography variant="body1">{`${Math.round(trackObj.audioFeatures.tempo)} BPM`}
+                            </Typography>)}
                     </Grid>
                 )
             })}

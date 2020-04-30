@@ -225,7 +225,7 @@ const getAuthenticatedUser = (req, res, next) => {
     let userData = {};
     return db.doc(`/users/${req.user.spotifyUser}`).get()
         .then(doc => {
-            console.log('res.statusCode 212', res.statusCode)
+            //console.log('res.statusCode 212', res.statusCode)
             if(doc.exists) {
                 userData.credentials = doc.data();
                 return db.collection('playlists')
@@ -260,7 +260,7 @@ const getAuthenticatedUser = (req, res, next) => {
                     })
                 })
             }
-            console.log('req.user.spotifyUser', req.user.spotifyUser)
+            //console.log('req.user.spotifyUser', req.user.spotifyUser)
             return db.collection('likes')
                 .where('spotifyUser','==',req.user.spotifyUser)
                 .orderBy('likedAt', 'desc')

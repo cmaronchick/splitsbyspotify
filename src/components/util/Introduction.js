@@ -47,7 +47,7 @@ const Introduction = props => {
                         </ListItemIcon>
                         <ListItemText>
                             <Typography variant="body1">
-                            Log In to Spotify to view your playlists.
+                            <strong>Log In to Spotify</strong> to view your playlists.
                             </Typography>
                         </ListItemText>
                     </ListItem>
@@ -59,7 +59,7 @@ const Introduction = props => {
                         </ListItemIcon>
                         <ListItemText>
                             <Typography variant="body1">
-                                Add your Spotify playlists to Your Splits Playlists
+                                <strong>Add your Spotify playlists</strong> to Your Splits Playlists
                             </Typography>
                         </ListItemText>
                     </ListItem>
@@ -71,7 +71,7 @@ const Introduction = props => {
                         </ListItemIcon>
                         <ListItemText>
                             <Typography variant="body1">
-                                Select your distance and target pace to see which song is playing at each mile marker
+                                Select your <strong>distance and target pace</strong> to see which song is playing at each mile marker
                             </Typography>
                         </ListItemText>
                     </ListItem>

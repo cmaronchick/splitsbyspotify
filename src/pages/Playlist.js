@@ -12,6 +12,8 @@ import CardMedia from '@material-ui/core/CardMedia'
 import CardContent from '@material-ui/core/CardContent'
 import CircularProgress from '@material-ui/core/CircularProgress'
 import NavigateBefore from '@material-ui/icons/NavigateBefore'
+import Button from '@material-ui/core/Button'
+import Box from '@material-ui/core/Box'
 
 import SpotifyImage from '../images/Spotify_Icon_RGB_Green.png'
 
@@ -24,6 +26,7 @@ import Introduction from '../components/util/Introduction'
 import PlaylistActions from '../components/playlists/PlaylistActions'
 import { getMyPlaylist,
     getSinglePlaylistFromSpotify,
+    getTrackAudioFeatures,
     likePlaylist,
     unlikePlaylist,
     toggleCommentsDialog } from '../redux/actions/spotifyActions'
@@ -52,11 +55,17 @@ const Playlist = (props) => {
     const { playlistName, likeCount, commentCount, comments, firebasePlaylistId, spotifyPlaylistId } = playlistObj
     const tracks = playlistObj ? playlistObj.tracks : []
     
-    
+    if (props.firebasePlaylistId && playlistObj.firebasePlaylistId && (props.firebasePlaylistId !== playlistObj.firebasePlaylistId)) {
+        if (!props.playlistLoading) {
+            props.getMyPlaylist(props.firebasePlaylistId)
+        }
+    }
+    if (props.firebasePlaylistId && !props.playlistObj.firebasePlaylistId && !props.playlistLoading && props.FBUser.credentials.userId) {
+        props.getMyPlaylist(props.firebasePlaylistId)
+    }
 
     const handleShowCommentsDialog = () => {
         props.toggleCommentsDialog(props.showCommentsDialog)
-
     }
     return authenticated ? ((
         <Grid container spacing={2}> 
@@ -92,10 +101,21 @@ const Playlist = (props) => {
                     </Grid>
                 )} */}
                 {playlistLoading ? (
-                    <CircularProgress />
+                    <Box className={classes.playlistLoading}>
+                        <CircularProgress />
+                    </Box>
                 ) : (
                     <Fragment>
                         <Grid item xs={12}>
+                            {/* <Button disabled={!props.user.spotifyAccessToken} onClick={() => props.getTrackAudioFeatures(props.user.spotifyAccessToken,props.playlistObj)}>
+                                Get Audio Analysis
+                            </Button> */}
+                            {playlistObj.avgBPM && (
+                                <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly'}}>
+                                    <div>Average BPM: {playlistObj.avgBPM.toFixed(2)}</div>
+                                    <div>Min: {Math.round(playlistObj.minBPM)}</div>
+                                    <div>Max: {Math.round(playlistObj.maxBPM)}</div>
+                                </div>)}
                             <PlaylistActions 
                             playlist={playlistObj} 
                             likePlaylist={props.likePlaylist} 
@@ -136,6 +156,7 @@ const mapActionsToProps = {
     calculateSplits,
     getMyPlaylist,
     getSinglePlaylistFromSpotify,
+    getTrackAudioFeatures,
     likePlaylist,
     unlikePlaylist,
     toggleCommentsDialog
@@ -148,7 +169,8 @@ const mapStateToProps = (state) => ({
     spotifyUser: state.user.spotifyUser,
     FBUser: state.user.FBUser,
     playlistLoading: state.spotify.playlistLoading,
-    splitsObj: state.splits
+    splitsObj: state.splits,
+    user: state.user
 })
 
 

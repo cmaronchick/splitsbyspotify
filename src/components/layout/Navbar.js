@@ -26,7 +26,7 @@ const Navbar = (props) => {
         <AppBar>
             <Toolbar className="nav-container">
                 <Button color="inherit" component={Link} to="/">My {window.innerWidth > 500 ? `Playlists` : `Lists`}</Button>
-
+                <Button color="inherit" component={Link} to="/Playlists">Browse {window.innerWidth > 500 ? `Playlists` : `All`}</Button>
                 {/* show Login button only if user is not authenticated */}
                 {!authenticated ? (
                     <Fragment>
@@ -42,7 +42,6 @@ const Navbar = (props) => {
                         <Button color="inherit" component={Link} to="/Profile">Profile</Button>
                     </Fragment>
                 )}
-                <Button color="inherit" component={Link} to="/Playlists">Browse {window.innerWidth > 500 ? `Playlists` : `All`}</Button>
             </Toolbar>
         </AppBar>
     )

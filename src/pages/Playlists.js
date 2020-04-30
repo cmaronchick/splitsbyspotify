@@ -42,8 +42,11 @@ const styles = (theme) => ({
     icon: {
       color: 'rgba(255, 255, 255, 0.54)',
     },
+    subTitle: {
+        backgroundColor: 'rgba(0,0,0,0.7)'
+    },
     link: {
-        color: theme.palette.primary.main
+        color: theme.palette.primary.main,
     }
 })
 
@@ -61,14 +64,16 @@ const Playlists = props => {
         </GridListTile>
         {Object.keys(playlists).map(playlistId => {
             const playlist = playlists[playlistId]
+            console.log('playlist', playlist)
             const { firebasePlaylistId, playlistImage, playlistName } = playlist
             return (
                 <GridListTile key={firebasePlaylistId}>
                 <img src={playlistImage} alt={playlistName} />
                 <GridListTileBar
-                title={<Link to={`/playlist/${firebasePlaylistId}`} className={classes.link}>{playlistName}</Link>}
+                title={<Link to={`/playlist/${firebasePlaylistId}`} className={classes.link}>{playlistName}{playlist.avgBPM && ` (${Math.round(playlist.avgBPM)} BPM)`}</Link>}
                 subtitle={<span>by: {playlist.spotifyUser}</span>}
-                actionIcon={spotifyUser && (!playlist.firebaseFollowers || !playlist.firebaseFollowers[spotifyUser.id] ? (
+                className={classes.subTitle}
+                actionIcon={spotifyUser && spotifyUser.id !== playlist.spotifyUser && (!playlist.firebaseFollowers || !playlist.firebaseFollowers[spotifyUser.id] ? (
                     <MyButton tip={`Add ${playlistName} to My Playlists`} onClick={() => props.followPlaylist(FBUser, playlist)}
                     tipPlacement='bottom' btnClassName={classes.followButton}>
                         <AddCircle />

@@ -221,6 +221,7 @@ class App extends Component {
                     <Profile handleSpotifyLogin={this.handleSpotifyLogin} />
                   } />
                   <Route path={['/playlist/:firebasePlaylistId', '/playlist']} render={({match}) => {
+                    console.log('match.params.firebasePlaylistId', match.params.firebasePlaylistId)
                     return <Playlist firebasePlaylistId={match.params.firebasePlaylistId}
                     // selectedDistance={this.state.selectedDistance}
                     // targetPace={this.state.targetPace}

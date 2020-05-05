@@ -61,7 +61,7 @@ const styles = {
         //     zIndex: 9998
         // },
         '&:hover': {
-            minHeight: '25px !important',
+            height: 'inherit !important',
             overflow: 'auto',
             backgroundColor: theme.palette.secondary.light,
             '-webkit-transition': 'ease-out 0.4s',

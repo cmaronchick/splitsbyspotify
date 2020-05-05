@@ -4,6 +4,8 @@ import withStyles from '@material-ui/core/styles/withStyles'
 import { Link } from 'react-router-dom'
 import dayjs from 'dayjs'
 
+import SpotifyImage from '../images/Spotify_Icon_RGB_Green.png'
+
 //MUI Stuff
 import Paper from '@material-ui/core/Paper'
 import Button from '@material-ui/core/Button'
@@ -37,8 +39,8 @@ const styles = (theme) => ({
         float: 'right',
     },
     spotifyLoginButton: {
-        margin: '0 auto'
-    }
+        margin: '0 auto',
+    },
 })
 
 
@@ -65,7 +67,7 @@ const Profile = (props) => {
     }
 
     const { photoURL, imageURL, stravaProfile, bio, location, createdAt } = FBUser.credentials ? FBUser.credentials : FBUser.user ? FBUser.user : { photoURL: null}
-    const { display_name, id } = spotifyUser
+    const { display_name, id, external_urls } = spotifyUser
     let profileMarkup = !loading ? (authenticated ? (
         <Paper className={classes.paper}>
             <div className={classes.profile}>
@@ -82,9 +84,14 @@ const Profile = (props) => {
                 </div>
                 <hr />
                 <div className='profile-details'>
-                    <MuiLink component={Link} to={`/users/${id}`} color="primary" variant="h5">
+                    <MuiLink component={Link} to={`/user/${id}`} color="primary" variant="h5">
                         @{id}
                     </MuiLink>
+                    {external_urls && external_urls.spotify && (
+                        <a href={external_urls.spotify} target="_blank" rel="noopener noreferrer" color="primary" variant="h5">
+                            <img src={SpotifyImage} alt="View on Spotify" className={classes.spotifyIcon} style={{marginLeft: 10}} />
+                        </a>
+                    )}
                     
                     {bio && <Typography variant="body2">{bio}</Typography>}
                     <hr />

@@ -28,6 +28,14 @@ const PlaylistActions = props => {
         props.unlikePlaylist(playlist.firebasePlaylistId)
     }
 
+    const handleFollowPlaylistOnSpotify = () => {
+        props.followPlaylistOnSpotify(playlist.spotifyPlaylistId)
+    }
+
+    const handleUnfollowPlaylistOnSpotify = () => {
+        props.unfollowPlaylistOnSpotify(playlist.spotifyPlaylistId)
+    }
+
     const handleShowCommentsDialog = () => {
         props.handleShowCommentsDialog()
     }

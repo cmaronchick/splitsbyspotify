@@ -20,6 +20,10 @@ import {
     UNLIKE_PLAYLIST,
     FOLLOW_PLAYLIST,
     UNFOLLOW_PLAYLIST,
+    FOLLOW_PLAYLIST_ON_SPOTIFY,
+    UNFOLLOW_PLAYLIST_ON_SPOTIFY,
+    FOLLOW_USER_ON_SPOTIFY,
+    UNFOLLOW_USER_ON_SPOTIFY,
     SHOW_COMMENT_DIALOG,
     HIDE_COMMENT_DIALOG,
     SET_ERRORS,
@@ -91,7 +95,6 @@ export default function(state = initialState, action) {
                 myPlaylistsFromSpotifyLoading: false,
             }
         case SET_PLAYLIST:
-            console.log('action.payload', action.payload)
             return {
                 ...state,
                 playlist: action.payload,
@@ -175,10 +178,12 @@ export default function(state = initialState, action) {
             }
 
         case GET_PLAYLIST_AUDIO_FEATURES:
-            console.log('action.payload.playlist', action.payload.playlist)
             return {
                 ...state,
-                playlist: action.payload.playlist
+                playlist: {
+                    ...state.playlist,
+                    ...action.payload
+                }
             }
         case FOLLOW_PLAYLIST:
             const followedPlaylistFBUser = action.payload.FBUser
@@ -218,6 +223,24 @@ export default function(state = initialState, action) {
                 ...state,
                 allPlaylists: unfollowAllPlaylists,
                 myPlaylists: unfollowMyPlaylists
+            }
+        case FOLLOW_PLAYLIST_ON_SPOTIFY:
+        case UNFOLLOW_PLAYLIST_ON_SPOTIFY:
+            return {
+                ...state,
+                playlist: {
+                    ...state.playlist,
+                    following: action.payload
+                }
+            }
+        case FOLLOW_USER_ON_SPOTIFY:
+        case UNFOLLOW_USER_ON_SPOTIFY:
+            return {
+                ...state,
+                playlist: {
+                    ...state.playlist,
+                    followingOwner: action.payload
+                }
             }
         case LIKE_PLAYLIST:
         case UNLIKE_PLAYLIST:

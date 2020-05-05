@@ -36,18 +36,22 @@ import Cookies from './pages/Cookies'
 import SpotifyLogin from './components/layout/SpotifyLogin'
 import AuthRoute from './components/util/AuthRoute'
 import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom'
+import MyButton from './util/MyButton';
+import EmailIcon from '@material-ui/icons/Email'
+import { Typography } from '@material-ui/core';
 
 const theme = createMuiTheme(themeFile)
 const FBIDToken = localStorage.FBIDToken
 const spotifyAccessToken = localStorage.spotifyAccessToken
 const spotifyRefreshToken = localStorage.spotifyRefreshToken
 const tourCompleted = localStorage.tourCompleted
-if (FBIDToken && spotifyAccessToken) {
+if (FBIDToken && spotifyAccessToken && spotifyRefreshToken && spotifyRefreshToken !== 'undefined') {
   if (tourCompleted !== 'true') localStorage.tourCompleted = 'true'
   const decodedToken = jwtDecode(FBIDToken);
   if (decodedToken.exp * 1000 > Date.now()) {
     //window.location.href = '/login'
     store.dispatch({ type: SET_AUTHENTICATED })
+    console.log('spotifyRefreshToken', spotifyRefreshToken)
     store.dispatch(refreshTokens(spotifyRefreshToken));
   } else {
     console.log('old token', decodedToken.exp * 1000 > Date.now())
@@ -196,7 +200,11 @@ class App extends Component {
       this.handleGetMyPlaylist(firebasePlaylistId)
     }
     store.dispatch(getAllPlaylists())
+    window.addEventListener('storage', (e) => {
+      console.log('e', e)
+    })
   }
+
 
   
 
@@ -217,7 +225,7 @@ class App extends Component {
                 <Switch>
                   <AuthRoute path='/signup' component={Signup}/>
                   <AuthRoute path='/login' component={Login}/>
-                  <Route path={['/profile','/profile/:spotifyUser']} render={({match}) => 
+                  <Route path={['/profile','/user/:spotifyUser']} render={({match}) => 
                     <Profile handleSpotifyLogin={this.handleSpotifyLogin} />
                   } />
                   <Route path={['/playlist/:firebasePlaylistId', '/playlist']} render={({match}) => {
@@ -259,6 +267,14 @@ class App extends Component {
               </div>
             </Router>
           </Provider>
+          <div className="footer">
+            <Typography variant="body1">Built by Chris Aronchick</Typography>
+            <MyButton btnClassName="footerButton" tip="Got feedback? Send me an e-mail!">
+              <a href="mailto:chrisaronchick@gmail.com">
+                <EmailIcon/>
+              </a>
+            </MyButton>
+          </div>
       </MuiThemeProvider>
     );
   }

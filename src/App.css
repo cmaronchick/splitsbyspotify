@@ -80,6 +80,18 @@ a{
   font-weight: 700;
 }
 
+.footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer a {
+  color: #50d890;
+  margin-top: 5px;
+}
+
 @media(max-width: 768px) {
   .introText {
     padding: 0 20px;

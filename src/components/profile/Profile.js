@@ -36,7 +36,7 @@ Profile = (props) => {
                 </div>
                 <hr />
                 <div className='profile-details'>
-                    <MuiLink component={Link} to={`/users/${spotifyUser}`} color="primary" variant="h5">
+                    <MuiLink component={Link} to={`/user/${spotifyUser}`} color="primary" variant="h5">
                         @{spotifyUser}
                     </MuiLink>
                 </div>

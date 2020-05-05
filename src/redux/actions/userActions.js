@@ -52,7 +52,9 @@ export const login = (location, history) => async (dispatch) => {
 
         if (access_token) {
             localStorage.spotifyAccessToken = access_token;
-            localStorage.spotifyRefreshToken = refresh_token;
+            if (refresh_token) {
+                localStorage.spotifyRefreshToken = refresh_token;
+            }
             const spotifyAccessToken = `Bearer ${access_token}`
             console.log('spotifyAccessToken', spotifyAccessToken)
             let spotifyResponse = await ky.get('https://api.spotify.com/v1/me', {
@@ -144,6 +146,7 @@ export const refreshTokens = (spotifyRefreshToken) => async (dispatch) => {
     dispatch({ type: LOADING_USER})
     dispatch({ type: LOADING_PLAYLISTS_MY})
     dispatch({ type: LOADING_PLAYLISTS_MY_FROM_SPOTIFY})
+    console.log('spotifyRefreshToken', spotifyRefreshToken)
     let FBIDToken = localStorage.FBIDToken
     const searchParams = new URLSearchParams();
     searchParams.set('grant_type', 'refresh_token')
@@ -157,8 +160,12 @@ export const refreshTokens = (spotifyRefreshToken) => async (dispatch) => {
     };
     try {
         let spotifyTokenResponse = await ky.post('https://accounts.spotify.com/api/token', authOptions).json()
+        console.log('spotifyTokenResponse', spotifyTokenResponse)
         const { access_token, refresh_token, error} = spotifyTokenResponse;
             localStorage.spotifyAccessToken = access_token;
+            if (refresh_token) {
+                localStorage.spotifyRefreshToken = refresh_token
+            }
 
         if (access_token) {
             try {
@@ -221,7 +228,6 @@ export const refreshTokens = (spotifyRefreshToken) => async (dispatch) => {
 }
 
 export const updateTokens = (refreshToken) => async (dispatch) => {
-    console.log('updatingTokens')
     let FBIDToken = localStorage.FBIDToken
     const searchParams = new URLSearchParams();
     searchParams.set('grant_type', 'refresh_token')
@@ -239,6 +245,9 @@ export const updateTokens = (refreshToken) => async (dispatch) => {
 
         if (access_token) {
             localStorage.spotifyAccessToken = access_token;
+            if (refresh_token) {
+                localStorage.spotifyRefreshToken = refresh_token
+            }
             let spotifyResponse = await ky.get('https://api.spotify.com/v1/me',{
                 headers: {
                     'Authorization': 'Bearer ' + access_token

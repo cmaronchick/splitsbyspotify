@@ -12,10 +12,12 @@ import GridListTileBar from '@material-ui/core/GridListTileBar';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import AddCircle from '@material-ui/icons/AddCircle'
 import RemoveCircle from '@material-ui/icons/RemoveCircle'
+import CircularProgress from '@material-ui/core/CircularProgress'
 
 import MyButton from '../util/MyButton'
 
 import {
+    getMyPlaylist,
     addToMyPlaylists,
     removeFromMyPlaylists,
     confirmRemoveFromMyPlaylists,
@@ -62,7 +64,11 @@ const Playlists = props => {
             </Typography>
         </ListSubheader>
         </GridListTile>
-        {Object.keys(playlists).map(playlistId => {
+        {props.allPlaylistsLoading ? (
+            <div className={classes.loadingDiv}>
+                <CircularProgress size={30} className={classes.progress} />
+            </div>
+            ) : Object.keys(playlists).map(playlistId => {
             const playlist = playlists[playlistId]
             console.log('playlist', playlist)
             const { firebasePlaylistId, playlistImage, playlistName } = playlist
@@ -70,8 +76,12 @@ const Playlists = props => {
                 <GridListTile key={firebasePlaylistId}>
                 <img src={playlistImage} alt={playlistName} />
                 <GridListTileBar
-                title={<Link to={`/playlist/${firebasePlaylistId}`} className={classes.link}>{playlistName}{playlist.avgBPM && ` (${Math.round(playlist.avgBPM)} BPM)`}</Link>}
-                subtitle={<span>by: {playlist.spotifyUser}</span>}
+                title={<Link to={`/playlist/${firebasePlaylistId}`}
+                    onClick={() => props.getMyPlaylist(firebasePlaylistId)}
+                    className={classes.link}>
+                        {playlistName}
+                    </Link>}
+                subtitle={`by: ${playlist.spotifyUser} ${playlist.avgBPM && ` | ${Math.round(playlist.avgBPM)} BPM`}`}
                 className={classes.subTitle}
                 actionIcon={spotifyUser && spotifyUser.id !== playlist.spotifyUser && (!playlist.firebaseFollowers || !playlist.firebaseFollowers[spotifyUser.id] ? (
                     <MyButton tip={`Add ${playlistName} to My Playlists`} onClick={() => props.followPlaylist(FBUser, playlist)}
@@ -99,6 +109,7 @@ Playlists.propTypes = {
 }
 
 const mapActionsToProps = {
+    getMyPlaylist,
     addToMyPlaylists,
     removeFromMyPlaylists,
     confirmRemoveFromMyPlaylists,
@@ -112,7 +123,8 @@ const mapActionsToProps = {
 const mapStateToProps = (state) => ({
     FBUser: state.user.FBUser,
     spotifyUser: state.user.spotifyUser,
-    allPlaylists: state.spotify.allPlaylists
+    allPlaylists: state.spotify.allPlaylists,
+    allPlaylistsLoading: state.spotify.allPlaylistsLoading
 })
 
 export default connect(mapStateToProps, mapActionsToProps)(withStyles(styles)(Playlists))

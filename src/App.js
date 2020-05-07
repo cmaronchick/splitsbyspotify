@@ -7,7 +7,7 @@ import ky from 'ky/umd'
 import {Provider} from 'react-redux'
 import store from './redux/store'
 
-import { login, logout, refreshTokens, updateTokens } from './redux/actions/userActions'
+import { login, logout, refreshTokens, updateTokens, getOtherUserDetails } from './redux/actions/userActions'
 import { getAllPlaylists,
   getMyPlaylists,
   getMyPlaylist, } from './redux/actions/spotifyActions'
@@ -153,15 +153,6 @@ class App extends Component {
     }
   }
 
-  handleGetMyPlaylist = async (firebasePlaylistId) => {
-    console.log('handleGetMyPlaylist firebasePlaylistId', firebasePlaylistId)
-    try {
-      let FBIDToken = await firebase.auth().currentUser.getIdToken()
-      store.dispatch(getMyPlaylist(firebasePlaylistId))
-    } catch (getMyPlaylistError) {
-      console.log('getMyPlaylistError', getMyPlaylistError)
-    }
-  }
 
   checkSpotifyPlaylistInMyPlaylists = () => {
     
@@ -197,7 +188,7 @@ class App extends Component {
     }
     if (window.location.pathname.indexOf('/Playlist') > -1 && window.location.pathname.split('/').length > 2) {
       let firebasePlaylistId = window.location.pathname.split('/')[2]
-      this.handleGetMyPlaylist(firebasePlaylistId)
+      store.dispatch(getMyPlaylist(firebasePlaylistId))
     }
     store.dispatch(getAllPlaylists())
     window.addEventListener('storage', (e) => {
@@ -226,7 +217,7 @@ class App extends Component {
                   <AuthRoute path='/signup' component={Signup}/>
                   <AuthRoute path='/login' component={Login}/>
                   <Route path={['/profile','/user/:spotifyUser']} render={({match}) => 
-                    <Profile handleSpotifyLogin={this.handleSpotifyLogin} />
+                    <Profile selectedUser={match.params.spotifyUser} handleSpotifyLogin={this.handleSpotifyLogin} />
                   } />
                   <Route path={['/playlist/:firebasePlaylistId', '/playlist']} render={({match}) => {
                     console.log('match.params.firebasePlaylistId', match.params.firebasePlaylistId)

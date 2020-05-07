@@ -29,7 +29,7 @@ import {
     SET_ERRORS,
     CLEAR_ERRORS,
     LOADING_PLAYLIST} from '../types'
-import { updateTokens } from './userActions'
+import { updateTokens, refreshTokens } from './userActions'
 import ky from 'ky/umd'
 import firebase from '../../constants/firebase'
 import store from '../store'
@@ -66,12 +66,13 @@ export const getAllPlaylists = () => async (dispatch) => {
 }
 
 // GET ALL MY PLAYLISTS FROM SPOTIFY
-export const getAllMyPlaylistsFromSpotify = (access_token) => async (dispatch) => {
-    
+export const getAllMyPlaylistsFromSpotify = () => async (dispatch) => {
+    let updatedTokens = await dispatch(updateTokens())
+    let spotifyAccessToken = store.getState().user.spotifyAccessToken
     try {
         let allMyPlaylistsResponse = await ky.get('https://api.spotify.com/v1/me/playlists', {
                 headers: {
-                    Authorization: `Bearer ${access_token}`
+                    Authorization: `Bearer ${spotifyAccessToken}`
                 }
             }).json()
         
@@ -99,7 +100,10 @@ export const getAllMyPlaylistsFromSpotify = (access_token) => async (dispatch) =
         }
 }
 
-export const getPlaylistsFromSpotify = (spotifyAccessToken, playlists) => async (dispatch) => {
+export const getPlaylistsFromSpotify = (playlists) => async (dispatch) => {
+    
+    let updatedTokens = await dispatch(updateTokens())
+    let spotifyAccessToken = store.getState().user.spotifyAccessToken
   try {
     Object.keys(playlists).forEach(async (firebasePlaylistId) => {
         let spotifyPlaylistResponse = await ky.get(`https://api.spotify.com/v1/playlists/${playlists[firebasePlaylistId].spotifyPlaylistId}`, {
@@ -152,6 +156,9 @@ export const updatePlaylist = (playlist) => async (dispatch) => {
 }
 
 export const getSinglePlaylistFromSpotify = (spotifyAccessToken, spotifyPlaylistId) => async (dispatch) => {
+    
+    let updatedTokens = await dispatch(updateTokens())
+    spotifyAccessToken = store.getState().user.spotifyAccessToken
   let spotifyPlaylistResponse;
   try {
     spotifyPlaylistResponse = await ky.get(`https://api.spotify.com/v1/playlists/${spotifyPlaylistId}`, {
@@ -190,6 +197,7 @@ export const getSinglePlaylistFromSpotify = (spotifyAccessToken, spotifyPlaylist
 
 export const getMyPlaylists = (FBIDToken) => async (dispatch) => {
     dispatch({ type: LOADING_PLAYLISTS_MY })
+    let updatedTokens = await dispatch(updateTokens())
 
     let spotifyRefreshToken = localStorage.spotifyRefreshToken
     try {
@@ -212,7 +220,7 @@ export const getMyPlaylists = (FBIDToken) => async (dispatch) => {
                 myPlaylistsLoading: false
             }
         })
-        dispatch(getPlaylistsFromSpotify(store.getState().user.spotifyAccessToken,myPlaylists))
+        dispatch(getPlaylistsFromSpotify(myPlaylists))
     }catch (getPlaylistsResponseError) {
         console.log('getPlaylistsResponseError', getPlaylistsResponseError)
         dispatch({
@@ -226,6 +234,8 @@ export const getMyPlaylists = (FBIDToken) => async (dispatch) => {
 }
 
 export const getTrackAudioFeatures = (spotifyAccessToken, playlist) => async (dispatch) => {
+    let updatedTokens = await dispatch(updateTokens())
+    spotifyAccessToken = store.getState().user.spotifyAccessToken
     let avgBPM = 0;
     let minBPM = 9999,
         maxBPM = 0;
@@ -299,6 +309,8 @@ export const getMyPlaylist = (firebasePlaylistId) => async (dispatch) => {
     dispatch({
         type: LOADING_PLAYLIST
     })
+    let updatedTokens = await dispatch(updateTokens())
+    let spotifyAccessToken = store.getState().user.spotifyAccessToken
 
     let spotifyRefreshToken = localStorage.spotifyRefreshToken
     let playlist;
@@ -323,7 +335,7 @@ export const getMyPlaylist = (firebasePlaylistId) => async (dispatch) => {
        }
        let spotifyPlaylistResponse = await ky.get(`https://api.spotify.com/v1/playlists/${playlist.spotifyPlaylistId}`, {
            headers: {
-               Authorization: `Bearer ${store.getState().user.spotifyAccessToken}`
+               Authorization: `Bearer ${spotifyAccessToken}`
            }
        }).json()
        spotifyPlaylistResponse.firebasePlaylistId = firebasePlaylistId
@@ -611,6 +623,8 @@ export const clearErrors = () => (dispatch) => {
 
 
 export const getFollowPlaylistOnSpotify = (spotifyAccessToken, playlist) => async (dispatch) => {
+    let updatedTokens = await dispatch(updateTokens())
+    spotifyAccessToken = store.getState().user.spotifyAccessToken
     
 
     try {
@@ -630,6 +644,8 @@ export const getFollowPlaylistOnSpotify = (spotifyAccessToken, playlist) => asyn
 }
 
 export const followPlaylistOnSpotify = (spotifyAccessToken, spotifyPlaylistId) => async (dispatch) => {
+    let updatedTokens = await dispatch(updateTokens())
+    spotifyAccessToken = store.getState().user.spotifyAccessToken
     try {
         let followPlaylistResponse = await ky.put(`https://api.spotify.com/v1/playlists/${spotifyPlaylistId}/followers`, {
         headers: {
@@ -648,6 +664,8 @@ export const followPlaylistOnSpotify = (spotifyAccessToken, spotifyPlaylistId) =
 }
 
 export const unfollowPlaylistOnSpotify = (spotifyAccessToken, spotifyPlaylistId) => async (dispatch) => {
+    let updatedTokens = await dispatch(updateTokens())
+    spotifyAccessToken = store.getState().user.spotifyAccessToken
     try {
         let unfollowPlaylistResponse = await ky.delete(`https://api.spotify.com/v1/playlists/${spotifyPlaylistId}/followers`, {
         headers: {
@@ -666,6 +684,8 @@ export const unfollowPlaylistOnSpotify = (spotifyAccessToken, spotifyPlaylistId)
 }
 
 export const getFollowUserOnSpotify = (spotifyAccessToken, spotifyUserId) => async (dispatch) => {
+    let updatedTokens = await dispatch(updateTokens())
+    spotifyAccessToken = store.getState().user.spotifyAccessToken
     try {
         let followUserResponse = await ky.get(`https://api.spotify.com/v1/me/following/contains?type=user&ids=${spotifyUserId}`, {
         headers: {
@@ -683,6 +703,8 @@ export const getFollowUserOnSpotify = (spotifyAccessToken, spotifyUserId) => asy
 }
 
 export const followUserOnSpotify = (spotifyAccessToken, spotifyUserId) => async (dispatch) => {
+    let updatedTokens = await dispatch(updateTokens())
+    spotifyAccessToken = store.getState().user.spotifyAccessToken
     try {
         let followUserResponse = await ky.put(`https://api.spotify.com/v1/me/following?type=user&ids=${spotifyUserId}`, {
         headers: {
@@ -701,6 +723,8 @@ export const followUserOnSpotify = (spotifyAccessToken, spotifyUserId) => async 
 }
 
 export const unfollowUserOnSpotify = (spotifyAccessToken, spotifyUserId) => async (dispatch) => {
+    let updatedTokens = await dispatch(updateTokens())
+    spotifyAccessToken = store.getState().user.spotifyAccessToken
     try {
         let unfollowUserResponse = await ky.delete(`https://api.spotify.com/v1/me/following?type=user&ids=${spotifyUserId}`, {
         headers: {

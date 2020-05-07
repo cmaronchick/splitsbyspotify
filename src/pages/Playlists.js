@@ -27,6 +27,7 @@ import {
     followPlaylist,
     unfollowPlaylist
 } from '../redux/actions/spotifyActions'
+import { getOtherUserDetails } from '../redux/actions/userActions'
 import { connect } from 'react-redux'
 
 const styles = (theme) => ({
@@ -52,9 +53,18 @@ const styles = (theme) => ({
     }
 })
 
+
 const Playlists = props => {
     const playlists = props.allPlaylists
     const { classes, spotifyUser, FBUser } = props
+    const showUser = (playlistSpotifyUser, avgBPM) => {
+        console.log('playlistSpotifyUser', playlistSpotifyUser)
+        return (
+            <div>by: <Link onClick={playlistSpotifyUser !== spotifyUser.id ? () => props.getOtherUserDetails(playlistSpotifyUser) : null} className={classes.link} to={playlistSpotifyUser !== spotifyUser.id ? `/user/${playlistSpotifyUser}` : `/Profile`}>{playlistSpotifyUser}</Link>
+            {avgBPM && ` | ${Math.round(avgBPM)} BPM`}
+            </div>
+        )
+    }
     return (
     <GridList cellHeight={180} className={classes.gridList} cols={(window.innerWidth < 600) ? 1 : (window.innerWidth < 800) ? 2 : 3}>
         <GridListTile key="Subheader" cols={(window.innerWidth < 600) ? 1 : (window.innerWidth < 800) ? 2 : 3} style={{ height: 'auto' }}>
@@ -81,7 +91,7 @@ const Playlists = props => {
                     className={classes.link}>
                         {playlistName}
                     </Link>}
-                subtitle={`by: ${playlist.spotifyUser} ${playlist.avgBPM && ` | ${Math.round(playlist.avgBPM)} BPM`}`}
+                subtitle={showUser(playlist.spotifyUser, playlist.avgBPM)}
                 className={classes.subTitle}
                 actionIcon={spotifyUser && spotifyUser.id !== playlist.spotifyUser && (!playlist.firebaseFollowers || !playlist.firebaseFollowers[spotifyUser.id] ? (
                     <MyButton tip={`Add ${playlistName} to My Playlists`} onClick={() => props.followPlaylist(FBUser, playlist)}
@@ -117,7 +127,8 @@ const mapActionsToProps = {
     likePlaylist,
     unlikePlaylist,
     followPlaylist,
-    unfollowPlaylist
+    unfollowPlaylist,
+    getOtherUserDetails
 }
 
 const mapStateToProps = (state) => ({

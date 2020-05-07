@@ -28,7 +28,6 @@ const styles = (theme) => ({
 
 const PlaylistHeader = props => {
   const { classes, playlistObj, playlistLoading, user } = props
-  console.log('playlistObj', playlistLoading)
   return !playlistLoading && playlistObj.name ? (
     <div className={classes.playlistHeader}>
       <Link className={classes.link} to="/">

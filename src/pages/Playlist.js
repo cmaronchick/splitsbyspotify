@@ -64,6 +64,7 @@ const Playlist = (props) => {
     const handleShowCommentsDialog = () => {
         props.toggleCommentsDialog(props.showCommentsDialog)
     }
+
     return authenticated ? ((
         <Grid container spacing={2}> 
                 <Grid item xs={12}>
@@ -135,17 +136,19 @@ const Playlist = (props) => {
     )
 }
 
-const mapActionsToProps = {
+const mapActionsToProps = dispatch => ({
     setSelectedDistance,
     setTargetPace,
     calculateSplits,
-    getMyPlaylist,
+    getMyPlaylist: firebasePlaylistId => {
+        dispatch(getMyPlaylist(firebasePlaylistId))
+    },
     getSinglePlaylistFromSpotify,
     getTrackAudioFeatures,
     likePlaylist,
     unlikePlaylist,
     toggleCommentsDialog
-}
+})
 
 const mapStateToProps = (state) => ({
     playlistObj: state.spotify.playlist,

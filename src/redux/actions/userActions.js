@@ -9,14 +9,17 @@ import {
     SET_TOUR_COMPLETED,
     LOADING_USER,
     CLEAR_PLAYLISTS,
+    LOADING_PLAYLIST,
     LOADING_PLAYLISTS_MY,
     LOADING_PLAYLISTS_MY_FROM_SPOTIFY,
-    MARK_NOTIFICATIONS_READ} from '../types'
+    MARK_NOTIFICATIONS_READ,
+    SET_OTHER_USER} from '../types'
 import ky from 'ky/umd'
 import { getUrlParameters } from '../../functions/utils'
 import {spotifyConfig} from '../../constants/spotifyConfig'
 import firebase from '../../constants/firebase'
 import { generateRandomString } from '../../functions/utils'
+import store from '../store'
 
 import { getAllMyPlaylistsFromSpotify, getMyPlaylists, getMyPlaylist } from './spotifyActions'
 
@@ -48,6 +51,7 @@ export const login = (location, history) => async (dispatch) => {
         console.log('spotifyTokenResponse', spotifyTokenResponse)
         var access_token = spotifyTokenResponse.access_token,
             refresh_token = spotifyTokenResponse.refresh_token,
+            expires_in = spotifyTokenResponse.expires_in,
             error = spotifyTokenResponse.error;
 
         if (access_token) {
@@ -93,6 +97,7 @@ export const login = (location, history) => async (dispatch) => {
                 type: SET_USER,
                 payload: {
                     spotifyAccessToken: access_token,
+                    spotifyAccessTokenExpiraton: Date.now() + (expires_in*1000),
                     spotifyRefreshToken: refresh_token,
                     FBIDToken
                 }
@@ -144,6 +149,7 @@ export const handleSpotifyLogin = () => {
 
 export const refreshTokens = (spotifyRefreshToken) => async (dispatch) => {
     dispatch({ type: LOADING_USER})
+    dispatch({ type: LOADING_PLAYLIST})
     dispatch({ type: LOADING_PLAYLISTS_MY})
     dispatch({ type: LOADING_PLAYLISTS_MY_FROM_SPOTIFY})
     console.log('spotifyRefreshToken', spotifyRefreshToken)
@@ -161,7 +167,7 @@ export const refreshTokens = (spotifyRefreshToken) => async (dispatch) => {
     try {
         let spotifyTokenResponse = await ky.post('https://accounts.spotify.com/api/token', authOptions).json()
         console.log('spotifyTokenResponse', spotifyTokenResponse)
-        const { access_token, refresh_token, error} = spotifyTokenResponse;
+        const { access_token, refresh_token, expires_in, error} = spotifyTokenResponse;
             localStorage.spotifyAccessToken = access_token;
             if (refresh_token) {
                 localStorage.spotifyRefreshToken = refresh_token
@@ -177,7 +183,9 @@ export const refreshTokens = (spotifyRefreshToken) => async (dispatch) => {
               dispatch({
                   type: SET_USER,
                   payload: {
-                      spotifyUser: spotifyResponse
+                      spotifyUser: spotifyResponse,
+                      spotifyAccessToken: access_token,
+                      spotifyAccessTokenExpiraton: Date.now() + (expires_in*1000),
                   }
               })
               const spotifyID = spotifyResponse.id,
@@ -227,8 +235,14 @@ export const refreshTokens = (spotifyRefreshToken) => async (dispatch) => {
   }
 }
 
-export const updateTokens = (refreshToken) => async (dispatch) => {
+export const updateTokens = () => async (dispatch) => {
+    let refreshToken = localStorage.spotifyRefreshToken
     let FBIDToken = localStorage.FBIDToken
+    if (store.getState().user.spotifyAccessTokenExpiraton > Date.now()) {
+        console.log('expiration is in the future')
+        return true
+    }
+    console.log('updating tokens')
     const searchParams = new URLSearchParams();
     searchParams.set('grant_type', 'refresh_token')
     searchParams.set('refresh_token', refreshToken)
@@ -241,7 +255,7 @@ export const updateTokens = (refreshToken) => async (dispatch) => {
     };
     try {
         let spotifyTokenResponse = await ky.post('https://accounts.spotify.com/api/token', authOptions).json()
-        const { access_token, refresh_token, error} = spotifyTokenResponse;
+        const { access_token, refresh_token, expires_in, error} = spotifyTokenResponse;
 
         if (access_token) {
             localStorage.spotifyAccessToken = access_token;
@@ -275,6 +289,7 @@ export const updateTokens = (refreshToken) => async (dispatch) => {
                 type: UPDATE_TOKENS,
                 payload: {
                     spotifyAccessToken: access_token,
+                    spotifyAccessTokenExpiraton: Date.now() + (expires_in*1000),
                     spotifyRefreshToken: refresh_token,
                     FBIDToken
                 }
@@ -385,6 +400,9 @@ export const getUserData = (accessToken, IDToken) => async (dispatch) => {
         if (window.location.pathname.indexOf('/playlist') > -1 && window.location.pathname.split('/').length > 2) {
             firebasePlaylistId = window.location.pathname.split('/')[2]
             dispatch(getMyPlaylist(firebasePlaylistId))
+        } else if (window.location.pathname.indexOf('/user/') > -1) {
+            let spotifyUser = window.location.pathname.split('/')[2]
+            dispatch(getOtherUserDetails(spotifyUser))
         }
         dispatch(getMyPlaylists(FBIDToken))
 
@@ -392,4 +410,18 @@ export const getUserData = (accessToken, IDToken) => async (dispatch) => {
         console.log('getUserDataError', getUserDataError)
 
     }
+}
+
+export const getOtherUserDetails = (spotifyUser) => async (dispatch) => {
+    dispatch({
+        type: LOADING_USER
+    })
+    console.log('spotifyUser', spotifyUser)
+    let otherProfile = await api.get(`user/${spotifyUser}`).json()
+    console.log('otherProfile', otherProfile)
+    dispatch({
+        type: SET_OTHER_USER,
+        payload: otherProfile.userDetails
+    })
+
 }

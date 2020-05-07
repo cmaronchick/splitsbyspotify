@@ -1,6 +1,8 @@
 import { SET_USER, 
     LOADING_USER, 
     UPDATE_TOKENS,
+    LOADING_OTHER_USER,
+    SET_OTHER_USER,
     SET_ERRORS, 
     CLEAR_ERRORS, 
     LOADING_UI, 
@@ -111,6 +113,19 @@ export default function(state = initialState, action) {
             return {
                 ...state,
                 FBUser
+            }
+        case LOADING_OTHER_USER:
+            return {
+                ...state,
+                loadingOtherUser: true
+            }
+        case SET_OTHER_USER:
+            return {
+                ...state,
+                profile: {
+                    ...action.payload
+                },
+                loading: false
             }
 
         default: 

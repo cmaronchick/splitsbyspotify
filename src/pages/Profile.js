@@ -4,7 +4,11 @@ import withStyles from '@material-ui/core/styles/withStyles'
 import { Link } from 'react-router-dom'
 import dayjs from 'dayjs'
 
+import SpotifyImage from '../images/Spotify_Icon_RGB_Green.png'
+import PlaylistPreview from '../components/playlists/PlaylistPreview'
+
 //MUI Stuff
+import Grid from '@material-ui/core/Grid'
 import Paper from '@material-ui/core/Paper'
 import Button from '@material-ui/core/Button'
 import Typography from '@material-ui/core/Typography'
@@ -24,6 +28,8 @@ import MyButton from '../util/MyButton'
 import EditDetails from '../components/profile/EditDetails'
 import ProfileSkeleton from '../util/ProfileSkeleton'
 
+import { likePlaylist, unlikePlaylist, toggleCommentsDialog} from '../redux/actions/spotifyActions'
+
 const styles = (theme) => ({
     ...theme.spreadThis,
     paper: {
@@ -37,14 +43,13 @@ const styles = (theme) => ({
         float: 'right',
     },
     spotifyLoginButton: {
-        margin: '0 auto'
-    }
+        margin: '0 auto',
+    },
 })
 
 
 const Profile = (props) => {
     const { classes, user: {loading, authenticated, spotifyUser, FBUser }}  = props
-    console.log('!spotifyUser || !FBUser || !FBUser.user', loading)
     if (!spotifyUser || !FBUser || (!FBUser.user && !FBUser.credentials)) {
         return loading ? (
             <div>Loading ...</div>
@@ -63,58 +68,99 @@ const Profile = (props) => {
         const fileInput = document.getElementById('imageInput')
         fileInput.click();
     }
+    let userDetails = FBUser.credentials ? FBUser.credentials : FBUser.user ? FBUser.user : { photoURL: null}
+    if (props.selectedUser && props.selectedUser !== spotifyUser.id && props.user.profile && !loading) {
+        userDetails = props.user.profile
+        userDetails.id = props.user.profile.spotifyUser
+        userDetails.external_urls = {
+            spotify: `https://open.spotify.com/user/${props.user.profile.spotifyUser}`
+        }
+    }
+    console.log('userDetails', userDetails)
 
-    const { photoURL, imageURL, stravaProfile, bio, location, createdAt } = FBUser.credentials ? FBUser.credentials : FBUser.user ? FBUser.user : { photoURL: null}
-    const { display_name, id } = spotifyUser
+    const { photoURL, imageURL, stravaProfile, bio, location, createdAt } = userDetails
+    const { display_name, id, external_urls } = props.selectedUser && props.selectedUser !== spotifyUser.id ? userDetails : spotifyUser
+    const {playlists} = props.selectedUser && props.selectedUser !== spotifyUser.id ? userDetails : FBUser
     let profileMarkup = !loading ? (authenticated ? (
-        <Paper className={classes.paper}>
-            <div className={classes.profile}>
-                <div className='image-wrapper'>
-                    <img src={imageURL ? imageURL : photoURL ? photoURL : `https://firebasestorage.googleapis.com/v0/b/splitsbyspotify.appspot.com/o/blank-profile-picture.png?alt=media&token=a78e5914-43fd-4e0b-b22e-0ae216ad19c4`} alt={display_name} className='profile-image'/>
-                    <input type='file' hidden='hidden' id='imageInput' onChange={handleImageChange}/>
-                    
-                    <MyButton tip="Edit Profile Picture" 
-                        placement="top"
-                        onClick={handleEditPicture}
-                        btnClassName='button'>
-                            <EditIcon color="primary" />
-                    </MyButton>
-                </div>
-                <hr />
-                <div className='profile-details'>
-                    <MuiLink component={Link} to={`/users/${id}`} color="primary" variant="h5">
-                        @{id}
-                    </MuiLink>
-                    
-                    {bio && <Typography variant="body2">{bio}</Typography>}
-                    <hr />
-                    {location && (
-                        <Fragment>
-                        <LocationOn color="primary" /> <span>{location}</span>
+        <Grid container spacing={2}>
+            <Grid item xs={12} sm={4}>
+                <Paper className={classes.paper}>
+                    <div className={classes.profile}>
+                        <div className='image-wrapper'>
+                            <img src={imageURL ? imageURL : photoURL ? photoURL : `https://firebasestorage.googleapis.com/v0/b/splitsbyspotify.appspot.com/o/blank-profile-picture.png?alt=media&token=a78e5914-43fd-4e0b-b22e-0ae216ad19c4`} alt={display_name} className='profile-image'/>
+                            <input type='file' hidden='hidden' id='imageInput' onChange={handleImageChange}/>
+                            {!(props.selectedUser !== spotifyUser.id) && (
+                                <MyButton tip="Edit Profile Picture" 
+                                    placement="top"
+                                    onClick={handleEditPicture}
+                                    btnClassName='button'>
+                                        <EditIcon color="primary" />
+                                </MyButton>
+                            )}
+                        </div>
                         <hr />
-                        </Fragment>
-                    )}
-                    {stravaProfile && (
-                        <Fragment>
-                        <a href={stravaProfile} target="_blank" rel="noopener noreferrer">
-                        <LinkIcon color="primary" />
-                            {' '}
-                            Strava Profile
-                        </a>
-                        <hr />
-                        </Fragment>
-                    )}
-                    <Fragment>
-                        <CalendarToday color="primary" /> {' '}
-                        <span>Joined {dayjs(createdAt).format('MMM YYYY')}</span>
-                    </Fragment>
-                    <hr />
-                    <EditDetails />
-                </div>
-            </div>
+                        <div className='profile-details'>
+                            <MuiLink component={Link} to={`/user/${id}`} color="primary" variant="h5">
+                                @{id}
+                            </MuiLink>
+                            {external_urls && external_urls.spotify && (
+                                <a href={external_urls.spotify} target="_blank" rel="noopener noreferrer" color="primary" variant="h5">
+                                    <img src={SpotifyImage} alt="View on Spotify" className={classes.spotifyIcon} style={{marginLeft: 10}} />
+                                </a>
+                            )}
+                            
+                            {bio && <Typography variant="body2">{bio}</Typography>}
+                            <hr />
+                            {location && (
+                                <Fragment>
+                                <LocationOn color="primary" /> <span>{location}</span>
+                                <hr />
+                                </Fragment>
+                            )}
+                            {stravaProfile && (
+                                <Fragment>
+                                <a href={stravaProfile} target="_blank" rel="noopener noreferrer">
+                                <LinkIcon color="primary" />
+                                    {' '}
+                                    Strava Profile
+                                </a>
+                                <hr />
+                                </Fragment>
+                            )}
+                            <Fragment>
+                                <CalendarToday color="primary" /> {' '}
+                                <span>Joined {dayjs(createdAt).format('MMM YYYY')}</span>
+                            </Fragment>
+                            <hr />
+                            {!(props.selectedUser !== spotifyUser.id) && (
+                                <EditDetails />
+                            )}
+                        </div>
+                    </div>
 
 
-        </Paper>) : (
+                </Paper>
+            </Grid>
+            <Grid item xs={12} sm={8}>
+                {playlists === undefined ? (
+                    <CircularProgress size={30} />
+                ) : playlists && Object.keys(playlists).length > 0 ? (
+                    Object.keys(playlists).map(playlistId => {
+                        return (
+                            <PlaylistPreview
+                            playlist={playlists[playlistId]}
+                            id={playlistId}
+                            key={playlistId}
+                            handleLikePlaylist={props.likePlaylist}
+                            handleUnlikePlaylist={props.unlikePlaylist}
+                            handleShowCommentsDialog={props.toggleCommentsDialog}/>
+                        )
+                    })
+                ) : (
+                    <Typography variant="body1" color="inherit">You have no playlists yet. Add some of yours from Spotify or browse other users' playlists.</Typography>
+                )}
+            </Grid>
+        </Grid>) : (
             <Paper className={classes.paper}>
             <Typography variant="h3" align="center">
                 User Profile
@@ -143,7 +189,10 @@ const mapStateToProps = (state) => ({
 const mapActionsToProps = {
     uploadImage,
     login,
-    logout
+    logout,
+    likePlaylist,
+    unlikePlaylist,
+    toggleCommentsDialog
 }
 
 Profile.propTypes = {

@@ -89,7 +89,7 @@ const PlaylistPreview = (props) => {
                 {/* <Typography variant="body2" value={createdAt}>{dayjs(createdAt).fromNow()}</Typography> */}
                 {/* onClick={() => props.getMyPlaylist(firebasePlaylistId)} */}
                 {firebasePlaylistId ? (
-                    <Link className={classes.playlistLink} to={`/playlist/${firebasePlaylistId}`}>
+                    <Link className={classes.playlistLink} to={`/playlist/${firebasePlaylistId}`} onClick={() => props.getMyPlaylist(firebasePlaylistId)}>
                         <Typography variant="h5">{playlistName}</Typography>
                     </Link>
                 ) : (

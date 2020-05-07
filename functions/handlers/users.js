@@ -236,13 +236,17 @@ const getAuthenticatedUser = (req, res, next) => {
             }
         })
         .then(data => {
-            userData.playlists = [];
+            userData.playlists = {}
             if (data && data.docs && data.docs.length > 0) {
-                data.forEach(doc => {
-                    userData.playlists.push({
+                console.log('data.docs.length', data.docs.length)
+                data.docs.forEach(doc => {
+                    console.log('doc.id', doc.id)
+
+                    userData.playlists[doc.id] = {
                         firebasePlaylistId: doc.id,
+                        inMyPlaylists: true,
                         ...doc.data()
-                    })
+                    }
                 })
             }
             return db.collection('notifications')
@@ -271,7 +275,6 @@ const getAuthenticatedUser = (req, res, next) => {
             if (likes && likes.docs && likes.docs.length > 0) {
                 likes.docs.forEach(likesObj => {
                     const like = likesObj.data()
-                    console.log('like', like)
                     userData.likes.push({likeId: like.id, ...like})
                 })
             }
@@ -321,15 +324,15 @@ const getUserDetails = (req, res, next) => {
 
         })
         .then(playlistDocs => {
-            let playlists = []
+            let playlists = {}
             if (playlistDocs && playlistDocs.docs && playlistDocs.docs.length > 0) {
                 playlistDocs.docs.forEach(playlistObj => {
                     const playlist = playlistObj.data()
                     console.log({playlist})
-                    playlists.push({
+                    playlists[playlistObj.id] = {
                         firebasePlaylistId: playlistObj.id,
                         ...playlist
-                    })
+                    }
                 })
             }
             userDetails.playlists = playlists

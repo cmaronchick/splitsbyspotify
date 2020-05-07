@@ -127,6 +127,18 @@ export default {
     followButton: {
       color: '#fff'
     },
+    expansionPanelSummary: {
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      width: '100%'
+    },
+    spotifyButton: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center'
+    },
     selectDistanceForm: {
       display: 'flex',
       flexDirection: 'column'

@@ -12,10 +12,12 @@ import GridListTileBar from '@material-ui/core/GridListTileBar';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import AddCircle from '@material-ui/icons/AddCircle'
 import RemoveCircle from '@material-ui/icons/RemoveCircle'
+import CircularProgress from '@material-ui/core/CircularProgress'
 
 import MyButton from '../util/MyButton'
 
 import {
+    getMyPlaylist,
     addToMyPlaylists,
     removeFromMyPlaylists,
     confirmRemoveFromMyPlaylists,
@@ -25,6 +27,7 @@ import {
     followPlaylist,
     unfollowPlaylist
 } from '../redux/actions/spotifyActions'
+import { getOtherUserDetails } from '../redux/actions/userActions'
 import { connect } from 'react-redux'
 
 const styles = (theme) => ({
@@ -50,9 +53,18 @@ const styles = (theme) => ({
     }
 })
 
+
 const Playlists = props => {
     const playlists = props.allPlaylists
     const { classes, spotifyUser, FBUser } = props
+    const showUser = (playlistSpotifyUser, avgBPM) => {
+        console.log('playlistSpotifyUser', playlistSpotifyUser)
+        return (
+            <div>by: <Link onClick={playlistSpotifyUser !== spotifyUser.id ? () => props.getOtherUserDetails(playlistSpotifyUser) : null} className={classes.link} to={playlistSpotifyUser !== spotifyUser.id ? `/user/${playlistSpotifyUser}` : `/Profile`}>{playlistSpotifyUser}</Link>
+            {avgBPM && ` | ${Math.round(avgBPM)} BPM`}
+            </div>
+        )
+    }
     return (
     <GridList cellHeight={180} className={classes.gridList} cols={(window.innerWidth < 600) ? 1 : (window.innerWidth < 800) ? 2 : 3}>
         <GridListTile key="Subheader" cols={(window.innerWidth < 600) ? 1 : (window.innerWidth < 800) ? 2 : 3} style={{ height: 'auto' }}>
@@ -62,7 +74,11 @@ const Playlists = props => {
             </Typography>
         </ListSubheader>
         </GridListTile>
-        {Object.keys(playlists).map(playlistId => {
+        {props.allPlaylistsLoading ? (
+            <div className={classes.loadingDiv}>
+                <CircularProgress size={30} className={classes.progress} />
+            </div>
+            ) : Object.keys(playlists).map(playlistId => {
             const playlist = playlists[playlistId]
             console.log('playlist', playlist)
             const { firebasePlaylistId, playlistImage, playlistName } = playlist
@@ -70,8 +86,12 @@ const Playlists = props => {
                 <GridListTile key={firebasePlaylistId}>
                 <img src={playlistImage} alt={playlistName} />
                 <GridListTileBar
-                title={<Link to={`/playlist/${firebasePlaylistId}`} className={classes.link}>{playlistName}{playlist.avgBPM && ` (${Math.round(playlist.avgBPM)} BPM)`}</Link>}
-                subtitle={<span>by: {playlist.spotifyUser}</span>}
+                title={<Link to={`/playlist/${firebasePlaylistId}`}
+                    onClick={() => props.getMyPlaylist(firebasePlaylistId)}
+                    className={classes.link}>
+                        {playlistName}
+                    </Link>}
+                subtitle={showUser(playlist.spotifyUser, playlist.avgBPM)}
                 className={classes.subTitle}
                 actionIcon={spotifyUser && spotifyUser.id !== playlist.spotifyUser && (!playlist.firebaseFollowers || !playlist.firebaseFollowers[spotifyUser.id] ? (
                     <MyButton tip={`Add ${playlistName} to My Playlists`} onClick={() => props.followPlaylist(FBUser, playlist)}
@@ -99,6 +119,7 @@ Playlists.propTypes = {
 }
 
 const mapActionsToProps = {
+    getMyPlaylist,
     addToMyPlaylists,
     removeFromMyPlaylists,
     confirmRemoveFromMyPlaylists,
@@ -106,13 +127,15 @@ const mapActionsToProps = {
     likePlaylist,
     unlikePlaylist,
     followPlaylist,
-    unfollowPlaylist
+    unfollowPlaylist,
+    getOtherUserDetails
 }
 
 const mapStateToProps = (state) => ({
     FBUser: state.user.FBUser,
     spotifyUser: state.user.spotifyUser,
-    allPlaylists: state.spotify.allPlaylists
+    allPlaylists: state.spotify.allPlaylists,
+    allPlaylistsLoading: state.spotify.allPlaylistsLoading
 })
 
 export default connect(mapStateToProps, mapActionsToProps)(withStyles(styles)(Playlists))

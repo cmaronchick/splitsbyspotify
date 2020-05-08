@@ -2,13 +2,27 @@ import React, { Fragment } from 'react'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core/styles'
 import theme from '../../constants/theme'
+
+// React DnD functionality
+
+import Reorder, {
+    reorder,
+    reorderImmutable,
+    reorderFromTo,
+    reorderFromToImmutable
+  } from 'react-reorder'
+
 import Grid from '@material-ui/core/Grid'
 import Typography from '@material-ui/core/Typography'
 import Box from '@material-ui/core/Box'
+import Button from '@material-ui/core/Button'
+import CircularProgress from '@material-ui/core/CircularProgress'
 
 import Splits from '../splits/Splits'
 
 import { connect } from 'react-redux'
+
+import { reorderPlaylist, submitReorderedPlaylistToSpotify } from '../../redux/actions/spotifyActions'
 
 const styles = {
     tracksContainer: {
@@ -90,8 +104,25 @@ const styles = {
         }
     }
 }
+const Track = (trackObj) => (
+
+    <Grid item
+    style={{
+    height: height
+}} data={` - ${Math.floor((trackObj.track.duration_ms/1000)/60)}:${Math.round((trackObj.track.duration_ms/1000)%60) < 10 ? '0' : ''}${Math.round((trackObj.track.duration_ms/1000)%60)}`}>
+    <Typography variant="body2">{trackObj.track.name}</Typography>
+    { trackObj.audioFeatures && (
+        <Typography variant="body1">{`${Math.round(trackObj.audioFeatures.tempo)} BPM`}
+        </Typography>)}
+</Grid>
+)
+
+
 
 const Tracks = props => {
+    const ItemTypes = {
+        TRACK: 'track'
+    }
     const { tracks, classes, splitsObj } = props
     const { targetPace, selectedDistance, splits } = splitsObj
     const { items } = tracks
@@ -102,8 +133,42 @@ const Tracks = props => {
     let splitTop = 0;
     const finishTop = splits && splits.length > 0 ? ((parseInt(splits[splits.length-1].split(':')[0])*6) + parseInt(splits[splits.length-1].split(':')[1])) : 0
 
+    const onReorder = (event, previousIndex, nextIndex, fromId, toId) => {
+        //console.log('reorder(items, previousIndex, nextIndex)', reorder(items, previousIndex, nextIndex))
+        props.reorderPlaylist(reorder(items, previousIndex, nextIndex))
+    }
+    
+    const onReorderGroup = (event, previousIndex, nextIndex, fromId, toId) => {
+      if (fromId === toId) {
+        const list = reorderImmutable(this.state[fromId], previousIndex, nextIndex);
+    
+        this.setState({
+          [fromId]: list
+        });
+      } else {
+        const lists = reorderFromToImmutable({
+          from: this.state[fromId],
+          to: this.state[toId]
+        }, previousIndex, nextIndex);
+    
+        this.setState({
+          [fromId]: lists.from,
+          [toId]: lists.to
+        });
+      }
+    }
+
     return (
         <div style={{position: 'relative'}}>
+            <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                <Button style={{flex: 1, marginBottom: 10}} color={props.playlist.updated ? 'primary' : 'secondary'} variant="contained" disabled={!props.playlist.updated && !props.spotify.playlistUpdating} onClick={() => props.submitReorderedPlaylistToSpotify(props.playlist)}>
+                    {!props.spotify.playlistUpdating ? (
+                        <Typography variant="body1">Update Playlist</Typography>
+                    ) : (
+                        <CircularProgress size={30} />
+                    )}
+                </Button>
+            </div>
         <div style={{display: 'flex', flexDirection: 'row'}}>
             {splits && (
                 <Splits splits={splits} targetPace={targetPace} selectedDistance={selectedDistance} />
@@ -112,6 +177,19 @@ const Tracks = props => {
         <Grid container className={classes.tracksContainer}>
         {items && items.length > 0 ? (
             <Fragment>
+                <Reorder
+                    reorderId="tracksList" // Unique ID that is used internally to track this list (required)
+                    draggedClassName="dragged" // Class name to be applied to dragged elements (optional), defaults to 'dragged'
+                    lock="horizontal" // Lock the dragging direction (optional): vertical, horizontal (do not use with groups)
+                    holdTime={200} // Default hold time before dragging begins (mouse & touch) (optional), defaults to 0
+                    onReorder={onReorder} // Callback when an item is dropped (you will need this to update your state)
+                    autoScroll={true} // Enable auto-scrolling when the pointer is close to the edge of the Reorder component (optional), defaults to true
+                    disabled={false} // Disable reordering (optional), defaults to false
+                    disableContextMenus={true} // Disable context menus when holding on touch devices (optional), defaults to true
+                    placeholder={
+                    <div className="custom-placeholder" /> // Custom placeholder element (optional), defaults to clone of dragged element
+                    }
+                >
             {items.map((trackObj, index) => {
                 const height = trackObj.track.duration_ms / 10000
                 return (
@@ -126,10 +204,26 @@ const Tracks = props => {
                     </Grid>
                 )
             })}
+            {
+                    // this.state.list.map((item) => (
+                    //     <li key={item.name}>
+                    //     {item.name}
+                    //     </li>
+                    // )).toArray()
+                    /*
+                    Note this example is an ImmutableJS List so we must convert it to an array.
+                    I've left this up to you to covert to an array, as react-reorder updates a lot,
+                    and if I called this internally it could get rather slow,
+                    whereas you have greater control over your component updates.
+                    */
+                    }
+                </Reorder>
             </Fragment>
         ) : null}
         </Grid>
         </div>
+
+        
         {splits && splits.length > 0 && splits.map(split => {
             let splitMin = parseInt(split.split(':')[0])*6
             let splitSec = parseInt(split.split(':')[1])
@@ -147,7 +241,14 @@ Tracks.propTypes = {
 
 
 const mapStateToProps = (state) => ({
-    splitsObj: state.splits
+    splitsObj: state.splits,
+    playlist: state.spotify.playlist,
+    spotify: state.spotify
 })
 
-export default connect(mapStateToProps, null)(withStyles(styles)(Tracks))
+const mapActionsToProps = {
+    reorderPlaylist,
+    submitReorderedPlaylistToSpotify
+}
+
+export default connect(mapStateToProps, mapActionsToProps)(withStyles(styles)(Tracks))

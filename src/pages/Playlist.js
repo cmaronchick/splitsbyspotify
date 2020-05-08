@@ -115,7 +115,7 @@ const Playlist = (props) => {
                             <Card>
                                 <CardHeader title="Tracks" />
                                 <CardContent>
-                                    <Tracks tracks={tracks} />
+                                    <Tracks tracks={tracks} updatedTracks={playlistObj.spotifyUser === spotifyUser.id ? tracks : null} />
                                 </CardContent>
                             </Card>
                         </Grid>)}

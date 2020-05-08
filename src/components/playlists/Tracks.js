@@ -137,26 +137,6 @@ const Tracks = props => {
         //console.log('reorder(items, previousIndex, nextIndex)', reorder(items, previousIndex, nextIndex))
         props.reorderPlaylist(reorder(items, previousIndex, nextIndex))
     }
-    
-    const onReorderGroup = (event, previousIndex, nextIndex, fromId, toId) => {
-      if (fromId === toId) {
-        const list = reorderImmutable(this.state[fromId], previousIndex, nextIndex);
-    
-        this.setState({
-          [fromId]: list
-        });
-      } else {
-        const lists = reorderFromToImmutable({
-          from: this.state[fromId],
-          to: this.state[toId]
-        }, previousIndex, nextIndex);
-    
-        this.setState({
-          [fromId]: lists.from,
-          [toId]: lists.to
-        });
-      }
-    }
 
     return (
         <Fragment>

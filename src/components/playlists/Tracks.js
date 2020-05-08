@@ -159,16 +159,21 @@ const Tracks = props => {
     }
 
     return (
+        <Fragment>
+        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+            <Button style={{flex: 1, marginBottom: 10}} color={props.playlist.updated ? 'primary' : 'secondary'} variant="contained" disabled={!props.playlist.updated && !props.spotify.playlistUpdating} onClick={() => props.submitReorderedPlaylistToSpotify(props.playlist)}>
+                {!props.playlist.updated ? (
+                    <Typography variant="body1">
+                        Drag and Drop to Reorder
+                    </Typography>
+                ) : !props.spotify.playlistUpdating ? (
+                    <Typography variant="body1">Update Playlist</Typography>
+                ) : (
+                    <CircularProgress size={30} />
+                )}
+            </Button>
+        </div>
         <div style={{position: 'relative'}}>
-            <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                <Button style={{flex: 1, marginBottom: 10}} color={props.playlist.updated ? 'primary' : 'secondary'} variant="contained" disabled={!props.playlist.updated && !props.spotify.playlistUpdating} onClick={() => props.submitReorderedPlaylistToSpotify(props.playlist)}>
-                    {!props.spotify.playlistUpdating ? (
-                        <Typography variant="body1">Update Playlist</Typography>
-                    ) : (
-                        <CircularProgress size={30} />
-                    )}
-                </Button>
-            </div>
         <div style={{display: 'flex', flexDirection: 'row'}}>
             {splits && (
                 <Splits splits={splits} targetPace={targetPace} selectedDistance={selectedDistance} />
@@ -176,7 +181,6 @@ const Tracks = props => {
 
         <Grid container className={classes.tracksContainer}>
         {items && items.length > 0 ? (
-            <Fragment>
                 <Reorder
                     reorderId="tracksList" // Unique ID that is used internally to track this list (required)
                     draggedClassName="dragged" // Class name to be applied to dragged elements (optional), defaults to 'dragged'
@@ -184,7 +188,7 @@ const Tracks = props => {
                     holdTime={200} // Default hold time before dragging begins (mouse & touch) (optional), defaults to 0
                     onReorder={onReorder} // Callback when an item is dropped (you will need this to update your state)
                     autoScroll={true} // Enable auto-scrolling when the pointer is close to the edge of the Reorder component (optional), defaults to true
-                    disabled={false} // Disable reordering (optional), defaults to false
+                    disabled={props.playlist.owner.id !== props.user.spotifyUser.id} // Disable reordering (optional), defaults to false
                     disableContextMenus={true} // Disable context menus when holding on touch devices (optional), defaults to true
                     placeholder={
                     <div className="custom-placeholder" /> // Custom placeholder element (optional), defaults to clone of dragged element
@@ -218,7 +222,6 @@ const Tracks = props => {
                     */
                     }
                 </Reorder>
-            </Fragment>
         ) : null}
         </Grid>
         </div>
@@ -232,6 +235,7 @@ const Tracks = props => {
         })}
         <Box style={{top: finishTop, display: finishTop > 0 ? 'block' : 'none'}} className="finish"></Box>
         </div>
+        </Fragment>
     )
 }
 
@@ -243,7 +247,8 @@ Tracks.propTypes = {
 const mapStateToProps = (state) => ({
     splitsObj: state.splits,
     playlist: state.spotify.playlist,
-    spotify: state.spotify
+    spotify: state.spotify,
+    user: state.user
 })
 
 const mapActionsToProps = {

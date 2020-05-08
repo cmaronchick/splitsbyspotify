@@ -15,7 +15,8 @@ import {
     LOADING_PLAYLISTS_ALL, 
     LOADING_PLAYLISTS_MY,
     LOADING_PLAYLISTS_MY_FROM_SPOTIFY, 
-    LOADING_PLAYLIST, 
+    LOADING_PLAYLIST,
+    UPDATING_PLAYLIST,
     LIKE_PLAYLIST, 
     UNLIKE_PLAYLIST,
     FOLLOW_PLAYLIST,
@@ -24,6 +25,7 @@ import {
     UNFOLLOW_PLAYLIST_ON_SPOTIFY,
     FOLLOW_USER_ON_SPOTIFY,
     UNFOLLOW_USER_ON_SPOTIFY,
+    REORDER_PLAYLIST,
     SHOW_COMMENT_DIALOG,
     HIDE_COMMENT_DIALOG,
     SET_ERRORS,
@@ -98,6 +100,18 @@ export default function(state = initialState, action) {
             return {
                 ...state,
                 playlist: action.payload,
+                playlistLoading: false,
+                playlistUpdating: false
+            }
+        case REORDER_PLAYLIST:
+            let reorderedPlaylist = {...state.playlist}
+            reorderedPlaylist.tracks = {
+                ...reorderedPlaylist.tracks,
+                items: action.payload}
+                reorderedPlaylist.updated = true
+            return {
+                ...state,
+                playlist: {...reorderedPlaylist},
                 playlistLoading: false
             }
         case UPDATE_PLAYLIST_FROM_SPOTIFY:
@@ -129,6 +143,11 @@ export default function(state = initialState, action) {
             return {
                 ...state,
                 playlistLoading: true
+            }
+        case UPDATING_PLAYLIST:
+            return {
+                ...state,
+                playlistUpdating: true
             }
         case ADD_TO_MY_PLAYLISTS:
             console.log('action.payload', action.payload)

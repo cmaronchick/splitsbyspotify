@@ -26,6 +26,8 @@ import {
     COMMENT_ON_PLAYLIST,
     SHOW_COMMENT_DIALOG,
     HIDE_COMMENT_DIALOG,
+    REORDER_PLAYLIST,
+    UPDATING_PLAYLIST,
     SET_ERRORS,
     CLEAR_ERRORS,
     LOADING_PLAYLIST} from '../types'
@@ -740,4 +742,42 @@ export const unfollowUserOnSpotify = (spotifyAccessToken, spotifyUserId) => asyn
     } catch (unfollowUserOnSpotifyError) {
         console.log('unfollowOnSpotifyError', unfollowUserOnSpotifyError)
     }
+}
+
+export const reorderPlaylist = (reorderedTracks) => (dispatch) => {
+    console.log('reorderedTracks', reorderedTracks)
+    dispatch({
+        type: REORDER_PLAYLIST,
+        payload: reorderedTracks
+    })
+}
+
+export const submitReorderedPlaylistToSpotify = (playlist) => async (dispatch) => {
+    dispatch({
+        type: UPDATING_PLAYLIST
+    })
+    let updatedTokens = await dispatch(updateTokens())
+    let uris = []
+    playlist.tracks.items.forEach(trackObj => {
+        uris.push(trackObj.track.uri)
+    })
+    const spotifyAccessToken = store.getState().user.spotifyAccessToken
+    try {
+        let reorderedPlaylistResponse = await ky.put(`https://api.spotify.com/v1/playlists/${playlist.spotifyPlaylistId}/tracks`, {
+            headers: {
+                Authorization: `Bearer ${spotifyAccessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({uris})
+        })
+        console.log('reorderedPlaylistResponse', reorderedPlaylistResponse)
+        playlist.updated = false
+        dispatch({
+            type: SET_PLAYLIST,
+            payload: playlist
+        })
+    } catch (reorderedPlaylistResponse) {
+        console.log('reorderedPlaylistResponse', reorderedPlaylistResponse)
+    }
+    
 }

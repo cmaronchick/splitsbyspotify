@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import Container from '@material-ui/core/Container'
 import Grid from '@material-ui/core/Grid'
 import GridList from '@material-ui/core/GridList'
@@ -99,6 +100,14 @@ const DistancePaceCalculator = (props) => {
             </Button>
         </div>
     )
+}
+
+DistancePaceCalculator.propTypes = {
+    splitsObj: PropTypes.object.isRequired,
+    selectedDistance: PropTypes.number,
+    targetPace: PropTypes.string,
+    classes: PropTypes.object.isRequired
+
 }
 
 const mapStateToProps = (state) => ({

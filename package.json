@@ -50,5 +50,11 @@
     ]
   },
   "homepage": "https://splitsbyspotify.firebaseapp.com",
-  "proxy": "https://us-central1-splitsbyspotify.cloudfunctions.net/api"
+  "proxy": "https://us-central1-splitsbyspotify.cloudfunctions.net/api",
+  "devDependencies": {
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.2",
+    "jest": "^26.0.1",
+    "jest-enzyme": "^7.1.2"
+  }
 }

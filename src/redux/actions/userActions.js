@@ -166,7 +166,6 @@ export const refreshTokens = (spotifyRefreshToken) => async (dispatch) => {
     };
     try {
         let spotifyTokenResponse = await ky.post('https://accounts.spotify.com/api/token', authOptions).json()
-        console.log('spotifyTokenResponse', spotifyTokenResponse)
         const { access_token, refresh_token, expires_in, error} = spotifyTokenResponse;
             localStorage.spotifyAccessToken = access_token;
             if (refresh_token) {
@@ -239,7 +238,6 @@ export const updateTokens = () => async (dispatch) => {
     let refreshToken = localStorage.spotifyRefreshToken
     let FBIDToken = localStorage.FBIDToken
     if (store.getState().user.spotifyAccessTokenExpiraton > Date.now()) {
-        console.log('expiration is in the future')
         return true
     }
     console.log('updating tokens')

@@ -92,7 +92,8 @@ const Introduction = props => {
 }
 
 Introduction.propTypes = {
-
+    user: PropTypes.object.isRequired,
+    handleSpotifyLogin: PropTypes.func.isRequired
 }
 
 const mapStateToProps = (state) => ({

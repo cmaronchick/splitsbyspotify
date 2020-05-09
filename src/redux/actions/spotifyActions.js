@@ -132,28 +132,31 @@ export const getPlaylistsFromSpotify = (playlists) => async (dispatch) => {
 }
 
 export const updatePlaylist = (playlist) => async (dispatch) => {
-
-    const { id, firebasePlaylistId, name, collaborative, images, avgBPM, minBPM, maxBPM, owner } = playlist
-    const publicPlaylist = playlist.public
-    const searchParams = new URLSearchParams()
-    searchParams.set('spotifyPlaylistId', id)
-    searchParams.set('playlistName', name)
-    searchParams.set('playlistImage', images[0].url)
-    searchParams.set('public', publicPlaylist)
-    searchParams.set('collaborative', collaborative)
-    if (avgBPM) {
-        searchParams.set('avgBPM', avgBPM)
-        searchParams.set('minBPM', minBPM)
-        searchParams.set('maxBPM', maxBPM)
+    try {
+        const { id, firebasePlaylistId, name, collaborative, images, avgBPM, minBPM, maxBPM, owner } = playlist
+        const publicPlaylist = playlist.public
+        const searchParams = new URLSearchParams()
+        searchParams.set('spotifyPlaylistId', id)
+        searchParams.set('playlistName', name)
+        searchParams.set('playlistImage', images[0].url)
+        searchParams.set('public', publicPlaylist)
+        searchParams.set('collaborative', collaborative)
+        if (avgBPM) {
+            searchParams.set('avgBPM', avgBPM)
+            searchParams.set('minBPM', minBPM)
+            searchParams.set('maxBPM', maxBPM)
+        }
+        let FBIDToken = await firebase.auth().currentUser.getIdToken()
+        let updatePlaylistResponse = await api.post(`playlists/${firebasePlaylistId}`, {
+        headers: {
+            Authorization: `Bearer ${FBIDToken}`,
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: searchParams
+        }).json()
+    } catch(updatePlaylistError) {
+        console.log('updatePlaylistError', updatePlaylistError)
     }
-    let FBIDToken = await firebase.auth().currentUser.getIdToken()
-    let updatePlaylistResponse = await api.post(`playlists/${firebasePlaylistId}`, {
-    headers: {
-        Authorization: `Bearer ${FBIDToken}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: searchParams
-    }).json()
 
 }
 
@@ -242,7 +245,6 @@ export const getTrackAudioFeatures = (spotifyAccessToken, playlist) => async (di
     let minBPM = 9999,
         maxBPM = 0;
     let totalBPM = 0;
-    //console.log('totalBPM', totalBPM)
     try {
         const {tracks} = playlist
         let tracksIds = ''
@@ -254,23 +256,6 @@ export const getTrackAudioFeatures = (spotifyAccessToken, playlist) => async (di
                     Authorization: `Bearer ${spotifyAccessToken}`
                 }
             }).json()
-        //   }
-          
-        //   const anAsyncFunction = async item => {
-        //       let audioFeatures = await functionWithPromise(item)
-        //       item.audioFeatures = audioFeatures
-        //       minBPM = (audioFeatures.tempo < minBPM) ? audioFeatures.tempo : minBPM
-        //       maxBPM = (audioFeatures.tempo > maxBPM) ? audioFeatures.tempo : maxBPM
-        //       totalBPM += audioFeatures.tempo
-        //       return item
-        //   }
-          
-        //   const getData = async () => {
-        //     return Promise.all(tracks.items.map(track => {
-        //         return anAsyncFunction(track)
-        //     }))
-        //   }
-        // let tracksWithAudioFeatures = await getData()
         tracks.items.map(trackObj => {
             tracksAudioFeatures.audio_features.forEach(audioFeature => {
 
@@ -346,7 +331,6 @@ export const getMyPlaylist = (firebasePlaylistId) => async (dispatch) => {
            ...spotifyPlaylistResponse
        }
        firebase.analytics().logEvent('getPlaylist', { firebasePlaylistId })
-       console.log('playlist', playlist)
 
         dispatch({
             type: SET_PLAYLIST,
@@ -362,6 +346,7 @@ export const getMyPlaylist = (firebasePlaylistId) => async (dispatch) => {
         } else {
             getFirebasePlaylistErrorsJSON = getFirebasePlaylistErrors
         }
+        firebase.analytics().logEvent('error', {request: 'getMyPlaylist'})
         dispatch({
             type: SET_ERRORS,
             payload: getFirebasePlaylistErrorsJSON
@@ -385,7 +370,6 @@ export const addToMyPlaylists = (playlist) => async (dispatch) => {
   searchParams.set('collaborative', collaborative)
   try {
     let FBIDToken = await firebase.auth().currentUser.getIdToken()
-    console.log('FBUser', FBIDToken)
     let addPlaylistResponse = await api.post('playlists', {
       headers: {
         Authorization: `Bearer ${FBIDToken}`,
@@ -393,7 +377,6 @@ export const addToMyPlaylists = (playlist) => async (dispatch) => {
       },
       body: searchParams
     }).json()
-    console.log('addPlaylistResponse', addPlaylistResponse)
     dispatch({
         type: ADD_TO_MY_PLAYLISTS,
         payload: {
@@ -745,7 +728,7 @@ export const unfollowUserOnSpotify = (spotifyAccessToken, spotifyUserId) => asyn
 }
 
 export const reorderPlaylist = (reorderedTracks) => (dispatch) => {
-    console.log('reorderedTracks', reorderedTracks)
+    firebase.analytics().logEvent('reorderedPlaylist', { submitted: false })
     dispatch({
         type: REORDER_PLAYLIST,
         payload: reorderedTracks
@@ -756,13 +739,13 @@ export const submitReorderedPlaylistToSpotify = (playlist) => async (dispatch) =
     dispatch({
         type: UPDATING_PLAYLIST
     })
+    try {
     let updatedTokens = await dispatch(updateTokens())
     let uris = []
     playlist.tracks.items.forEach(trackObj => {
         uris.push(trackObj.track.uri)
     })
     const spotifyAccessToken = store.getState().user.spotifyAccessToken
-    try {
         let reorderedPlaylistResponse = await ky.put(`https://api.spotify.com/v1/playlists/${playlist.spotifyPlaylistId}/tracks`, {
             headers: {
                 Authorization: `Bearer ${spotifyAccessToken}`,
@@ -770,14 +753,18 @@ export const submitReorderedPlaylistToSpotify = (playlist) => async (dispatch) =
             },
             body: JSON.stringify({uris})
         })
-        console.log('reorderedPlaylistResponse', reorderedPlaylistResponse)
+        firebase.analytics().logEvent('reorderedPlaylist', { submitted: true, firebasePlaylistId: playlist.firebasePlaylistId })
         playlist.updated = false
         dispatch({
             type: SET_PLAYLIST,
             payload: playlist
         })
-    } catch (reorderedPlaylistResponse) {
-        console.log('reorderedPlaylistResponse', reorderedPlaylistResponse)
+    } catch (reorderedPlaylistError) {
+        console.log('reorderedPlaylistResponse', reorderedPlaylistError)
+        dispatch({
+            type: SET_ERRORS,
+            payload: reorderedPlaylistError
+        })
     }
     
 }

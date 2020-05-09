@@ -6,10 +6,7 @@ import theme from '../../constants/theme'
 // React DnD functionality
 
 import Reorder, {
-    reorder,
-    reorderImmutable,
-    reorderFromTo,
-    reorderFromToImmutable
+    reorder
   } from 'react-reorder'
 
 import Grid from '@material-ui/core/Grid'
@@ -42,38 +39,6 @@ const styles = {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-
-        // '&[data]:after': {
-        //     textAlign: 'center',
-        //     fontWeight: 400,
-        //     content: 'attr(data)',
-        //     animation: 'anim2 .2s',
-        //     /*-moz-animation: anim2 .2s;
-        //     -webkit-animation: anim2 .2s;*/
-        //     animationFillMode: 'forwards',
-        //     cursor: 'default',
-        //     zIndex: 9999
-        // },
-        // '&:hover:after': {
-        //     textAlign: 'center',
-        //     animation: 'anim1 .3s',
-        //     /*-moz-animation: anim1 .3s;
-        //     -webkit-animation: anim1 .3s;*/
-        //     animationFillMode: 'forwards',
-        //     cursor: 'default',
-        //     zIndex: 9999
-        // },
-        // '&[data]:after': {
-        //     textAlign: 'center',
-        //     fontWeight: 400,
-        //     content: '"Here is some text"',
-        //     animation: 'anim2 .2s',
-        //     /*-moz-animation: anim2 .2s;
-        //     -webkit-animation: anim2 .2s;*/
-        //     animationFillMode: 'forwards',
-        //     cursor: 'default',
-        //     zIndex: 9998
-        // },
         '&:hover': {
             height: 'inherit !important',
             overflow: 'auto',
@@ -120,16 +85,12 @@ const Track = (trackObj) => (
 
 
 const Tracks = props => {
-    const ItemTypes = {
-        TRACK: 'track'
-    }
     const { tracks, classes, splitsObj } = props
     const { targetPace, selectedDistance, splits } = splitsObj
     const { items } = tracks
 
     const targetPaceMin = parseInt(targetPace.split(':')[0])
     const targetPaceSec = parseInt(targetPace.split(':')[1])
-    const targetPace_ms = ((targetPaceMin*60) + targetPaceSec) * 1000
     let splitTop = 0;
     const finishTop = splits && splits.length > 0 ? ((parseInt(splits[splits.length-1].split(':')[0])*6) + parseInt(splits[splits.length-1].split(':')[1])) : 0
 
@@ -180,10 +141,11 @@ const Tracks = props => {
                     <Grid item key={index} className={classes.track}
                         style={{
                         height: height
-                    }} data={` - ${Math.floor((trackObj.track.duration_ms/1000)/60)}:${Math.round((trackObj.track.duration_ms/1000)%60) < 10 ? '0' : ''}${Math.round((trackObj.track.duration_ms/1000)%60)}`}>
+                    }} data={`${trackObj.track.artists[0].name} - ${Math.floor((trackObj.track.duration_ms/1000)/60)}:${Math.round((trackObj.track.duration_ms/1000)%60) < 10 ? '0' : ''}${Math.round((trackObj.track.duration_ms/1000)%60)}`}>
                         <Typography variant="body2">{trackObj.track.name}</Typography>
                         { trackObj.audioFeatures && (
-                            <Typography variant="body1">{`${Math.round(trackObj.audioFeatures.tempo)} BPM`}
+                            <Typography variant="body1">
+                                {`${Math.round(trackObj.audioFeatures.tempo)} BPM`}
                             </Typography>)}
                     </Grid>
                 )
@@ -220,6 +182,10 @@ const Tracks = props => {
 }
 
 Tracks.propTypes = {
+    splitsObj: PropTypes.object.isRequired,
+    playlist: PropTypes.object.isRequired,
+    spotify: PropTypes.object.isRequired,
+    user: PropTypes.object.isRequired
 
 }
 

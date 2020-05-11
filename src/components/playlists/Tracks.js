@@ -69,20 +69,6 @@ const styles = {
         }
     }
 }
-const Track = (trackObj) => (
-
-    <Grid item
-    style={{
-    height: height
-}} data={` - ${Math.floor((trackObj.track.duration_ms/1000)/60)}:${Math.round((trackObj.track.duration_ms/1000)%60) < 10 ? '0' : ''}${Math.round((trackObj.track.duration_ms/1000)%60)}`}>
-    <Typography variant="body2">{trackObj.track.name}</Typography>
-    { trackObj.audioFeatures && (
-        <Typography variant="body1">{`${Math.round(trackObj.audioFeatures.tempo)} BPM`}
-        </Typography>)}
-</Grid>
-)
-
-
 
 const Tracks = props => {
     const { tracks, classes, splitsObj } = props

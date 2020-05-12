@@ -9,4 +9,7 @@ To use:
 You can then print out your wristband.
 
 Current task:
-* Set up authentication
+* Add visual indicator for BPM to help show how the playlist may speed up and slow down 
+
+Libraries used:
+* react-reorder

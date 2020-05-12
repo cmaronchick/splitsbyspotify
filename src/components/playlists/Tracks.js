@@ -67,6 +67,9 @@ const styles = {
         //     fontSize: 14,
         //     zIndex: 9999,
         }
+    },
+    convertingColorsLinearGradient: {
+        backgroundCmage: 'linear-gradient(90deg, rgba(0, 230, 80, 1) 35%, rgba(244, 236, 6, 1) 65%, rgba(242, 7, 7, 1) 100%)'
     }
 }
 

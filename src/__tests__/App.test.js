@@ -11,13 +11,6 @@ import createMuiTheme from '@material-ui/core/styles/createMuiTheme'
 
 const theme = createMuiTheme(themeFile)
 
-// test('renders introduction', () => {
-//   const { getByText } = render(<App isTest={true} />);
-//   const linkElement = getByText('Welcome to Splits By Spotify!');
-//   expect(linkElement).toBeInTheDocument();
-// });
-
-
 test('renders introduction', () => {
   const { getByText } = render(
     <MuiThemeProvider theme={theme}>

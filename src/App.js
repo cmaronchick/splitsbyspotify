@@ -1,19 +1,15 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types'
 import jwtDecode from 'jwt-decode'
 import firebase from './constants/firebase'
-import ky from 'ky/umd'
 
 import {Provider} from 'react-redux'
 import store from './redux/store'
 
-import { login, logout, refreshTokens, updateTokens, getOtherUserDetails } from './redux/actions/userActions'
+import { login, logout, refreshTokens, updateTokens } from './redux/actions/userActions'
 import { getAllPlaylists,
-  getMyPlaylists,
   getMyPlaylist, } from './redux/actions/spotifyActions'
 import { SET_AUTHENTICATED,
   LOADING_USER,
-  LOADING_PLAYLIST,
   LOADING_PLAYLISTS_MY,
   LOADING_PLAYLISTS_MY_FROM_SPOTIFY } from './redux/types'
 
@@ -21,8 +17,7 @@ import './App.css';
 import { ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme'
 
-import { getUrlParameters, generateRandomString } from './functions/utils'
-import { spotifyConfig } from './constants/spotifyConfig'
+import { getUrlParameters } from './functions/utils'
 import themeFile from './constants/theme'
 
 import Navbar from './components/layout/Navbar'
@@ -70,9 +65,6 @@ if (FBIDToken && spotifyAccessToken && spotifyRefreshToken && spotifyRefreshToke
   }
 }
 var stateKey = 'spotify_auth_state';
-ky.create({ 
-    prefixUrl: process.env.NODE_ENV === 'development' ? 'http://localhost:5000/api' : 'https://us-central1-splitsbyspotify.cloudfunctions.net/api'
-})
 
 class App extends Component {
   constructor(props) {
@@ -92,29 +84,6 @@ class App extends Component {
       selectedDistance: null,
       targetPace: null,
       splits: []
-    }
-  }
-
-  handleSpotifyLogin = () => {
-
-    firebase.analytics().logEvent('login', {step: 1, name: 'Login'})
-    let state = generateRandomString(16)
-    localStorage[stateKey] = state
-    let currentOrigin = window.location.origin
-    localStorage.loggedInPage = window.location.pathname
-    window.location.href = `https://accounts.spotify.com/authorize?response_type=code&client_id=${spotifyConfig.client_id}&scope=${spotifyConfig.scope}&redirect_uri=${currentOrigin}/spotifyCallback&state=${state}`
-  }
-  handleSpotifyLogout = () => {
-    let logoutResponse = store.dispatch(logout());
-    firebase.analytics().logEvent('logout')
-    if (logoutResponse) {
-      this.setState({
-        spotifyUser: null,
-        spotifyAccessToken: null,
-        spotifyRefreshToken: null,
-        playlists: null
-      })
-      window.history.pushState({ 'page_id': 1, 'user': 'null'}, '', '/')
     }
   }
 
@@ -139,61 +108,32 @@ class App extends Component {
     }
     store.dispatch(login(location, this.props.history));
   }
-  handleGetAllPlaylists = async (access_token) => {
-    store.dispatch(getAllPlaylists())
-  }
-  handleGetMyPlaylists = async () => {
-    let FBIDToken
-    try {
-      FBIDToken = await firebase.auth().currentUser.getIdToken()
-      store.dispatch(getMyPlaylists(FBIDToken))
-      console.log('FBIDToken', FBIDToken)
-    } catch(getTokenError) {
-      console.log('getTokenError120', getTokenError)
-    }
-  }
 
-
-  checkSpotifyPlaylistInMyPlaylists = () => {
-    
-    const { myPlaylists } = this.state
-    let allPlaylists = {...this.state.allPlaylists}
-    if (myPlaylists && Object.keys(myPlaylists).length > 0 && allPlaylists && Object.keys(allPlaylists).length > 0) {
-      Object.keys(myPlaylists).forEach(firebasePlaylistId => {
-        if (allPlaylists[myPlaylists[firebasePlaylistId].id]) {
-          allPlaylists[myPlaylists[firebasePlaylistId].id].inMyPlaylists = true
-        }
-      })
-      this.setState({
-        allPlaylists
-      })
-    }
-  }
-
-  handleTextInput = (event) => {
-    this.setState({
-      [event.target.name]: event.target.value
-    })
-  }
 
   componentDidMount() {
     let refreshToken = localStorage.spotifyRefreshToken
     let FBIDToken = localStorage.FBIDToken
+
+  // User auth state based on cookies is determined starting on line 43
+  // When the app mounts, it checks for the auth state and the presence of a refresh
+  // if the user is NOT authenticated AND there is a refresh token, the user tokens are refreshed and the user is authenticated
     if (!store.getState().user.authenticated && refreshToken && refreshToken !== "null" && refreshToken !== "undefined") {
       this.handleSpotifyRefreshToken(refreshToken)
     }
+
+    // when the user clicks login, they are sent to Spotify with a callback URL
+    // If the pathname contains a spotifyCallback, the app takes the callback query string and processes it (see userActions.js)
     if (window.location.pathname === '/spotifyCallback') {
       console.log('starting spotify login', window.location)
       this.handleSpotifyCallback(window.location)
     }
+
+    // if a user navigates directly to a playlist, the app retrieves the playlist information right away
     if (window.location.pathname.indexOf('/Playlist') > -1 && window.location.pathname.split('/').length > 2) {
       let firebasePlaylistId = window.location.pathname.split('/')[2]
       store.dispatch(getMyPlaylist(firebasePlaylistId))
     }
     store.dispatch(getAllPlaylists())
-    window.addEventListener('storage', (e) => {
-      console.log('e', e)
-    })
   }
 
 
@@ -219,38 +159,15 @@ class App extends Component {
                   <Route path={['/profile','/user/:spotifyUser']} render={({match}) => 
                     <Profile selectedUser={match.params.spotifyUser} handleSpotifyLogin={this.handleSpotifyLogin} />
                   } />
-                  <Route path={['/playlist/:firebasePlaylistId', '/playlist']} render={({match}) => {
-                    console.log('match.params.firebasePlaylistId', match.params.firebasePlaylistId)
-                    return <Playlist firebasePlaylistId={match.params.firebasePlaylistId}
-                    // selectedDistance={this.state.selectedDistance}
-                    // targetPace={this.state.targetPace}
-                    // splits={this.state.splits}
-                    // handleGetPlaylistTracks={this.handleGetPlaylistTracks}
-                    // handleSelectDistance={this.handleSelectDistance}
-                    // handleTextInput={this.handleTextInput}
-                    // handleCalculateButtonClick={this.handleCalculateButtonClick}
-                    // checkForPlaylist={this.checkForPlaylist}
-                    // playlistObj={this.state.currentPlaylist}
-                    // playlistLoading={this.state.currentPlaylistLoading}
-                    />
-                    }
-                  } />
+                  <Route path={['/playlist/:firebasePlaylistId', '/playlist']} render={({match}) => (
+                    <Playlist firebasePlaylistId={match.params.firebasePlaylistId}/>
+                    )} />
                   <Route path='/Playlists' component={Playlists} />
                   <Route path="/Cookies" component={Cookies} />
                   <Route path='/' render={({match}) => {
                     return (
                       <Home 
-                        // spotifyUser={this.state.spotifyUser} 
-                        // allPlaylists={this.state.allPlaylists} 
-                        // myPlaylists={this.state.myPlaylists}
                         handleSpotifyLogin={this.handleSpotifyLogin}
-                        // handleGetPlaylistTracks={this.handleGetPlaylistTracks}
-                        // handleShowConfirmDeleteDialog={this.handleShowConfirmDeleteDialog}
-                        // handleHideConfirmDeleteDialog={this.handleHideConfirmDeleteDialog}
-                        // handleConfirmDeletePlaylist={this.handleConfirmDeletePlaylist}
-                        // showConfirmDeleteDialog={this.state.showConfirmDeleteDialog}
-                        // confirmDeletePlaylistId={this.state.confirmDeletePlaylistId}
-                        // confirmDeletePlaylistName={this.state.confirmDeletePlaylistName}
                         />
                     )
                   }} />
@@ -270,21 +187,5 @@ class App extends Component {
     );
   }
 }
-
-// App.propTypes = {
-//   classes: PropTypes.object.isRequired,
-//   loginUser: PropTypes.func.isRequired,
-//   user: PropTypes.object.isRequired,
-//   UI: PropTypes.object.isRequired
-// }
-
-// const mapStateToProps = (state) => ({
-//   user: state.user,
-//   UI: state.UI
-// });
-
-// const mapActionsToProps = {
-//   loginUser
-// }
 
 export default App;

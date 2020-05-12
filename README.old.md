@@ -11,5 +11,10 @@ You can then print out your wristband.
 Current task:
 * Add visual indicator for BPM to help show how the playlist may speed up and slow down 
 
-Libraries used:
-* react-reorder
+Built with create-react-app and Firebase
+
+Tutorial followed from FreeCodeCamp.org:
+https://youtu.be/m_u6P5k0vP0
+
+Additional Libraries used:
+* react-reorder - Used for reordering playlist

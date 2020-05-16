@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from 'react'
+import { Link } from 'react-router-dom'
 import Grid from '@material-ui/core/Grid'
 import withStyles from '@material-ui/core/styles/withStyles'
 import ky from 'ky/umd'
@@ -106,7 +107,7 @@ class Home extends Component {
     //     })
     // }
 
-    playlistsMarkup = (playlists) => playlists && Object.keys(playlists).length > 0 ? (
+    playlistsMarkup = (playlists) => (
         Object.keys(playlists).map(playlistId => {
             return (
                 <PlaylistPreview
@@ -122,8 +123,6 @@ class Home extends Component {
                  handleShowCommentsDialog={this.props.toggleCommentsDialog}/>
             )
         })
-    ) : (
-        <Typography variant="body1" color="inherit">You have no playlists yet. Add some of yours from Spotify or browse other users' playlists.</Typography>
     )
 
     handleChange = (event, newValue) => {
@@ -161,8 +160,10 @@ class Home extends Component {
                         </AppBar>
                         <TabPanel value={selectedTab} index={0}>
                             <div className="playlist-container">
-                                {!this.props.myPlaylistsFromSpotifyLoading ? (
+                                {!this.props.myPlaylistsFromSpotifyLoading ? this.props.myPlaylistsFromSpotify && Object.keys(this.props.myPlaylistsFromSpotify).length > 0 ? (
                                     this.playlistsMarkup(this.props.myPlaylistsFromSpotify)
+                                ) : (
+                                    <Typography variant="body1" color="inherit">You have no Spotify playlists. You can <Link to="/Playlists">browse other users' playlists</Link> in order to find one you like.</Typography>
                                 ) : (
                                     <PlaylistSkeleton />
                                 )}
@@ -171,8 +172,10 @@ class Home extends Component {
                         </TabPanel>
                         <TabPanel value={selectedTab} index={1}>
                             <div className="playlist-container">
-                                {!this.props.myPlaylistsLoading ? (
+                                {!this.props.myPlaylistsLoading ? this.props.myPlaylists && Object.keys(this.props.myPlaylists).length > 0 ? (
                                     this.playlistsMarkup(this.props.myPlaylists)
+                                ) : (
+                                    <Typography variant="body1" color="inherit">You have not saved any playlists yet. Add some of yours from Spotify or <Link to="/Playlists">browse other users' playlists</Link> to save your splits.</Typography>
                                 ) : (
                                     <PlaylistSkeleton />
                                 )}

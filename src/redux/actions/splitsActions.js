@@ -56,7 +56,6 @@ export const calculateSplits = (selectedDistance, targetPace) => (dispatch) => {
           elapsedTime
         }
     })
-
 }
 
 export const setTargetPace = (targetPace) => (dispatch) => {

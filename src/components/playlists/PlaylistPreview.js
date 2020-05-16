@@ -40,7 +40,6 @@ const styles = (theme) => ({
 
 
 const PlaylistPreview = (props) => {
-
     const { classes, listType, playlist : { name, images, id, spotifyUser, owner, collaborative, inMyPlaylists, href, likeCount, commentCount, comments, tracks, spotifyPlaylistId } } = props
     const playlistName = name ? name : props.playlist.playlistName
     const firebasePlaylistId = props.playlist.firebasePlaylistId
@@ -58,7 +57,6 @@ const PlaylistPreview = (props) => {
         return (<div></div>)
     }
     const handleShowCommentsDialog = () => {
-        console.log('props.showCommentsDialog, firebasePlaylistId', props.showCommentsDialog, firebasePlaylistId)
         props.handleShowCommentsDialog(props.showCommentsDialog, firebasePlaylistId)
     }
     const publicPlaylist = props.playlist.public
@@ -93,7 +91,9 @@ const PlaylistPreview = (props) => {
                         <Typography variant="h5">{playlistName}</Typography>
                     </Link>
                 ) : (
-                    <Typography variant="h5">{playlistName}</Typography>
+                    <Link className={classes.playlistLink} to={`/spotifyplaylist/${id}`} onClick={() => props.getMyPlaylist(null, id)}>
+                        <Typography variant="h5">{playlistName}</Typography>
+                    </Link>
                 )}
                 <div className={classes.details}>
                     {(listType === 'all' && spotifyUser) || (owner && (owner.id !== props.spotifyUser.id)) && (

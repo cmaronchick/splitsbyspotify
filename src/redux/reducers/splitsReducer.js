@@ -8,7 +8,7 @@ import {
 
 const initialState = {
     splits: [],
-    targetPace: '',
+    targetPace: null,
     selectedDistance: 0,
     selectedMeasurement: localStorage.selectedMeasurement ? localStorage.selectedMeasurement : 'mi'
 }

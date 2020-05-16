@@ -266,6 +266,7 @@ export default function(state = initialState, action) {
             let likeAllPlaylists = {...state.allPlaylists}
             let likeMyPlaylists = {...state.myPlaylists}
             let likeMySpotifyPlaylists = {...state.myPlaylistsFromSpotify}
+            let likeMyPlaylist = {...state.playlist}
             likeAllPlaylists[action.payload.firebasePlaylistId] = {
                 ...likeAllPlaylists[action.payload.firebasePlaylistId],
                 ...action.payload
@@ -278,11 +279,18 @@ export default function(state = initialState, action) {
                 ...likeMySpotifyPlaylists[likeMyPlaylists[action.payload.firebasePlaylistId].spotifyPlaylistId],
                 ...action.payload
             }
+            if (likeMyPlaylist.id) {
+                likeMyPlaylist = {
+                    ...likeMyPlaylist,
+                    ...action.payload
+                }
+            }
             return {
                 ...state,
                 allPlaylists: likeAllPlaylists,
                 myPlaylists: likeMyPlaylists,
-                myPlaylistsFromSpotify: likeMySpotifyPlaylists
+                myPlaylistsFromSpotify: likeMySpotifyPlaylists,
+                playlist: likeMyPlaylist
             }
         case SHOW_COMMENT_DIALOG:
             return {

@@ -13,7 +13,9 @@ import { SET_USER,
     UNLIKE_PLAYLIST,
     FOLLOW_PLAYLIST,
     UNFOLLOW_PLAYLIST,
-    MARK_NOTIFICATIONS_READ } from '../types'
+    MARK_NOTIFICATIONS_READ,
+    SAVE_SPLITS,
+    DELETE_SPLITS } from '../types'
 
 const initialState = {
     authenticated: false,
@@ -127,7 +129,22 @@ export default function(state = initialState, action) {
                 },
                 loading: false
             }
-
+        case SAVE_SPLITS:
+            let splitsFBUser = {...state.FBUser}
+            splitsFBUser.splits[action.payload.firebasePlaylistId] = {
+                ...action.payload
+            }
+            return {
+                ...state,
+                FBUser: splitsFBUser
+            }
+        case DELETE_SPLITS:
+            let deleteSplitsFBUser = {...state.FBUser}
+            delete deleteSplitsFBUser.splits[action.payload.firebasePlaylistId]
+            return {
+                ...state,
+                FBUser: deleteSplitsFBUser
+            }
         default: 
             return {
                 ...state

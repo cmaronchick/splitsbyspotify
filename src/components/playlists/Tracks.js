@@ -14,6 +14,8 @@ import Typography from '@material-ui/core/Typography'
 import Box from '@material-ui/core/Box'
 import Button from '@material-ui/core/Button'
 import CircularProgress from '@material-ui/core/CircularProgress'
+import Slider from '@material-ui/core/Slider'
+import Tooltip from '@material-ui/core/Tooltip'
 
 import Splits from '../splits/Splits'
 
@@ -68,18 +70,65 @@ const styles = {
         //     zIndex: 9999,
         }
     },
+    slider: {
+        width: '40%',
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    sliderText: {
+        marginLeft: 5
+    },
     convertingColorsLinearGradient: {
         backgroundCmage: 'linear-gradient(90deg, rgba(0, 230, 80, 1) 35%, rgba(244, 236, 6, 1) 65%, rgba(242, 7, 7, 1) 100%)'
     }
 }
 
+const Track = ({ classes, trackObj, playlist, index }) => {
+    const height = trackObj.track.duration_ms / 10000
+    return (
+        <Grid item className={classes.track}
+        style={{
+        height: height
+    }} data={`${trackObj.track.artists[0].name} - ${Math.floor((trackObj.track.duration_ms/1000)/60)}:${Math.round((trackObj.track.duration_ms/1000)%60) < 10 ? '0' : ''}${Math.round((trackObj.track.duration_ms/1000)%60)}`}>
+        <Typography variant="body2">{trackObj.track.name}</Typography>
+        { trackObj.audioFeatures && (
+            <Box className={classes.slider}>
+            
+            <Slider 
+                defaultValue={Math.round(trackObj.audioFeatures.tempo)}
+                min={Math.round(playlist.minBPM)}
+                max={Math.round(playlist.maxBPM)}
+                disabled={true}
+                valueLabelDisplay="auto"
+            />
+            <Typography className={classes.sliderText} variant="body2">{Math.round(trackObj.audioFeatures.tempo)}</Typography>
+            </Box>
+            )}
+
+    </Grid>
+    )
+}
+
+
 const Tracks = props => {
-    const { tracks, classes, splitsObj } = props
-    const { targetPace, selectedDistance, splits } = splitsObj
+    const { tracks, classes, splitsObj, playlist } = props
+    let targetPace, selectedDistance;
+    if (!splitsObj.selectedDistance && playlist.selectedDistance) {
+        selectedDistance = playlist.selectedDistance
+    } else if (splitsObj.selectedDistance) {
+        selectedDistance = splitsObj.selectedDistance
+    }
+    if (splitsObj.targetPace === null && playlist.targetPace) {
+        targetPace = playlist.targetPace
+    } else if (splitsObj.targetPace || splitsObj.targetPace === '') {
+        targetPace = splitsObj.targetPace
+    }
+    const { splits } = splitsObj
     const { items } = tracks
 
-    const targetPaceMin = parseInt(targetPace.split(':')[0])
-    const targetPaceSec = parseInt(targetPace.split(':')[1])
+    const targetPaceMin = targetPace && (parseInt(targetPace.split(':')[0]))
+    const targetPaceSec = targetPace && (parseInt(targetPace.split(':')[1]))
     let splitTop = 0;
     const finishTop = splits && splits.length > 0 ? ((parseInt(splits[splits.length-1].split(':')[0])*6) + parseInt(splits[splits.length-1].split(':')[1])) : 0
 
@@ -90,19 +139,21 @@ const Tracks = props => {
 
     return (
         <Fragment>
-        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-            <Button style={{flex: 1, marginBottom: 10}} color={props.playlist.updated ? 'primary' : 'secondary'} variant="contained" disabled={!props.playlist.updated && !props.spotify.playlistUpdating} onClick={() => props.submitReorderedPlaylistToSpotify(props.playlist)}>
-                {!props.playlist.updated ? (
-                    <Typography variant="body1">
-                        Drag and Drop to Reorder
-                    </Typography>
-                ) : !props.spotify.playlistUpdating ? (
-                    <Typography variant="body1">Update Playlist</Typography>
-                ) : (
-                    <CircularProgress size={30} />
-                )}
-            </Button>
-        </div>
+            {props.playlist.owner.id === props.user.spotifyUser.id && (
+                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                    <Button style={{flex: 1, marginBottom: 10}} color={props.playlist.updated ? 'primary' : 'secondary'} variant="contained" disabled={!props.playlist.updated && !props.spotify.playlistUpdating} onClick={() => props.submitReorderedPlaylistToSpotify(props.playlist)}>
+                        {!props.playlist.updated ? (
+                            <Typography variant="body1">
+                                Drag and Drop to Reorder
+                            </Typography>
+                        ) : !props.spotify.playlistUpdating ? (
+                            <Typography variant="body1">Update Playlist</Typography>
+                        ) : (
+                            <CircularProgress size={30} />
+                        )}
+                    </Button>
+                </div>
+            )}
         <div style={{position: 'relative'}}>
         <div style={{display: 'flex', flexDirection: 'row'}}>
             {splits && (
@@ -110,7 +161,7 @@ const Tracks = props => {
             )}
 
         <Grid container className={classes.tracksContainer}>
-        {items && items.length > 0 ? (
+        {items && items.length > 0 ? props.playlist.owner.id === props.user.spotifyUser.id ? (
                 <Reorder
                     reorderId="tracksList" // Unique ID that is used internally to track this list (required)
                     draggedClassName="dragged" // Class name to be applied to dragged elements (optional), defaults to 'dragged'
@@ -118,41 +169,49 @@ const Tracks = props => {
                     holdTime={200} // Default hold time before dragging begins (mouse & touch) (optional), defaults to 0
                     onReorder={onReorder} // Callback when an item is dropped (you will need this to update your state)
                     autoScroll={true} // Enable auto-scrolling when the pointer is close to the edge of the Reorder component (optional), defaults to true
-                    disabled={props.playlist.owner.id !== props.user.spotifyUser.id} // Disable reordering (optional), defaults to false
+                    disabled={false}// Disable reordering (optional), defaults to false
                     disableContextMenus={true} // Disable context menus when holding on touch devices (optional), defaults to true
                     placeholder={
                     <div className="custom-placeholder" /> // Custom placeholder element (optional), defaults to clone of dragged element
                     }
                 >
+                    {items.map((trackObj, index) => {
+                        const height = trackObj.track.duration_ms / 10000
+
+                        return (
+                            <Grid item key={index} className={classes.track}
+                            style={{
+                            height: height
+                        }} data={`${trackObj.track.artists[0].name} - ${Math.floor((trackObj.track.duration_ms/1000)/60)}:${Math.round((trackObj.track.duration_ms/1000)%60) < 10 ? '0' : ''}${Math.round((trackObj.track.duration_ms/1000)%60)}`}>
+                            <Typography variant="body2">{trackObj.track.name}</Typography>
+                            { trackObj.audioFeatures && (
+                                <Box className={classes.slider}>
+                                
+                                <Slider 
+                                    defaultValue={Math.round(trackObj.audioFeatures.tempo)}
+                                    min={Math.round(playlist.minBPM)}
+                                    max={Math.round(playlist.maxBPM)}
+                                    disabled={true}
+                                    valueLabelDisplay="auto"
+                                    track={false}
+                                />
+                                <Typography className={classes.sliderText} variant="body2">{Math.round(trackObj.audioFeatures.tempo)}</Typography>
+                                </Box>
+                                )}
+
+                        </Grid>
+                        )
+                    })}
+                </Reorder>
+        ) : (
+            <Fragment>
             {items.map((trackObj, index) => {
-                const height = trackObj.track.duration_ms / 10000
-                return (
-                    <Grid item key={index} className={classes.track}
-                        style={{
-                        height: height
-                    }} data={`${trackObj.track.artists[0].name} - ${Math.floor((trackObj.track.duration_ms/1000)/60)}:${Math.round((trackObj.track.duration_ms/1000)%60) < 10 ? '0' : ''}${Math.round((trackObj.track.duration_ms/1000)%60)}`}>
-                        <Typography variant="body2">{trackObj.track.name}</Typography>
-                        { trackObj.audioFeatures && (
-                            <Typography variant="body1">
-                                {`${Math.round(trackObj.audioFeatures.tempo)} BPM`}
-                            </Typography>)}
-                    </Grid>
+                const key = `${trackObj.track.id}${index}`
+                return trackObj && trackObj.track && trackObj.track.id && (
+                <Track key={key} classes={classes} trackObj={trackObj} index={index} playlist={playlist} />
                 )
             })}
-            {
-                    // this.state.list.map((item) => (
-                    //     <li key={item.name}>
-                    //     {item.name}
-                    //     </li>
-                    // )).toArray()
-                    /*
-                    Note this example is an ImmutableJS List so we must convert it to an array.
-                    I've left this up to you to covert to an array, as react-reorder updates a lot,
-                    and if I called this internally it could get rather slow,
-                    whereas you have greater control over your component updates.
-                    */
-                    }
-                </Reorder>
+            </Fragment>
         ) : null}
         </Grid>
         </div>

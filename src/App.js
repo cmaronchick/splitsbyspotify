@@ -159,9 +159,9 @@ class App extends Component {
                   <Route path={['/profile','/user/:spotifyUser']} render={({match}) => 
                     <Profile selectedUser={match.params.spotifyUser} handleSpotifyLogin={this.handleSpotifyLogin} />
                   } />
-                  <Route path={['/playlist/:firebasePlaylistId', '/playlist']} render={({match}) => (
+                  <Route path={['/playlist/:firebasePlaylistId', '/playlist', '/spotifyplaylist/:spotifyPlaylistId']} render={({match}) => match.params.firebasePlaylistId ? (
                     <Playlist firebasePlaylistId={match.params.firebasePlaylistId}/>
-                    )} />
+                    ) : match.params.spotifyPlaylistId && (<Playlist spotifyPlaylistId={match.params.spotifyPlaylistId}/>)} />
                   <Route path='/Playlists' component={Playlists} />
                   <Route path="/Cookies" component={Cookies} />
                   <Route path='/' render={({match}) => {

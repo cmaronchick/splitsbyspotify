@@ -13,7 +13,10 @@ import {
     LOADING_PLAYLISTS_MY,
     LOADING_PLAYLISTS_MY_FROM_SPOTIFY,
     MARK_NOTIFICATIONS_READ,
-    SET_OTHER_USER} from '../types'
+    SET_OTHER_USER,
+    LOADING_SPLITS,
+    SAVE_SPLITS,
+    DELETE_SPLITS } from '../types'
 import ky from 'ky/umd'
 import { getUrlParameters } from '../../functions/utils'
 import {spotifyConfig} from '../../constants/spotifyConfig'
@@ -21,7 +24,7 @@ import firebase from '../../constants/firebase'
 import { generateRandomString } from '../../functions/utils'
 import store from '../store'
 
-import { getAllMyPlaylistsFromSpotify, getMyPlaylists, getMyPlaylist } from './spotifyActions'
+import { getAllMyPlaylistsFromSpotify, getMyPlaylists, getMyPlaylist, getSinglePlaylistFromSpotify } from './spotifyActions'
 
 const api = ky.create({prefixUrl: process.env.NODE_ENV === 'production' ? 'https://us-central1-splitsbyspotify.cloudfunctions.net/api/' : 'http://localhost:5001/splitsbyspotify/us-central1/api/'});
 
@@ -398,6 +401,10 @@ export const getUserData = (accessToken, IDToken) => async (dispatch) => {
         if (window.location.pathname.indexOf('/playlist') > -1 && window.location.pathname.split('/').length > 2) {
             firebasePlaylistId = window.location.pathname.split('/')[2]
             dispatch(getMyPlaylist(firebasePlaylistId))
+        } else if (window.location.pathname.indexOf('/spotifyplaylist') > -1 && window.location.pathname.split('/').length > 2) {
+            const spotifyPlaylistId = window.location.pathname.split('/')[2]
+            dispatch(getMyPlaylist(null, spotifyPlaylistId))
+
         } else if (window.location.pathname.indexOf('/user/') > -1) {
             let spotifyUser = window.location.pathname.split('/')[2]
             dispatch(getOtherUserDetails(spotifyUser))
@@ -422,4 +429,33 @@ export const getOtherUserDetails = (spotifyUser) => async (dispatch) => {
         payload: otherProfile.userDetails
     })
 
+}
+
+export const saveSplits = ({ firebasePlaylistId, selectedDistance, targetPace, selectedMeasurement}) => async (dispatch) => {
+    dispatch({ type: LOADING_SPLITS })
+    let splitsObj = { firebasePlaylistId, selectedDistance, targetPace, selectedMeasurement}
+    try {
+        let FBUser = store.getState().user.FBUser
+        console.log('FBUser', FBUser)
+        let FBIDToken = await firebase.auth().currentUser.getIdToken()
+        localStorage.FBIDToken = FBIDToken
+
+        let saveUserResponse = await api.post(`user/${FBUser.credentials.spotifyUser}/splits`, {
+            headers: {
+                Authorization: `Bearer ${FBIDToken}`,
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify(splitsObj)
+        }).json()
+        dispatch({
+            type: SAVE_SPLITS,
+            payload: splitsObj
+        })
+    } catch(saveSplitsError) {
+        console.log('saveSplitsError', saveSplitsError)
+    }
+}
+
+export const deleteSplits = () => (dispatch) => {
+    
 }

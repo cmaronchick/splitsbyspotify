@@ -3,6 +3,7 @@ const { db } = require('../util/admin')
 const getPlaylists = (req, res) => {
     db
         .collection('playlists')
+        .where('public','==','true')
         .orderBy('createdAt', 'desc')
         .get()
         .then(data => {
@@ -66,6 +67,50 @@ const getPlaylist = (req, res, next) => {
             }
             playlistData = doc.data()
             playlistData.firebasePlaylistId = doc.id;
+            return db.collection('comments')
+            .where('firebasePlaylistId', '==', firebasePlaylistId)
+            .orderBy('createdAt', 'asc')
+            .get()
+        })
+        .then(data => {
+            playlistData.comments = []
+            if (data.docs && data.docs.length > 0) {
+                data.forEach(doc => {
+                    const commentData = doc.data()
+                    commentData.id = doc.id
+                    playlistData.comments.push(commentData)
+                })
+            }
+            return res.status(200).json({message: 'Playlist retrieved successfully', playlistData})
+        })
+        .catch(getPlaylistError => {
+            console.error('getPlaylistError: ', getPlaylistError.message)
+            req.error = getPlaylistError;
+            return next()
+        })
+}
+
+const getPlaylistBySpotifyId = (req, res, next) => {
+    let playlistData = {};
+    const { spotifyPlaylistId } = req.params;
+
+    if (!spotifyPlaylistId) {
+        return res.status(500).json({ error: 'No playlist id provided'})
+    }
+console.log('spotifyPlaylistId', spotifyPlaylistId)
+    return db
+        .collection('playlists')
+        .where('spotifyPlaylistId','==',spotifyPlaylistId)
+        .limit(1)
+        .get()
+        .then(data => {
+            if (!data || data.docs.length === 0) {
+                throw new Error(JSON.stringify({ code: 404, message: 'No playlist found' }))
+            }
+            let doc = data.docs[0]
+            playlistData = doc.data()
+            const firebasePlaylistId = doc.id;
+            playlistData.firebasePlaylistId = firebasePlaylistId;
             return db.collection('comments')
             .where('firebasePlaylistId', '==', firebasePlaylistId)
             .orderBy('createdAt', 'asc')
@@ -362,6 +407,16 @@ const updatePlaylist = (req, res, next) => {
         photoURL: req.user.photoURL
     }
 
+    if (req.body.selectedDistance) {
+        updatedPlaylist.selectedDistance = parseFloat(req.body.selectedDistance)
+    }
+    if (req.body.targetPace) {
+        updatedPlaylist.targetPace = req.body.targetPace
+    }
+    if (req.body.selectedMeasurement) {
+        updatedPlaylist.selectedMeasurement = req.body.selectedMeasurement
+    }
+
     if (req.body.avgBPM) {
         updatedPlaylist.avgBPM = parseFloat(req.body.avgBPM)
     }
@@ -517,4 +572,4 @@ const unfollowPlaylist = (req, res, next) => {
         })
 }
 
-module.exports = { getPlaylists, getMyPlaylists, getPlaylist, addPlaylist, deletePlaylist, updatePlaylist, followPlaylist, unfollowPlaylist, commentOnPlaylist, deleteCommentOnPlaylist, likeAPlaylist, unlikeAPlaylist }
+module.exports = { getPlaylists, getMyPlaylists, getPlaylist, getPlaylistBySpotifyId, addPlaylist, deletePlaylist, updatePlaylist, followPlaylist, unfollowPlaylist, commentOnPlaylist, deleteCommentOnPlaylist, likeAPlaylist, unlikeAPlaylist }

@@ -10,6 +10,7 @@ const {
     getPlaylists,
     getMyPlaylists,
     getPlaylist,
+    getPlaylistBySpotifyId,
     deletePlaylist,
     addPlaylist,
     updatePlaylist,
@@ -26,6 +27,8 @@ const {
     getAuthenticatedUser,
     addUserDetails,
     getUserDetails,
+    saveSplits,
+    deleteSplits,
     spotifyLogin,
     createFirebaseAccount,
     markNotificationsAsRead } = require('./handlers/users')
@@ -39,6 +42,7 @@ const {errors} = require('./handlers/errors')
 app.get('/playlists', getPlaylists)
 app.get('/playlists/my', FBAuth, getMyPlaylists, errors)
 app.post('/playlists', FBAuth, addPlaylist, errors)
+app.get('/playlists/spotify/:spotifyPlaylistId', getPlaylistBySpotifyId, errors)
 app.get('/playlists/:firebasePlaylistId', getPlaylist, errors)
 app.post('/playlists/:firebasePlaylistId', FBAuth, updatePlaylist, errors)
 app.post('/playlists/:firebasePlaylistId/follow', FBAuth, followPlaylist, errors)
@@ -56,6 +60,8 @@ app.post('/user/image', FBAuth, uploadImage)
 app.get('/user', FBAuth, getAuthenticatedUser)
 app.post('/user', FBAuth, addUserDetails)
 app.get('/user/:spotifyUser', getUserDetails, errors)
+app.post('/user/:spotifyUser/splits', FBAuth, saveSplits, errors)
+app.delete('/user/:spotifyUser/splits', FBAuth, deleteSplits, errors)
 app.post('/notifications', FBAuth, markNotificationsAsRead)
 
 // Spotify

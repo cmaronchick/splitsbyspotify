@@ -8,6 +8,7 @@ import Card from '@material-ui/core/Card'
 import CardHeader from '@material-ui/core/CardHeader'
 import CardContent from '@material-ui/core/CardContent'
 import CircularProgress from '@material-ui/core/CircularProgress'
+import Slider from '@material-ui/core/Slider'
 import Box from '@material-ui/core/Box'
 
 import SpotifyImage from '../images/Spotify_Icon_RGB_Green.png'
@@ -35,6 +36,11 @@ const styles = (theme) => ({
     },
     card: {
         margin: 10
+    },
+    slider: {
+        padding: '0 20px',
+        width: '90%',
+        textAlign: 'center'
     }
 })
 
@@ -62,7 +68,8 @@ const Playlist = (props) => {
     
 
     const handleShowCommentsDialog = () => {
-        props.toggleCommentsDialog(props.showCommentsDialog)
+        console.log('comments clicked', props.showCommentsDialog)
+        props.toggleCommentsDialog(props.showCommentsDialog, firebasePlaylistId)
     }
 
     return authenticated ? ((
@@ -97,18 +104,40 @@ const Playlist = (props) => {
                                 Get Audio Analysis
                             </Button> */}
                             {playlistObj.avgBPM && (
-                                <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly'}}>
-                                    <div>Average BPM: {playlistObj.avgBPM.toFixed(2)}</div>
-                                    <div>Min: {Math.round(playlistObj.minBPM)}</div>
-                                    <div>Max: {Math.round(playlistObj.maxBPM)}</div>
-                                </div>)}
-                            <PlaylistActions 
-                            playlist={playlistObj} 
-                            likePlaylist={props.likePlaylist} 
-                            unlikePlaylist={props.unlikePlaylist} 
-                            likeCount={likeCount} 
-                            commentCount={commentCount} 
-                            handleShowCommentsDialog={handleShowCommentsDialog}/>
+                                <div className={classes.slider}>
+                                    <Typography variant="h5">
+                                        Beats per Minute
+                                    </Typography>
+                                    <Slider 
+                                        defaultValue={Math.round(playlistObj.avgBPM)}
+                                        min={Math.round(playlistObj.minBPM)}
+                                        max={Math.round(playlistObj.maxBPM)}
+                                        marks={[
+                                        {
+                                            value: Math.round(playlistObj.minBPM),
+                                            label: `Min ${Math.round(playlistObj.minBPM)}`
+                                        },
+                                        {
+                                            value: playlistObj.avgBPM.toFixed(2),
+                                            label: `Avg ${playlistObj.avgBPM.toFixed(2)}`
+                                        },
+                                        {
+                                            value: Math.round(playlistObj.maxBPM),
+                                            label: `Max ${Math.round(playlistObj.maxBPM)}`
+                                        }]}
+                                        disabled={true}
+                                    />
+                                </div>
+                            )}
+                            {playlistObj.firebasePlaylistId && (
+                                <PlaylistActions 
+                                playlist={playlistObj} 
+                                likePlaylist={props.likePlaylist} 
+                                unlikePlaylist={props.unlikePlaylist} 
+                                likeCount={likeCount} 
+                                commentCount={commentCount} 
+                                handleShowCommentsDialog={handleShowCommentsDialog}/>
+                            )}
                         </Grid>
                         {tracks && tracks.items && 
                         (<Grid item xs={12}>
@@ -122,33 +151,33 @@ const Playlist = (props) => {
                     </Fragment>
                 )}
                 </Grid>
-                <Comments
-                    open={props.showCommentsDialog}
-                    playlistName={playlistName}
-                    spotifyPlaylistId={spotifyPlaylistId}
-                    firebasePlaylistId={firebasePlaylistId}
-                    comments={comments}
-                    onClose={handleShowCommentsDialog}
-                    user={props.FBuser} />
+                {playlistObj.firebasePlaylistId && (
+                    <Comments
+                        open={props.showCommentsDialog}
+                        playlistName={playlistName}
+                        spotifyPlaylistId={spotifyPlaylistId}
+                        firebasePlaylistId={firebasePlaylistId}
+                        comments={comments}
+                        onClose={handleShowCommentsDialog}
+                        user={props.FBuser} />
+                )}
         </Grid>
     )) : (
         <Introduction />
     )
 }
 
-const mapActionsToProps = dispatch => ({
+const mapActionsToProps = {
     setSelectedDistance,
     setTargetPace,
     calculateSplits,
-    getMyPlaylist: firebasePlaylistId => {
-        dispatch(getMyPlaylist(firebasePlaylistId))
-    },
+    getMyPlaylist,
     getSinglePlaylistFromSpotify,
     getTrackAudioFeatures,
     likePlaylist,
     unlikePlaylist,
     toggleCommentsDialog
-})
+}
 
 const mapStateToProps = (state) => ({
     playlistObj: state.spotify.playlist,

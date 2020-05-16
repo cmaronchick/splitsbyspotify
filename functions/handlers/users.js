@@ -108,9 +108,9 @@ const login = (req, res) => {
     })
 }
 
-createFirebaseAccount = (req, res) => {
+const createFirebaseAccount = (req, res) => {
     const {spotifyID, display_name, email, accessToken} = req.body
-    console.log({spotifyID, display_name, email, accessToken})
+    // console.log({spotifyID, display_name, email, accessToken})
     // The UID we'll assign to the user.
     const uid = `spotify:${spotifyID}`;
   
@@ -235,13 +235,11 @@ const getAuthenticatedUser = (req, res, next) => {
                 throw new Error(JSON.stringify({ code: 404, message: 'User not found'}))
             }
         })
+
         .then(data => {
             userData.playlists = {}
             if (data && data.docs && data.docs.length > 0) {
-                console.log('data.docs.length', data.docs.length)
                 data.docs.forEach(doc => {
-                    console.log('doc.id', doc.id)
-
                     userData.playlists[doc.id] = {
                         firebasePlaylistId: doc.id,
                         inMyPlaylists: true,
@@ -278,6 +276,21 @@ const getAuthenticatedUser = (req, res, next) => {
                     userData.likes.push({likeId: like.id, ...like})
                 })
             }
+            return db.collection('savedSplits')
+                .where('spotifyUserId','==', req.user.spotifyUser)
+                .get()
+        })
+        .then(splits => {
+            userData.splits = {}
+            if (splits && splits.docs && splits.docs.length > 0) {
+                splits.docs.forEach(split => {
+                    const data = split.data()
+                    userData.splits[data.firebasePlaylistId] = {
+                        ...data
+                    }
+                })
+            }
+
             return res.status(200).json(userData)
             //return next()
         })
@@ -423,4 +436,64 @@ const markNotificationsAsRead = (req, res, next) => {
 
 }
 
-module.exports = { signUp, login, uploadImage, getAuthenticatedUser, addUserDetails, getUserDetails, spotifyLogin, createFirebaseAccount, markNotificationsAsRead }
+const saveSplits = (req, res) => {
+    if (!req.body) {
+        return res.status(500).json({ message: 'Something went wrong.'})
+    }
+    const { spotifyUser } = req.user
+    const { firebasePlaylistId, selectedDistance, targetPace, selectedMeasurement } = req.body
+
+    const splitsObject = { spotifyUserId: spotifyUser, firebasePlaylistId, selectedDistance, targetPace, selectedMeasurement }
+    
+    return db.collection('savedSplits')
+        .where('firebasePlaylistId','==',firebasePlaylistId)
+        .where('spotifyUserId','==',splitsObject.spotifyUserId)
+        .get()
+        .then(data => {
+            if (data.docs.length === 0) {
+                return db.collection('savedSplits').add(splitsObject)
+            }
+            const doc = data.docs[0]
+            return db.doc(`/savedSplits/${doc.id}`).update(splitsObject)
+        })
+        .then(writeResponse => {
+            console.log('writeResponse', writeResponse)
+            return res.status(200).json({ message: 'Splits saved successfully'})
+        })
+        .catch(savedSplitError => {
+            console.log('savedSplitError', savedSplitError)
+            return res.status(500).json({ message: `${savedSplitError}`})
+        })
+}
+
+const deleteSplits = (req, res) => {
+    if (!req.body) {
+        return res.status(500).json({ message: 'Something went wrong.'})
+    }
+    const { spotifyUser } = req.user
+    const { firebasePlaylistId, selectedDistance, targetPace, selectedMeasurement } = req.body
+
+    const splitsObject = { spotifyUserId: spotifyUser, firebasePlaylistId, selectedDistance, targetPace, selectedMeasurement }
+    
+    return db.collection('savedSplits')
+        .where('firebasePlaylistId','==',firebasePlaylistId)
+        .where('spotifyUserId','==',splitsObject.spotifyUserId)
+        .get()
+        .then(data => {
+            if (data.docs.length === 0) {
+                return res.status(404).json({message: 'Saved Split not found'})
+            }
+            const doc = data.docs[0]
+            return db.doc(`/savedSplits/${doc.id}`).delete()
+        })
+        .then(writeResponse => {
+            console.log('writeResponse', writeResponse)
+            return res.status(200).json({ message: 'Splits deleted successfully'})
+        })
+        .catch(savedSplitError => {
+            console.log('savedSplitError', savedSplitError)
+            return res.status(500).json({ message: `${savedSplitError}`})
+        })
+}
+
+module.exports = { signUp, login, uploadImage, getAuthenticatedUser, addUserDetails, getUserDetails, spotifyLogin, createFirebaseAccount, markNotificationsAsRead, saveSplits, deleteSplits }

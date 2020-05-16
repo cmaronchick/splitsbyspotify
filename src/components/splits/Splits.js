@@ -15,8 +15,8 @@ const styles = (theme) => ({
 
 const Splits = props => {
     const { splits, targetPace, classes } = props
-    const targetPaceMin = parseInt(targetPace.split(':')[0])
-    const targetPaceSec = parseInt(targetPace.split(':')[1])
+    const targetPaceMin = targetPace && (parseInt(targetPace.split(':')[0]))
+    const targetPaceSec = targetPace && (parseInt(targetPace.split(':')[1]))
     const targetPace_ms = ((targetPaceMin*60) + targetPaceSec) * 1000
     return (
         <Grid>
@@ -42,9 +42,9 @@ const Splits = props => {
 }
 
 Splits.propTypes = {
-    splits: PropTypes.array.isRequired,
-    targetPace: PropTypes.string.isRequired,
-    selectedDistance: PropTypes.number.isRequired
+    splits: PropTypes.array,
+    targetPace: PropTypes.string,
+    selectedDistance: PropTypes.number
 }
 
 

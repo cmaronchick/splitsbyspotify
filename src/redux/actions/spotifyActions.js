@@ -30,8 +30,10 @@ import {
     UPDATING_PLAYLIST,
     SET_ERRORS,
     CLEAR_ERRORS,
-    LOADING_PLAYLIST} from '../types'
+    LOADING_PLAYLIST,
+SET_TARGET_PACE, SET_SELECTED_DISTANCE, SET_SELECTED_MEASUREMENT, SET_SPLITS} from '../types'
 import { updateTokens, refreshTokens } from './userActions'
+import { calculateSplits } from './splitsActions'
 import ky from 'ky/umd'
 import firebase from '../../constants/firebase'
 import store from '../store'
@@ -133,7 +135,7 @@ export const getPlaylistsFromSpotify = (playlists) => async (dispatch) => {
 
 export const updatePlaylist = (playlist) => async (dispatch) => {
     try {
-        const { id, firebasePlaylistId, name, collaborative, images, avgBPM, minBPM, maxBPM, owner } = playlist
+        const { id, firebasePlaylistId, name, collaborative, images, avgBPM, minBPM, maxBPM, owner, targetPace, selectedDistance, selectedMeasurement } = playlist
         const publicPlaylist = playlist.public
         const searchParams = new URLSearchParams()
         searchParams.set('spotifyPlaylistId', id)
@@ -141,6 +143,11 @@ export const updatePlaylist = (playlist) => async (dispatch) => {
         searchParams.set('playlistImage', images[0].url)
         searchParams.set('public', publicPlaylist)
         searchParams.set('collaborative', collaborative)
+        if (targetPace && selectedDistance && selectedMeasurement) {
+            searchParams.set('targetPace', targetPace)
+            searchParams.set('selectedDistance', selectedDistance)
+            searchParams.set('selectedMeasurement', selectedMeasurement)
+        }
         if (avgBPM) {
             searchParams.set('avgBPM', avgBPM)
             searchParams.set('minBPM', minBPM)
@@ -181,7 +188,7 @@ export const getSinglePlaylistFromSpotify = (spotifyAccessToken, spotifyPlaylist
     
   }
   try {
-    let followPlaylistResponse = await ky.get(`https://api.spotify.com/v1/playlists/${spotifyPlaylistResponse}/followers/contains?ids=${store.getState().user.spotifyUser.id}`, {
+    let followPlaylistResponse = await ky.get(`https://api.spotify.com/v1/playlists/${spotifyPlaylistId}/followers/contains?ids=${store.getState().user.spotifyUser.id}`, {
     headers: {
         Authorization: `Bearer ${spotifyAccessToken}`
     }
@@ -292,14 +299,13 @@ export const getTrackAudioFeatures = (spotifyAccessToken, playlist) => async (di
 
 // GET SINGLE PLAYLISTS
 
-export const getMyPlaylist = (firebasePlaylistId) => async (dispatch) => {
+export const getMyPlaylist = (firebasePlaylistId, spotifyPlaylistId) => async (dispatch) => {
     dispatch({
         type: LOADING_PLAYLIST
     })
     let updatedTokens = await dispatch(updateTokens())
     let spotifyAccessToken = store.getState().user.spotifyAccessToken
 
-    let spotifyRefreshToken = localStorage.spotifyRefreshToken
     let playlist;
     try {
         // let FBIDToken = await firebase.auth().currentUser.getIdToken()
@@ -308,19 +314,17 @@ export const getMyPlaylist = (firebasePlaylistId) => async (dispatch) => {
         //             Authorization: `Bearer ${FBIDToken}`
         //         }
         //     }).json()
-        let getPlaylistResponse = await api.get(`playlists/${firebasePlaylistId}`).json()
-        // console.log('store.getState().user.spotifyAccessToken', store.getState().user.spotifyAccessToken)
-        playlist = {...getPlaylistResponse.playlistData}
+        if (firebasePlaylistId) {
+            let getPlaylistResponse = await api.get(`playlists/${firebasePlaylistId}`).json()
+            // console.log('store.getState().user.spotifyAccessToken', store.getState().user.spotifyAccessToken)
+            playlist = {...getPlaylistResponse.playlistData}
+        }
 
         /*check to see if user has access to the playlist
         Playlist must be public or must belong to the user
         */
 
-       let FBUser = await firebase.auth().currentUser
-       if (!FBUser) {
-           dispatch(updateTokens(spotifyRefreshToken))
-       }
-       let spotifyPlaylistResponse = await ky.get(`https://api.spotify.com/v1/playlists/${playlist.spotifyPlaylistId}`, {
+       let spotifyPlaylistResponse = await ky.get(`https://api.spotify.com/v1/playlists/${playlist && playlist.spotifyPlaylistId ? playlist.spotifyPlaylistId : spotifyPlaylistId}`, {
            headers: {
                Authorization: `Bearer ${spotifyAccessToken}`
            }
@@ -330,16 +334,50 @@ export const getMyPlaylist = (firebasePlaylistId) => async (dispatch) => {
            ...playlist,
            ...spotifyPlaylistResponse
        }
-       firebase.analytics().logEvent('getPlaylist', { firebasePlaylistId })
+       firebase.analytics().logEvent('getPlaylist', {
+           firebasePlaylistId: firebasePlaylistId ? firebasePlaylistId : null,
+           spotifyPlaylistId: spotifyPlaylistId ? spotifyPlaylistId : null
+        })
+        if (!playlist.spotifyPlaylistId) {
+            playlist.spotifyPlaylistId = spotifyPlaylistId
+        }
 
         dispatch({
             type: SET_PLAYLIST,
             payload: playlist
         })
+        dispatch({
+            type: CLEAR_ERRORS
+        })
         dispatch(getFollowPlaylistOnSpotify(store.getState().user.spotifyAccessToken, playlist))
         dispatch(getFollowUserOnSpotify(store.getState().user.spotifyAccessToken, playlist.owner.id))
         dispatch(getTrackAudioFeatures(store.getState().user.spotifyAccessToken, playlist))
+        const userSplits = store.getState().user.FBUser.splits
+        let playlistSplits = userSplits && userSplits[playlist.firebasePlaylistId] ? userSplits[playlist.firebasePlaylistId] : null
+        if (!store.getState().splits.selectedDistance && playlistSplits) {
+            dispatch({
+                type: SET_SELECTED_DISTANCE,
+                payload: playlistSplits.selectedDistance
+            })
+        }
+        if (!store.getState().splits.selectedMeasurement && playlistSplits) {
+            dispatch({
+                type: SET_SELECTED_MEASUREMENT,
+                payload: playlistSplits.selectedMeasurement
+            })
+        }
+        if (store.getState().splits.targetPace === null && playlistSplits) {
+            dispatch({
+                type: SET_TARGET_PACE,
+                payload: playlistSplits.targetPace
+            })
+        }
+        if ((!store.getState().splits.splits || store.getState().splits.splits.length === 0) && playlistSplits &&
+        playlistSplits.selectedDistance && playlistSplits.selectedMeasurement && playlistSplits.targetPace) {
+            dispatch(calculateSplits(playlistSplits.selectedDistance, playlistSplits.targetPace))
+        }
     } catch (getFirebasePlaylistErrors) {
+        console.log('getFirebasePlaylistErrors', getFirebasePlaylistErrors)
         let getFirebasePlaylistErrorsJSON = ''
         if (getFirebasePlaylistErrors.response) {
             getFirebasePlaylistErrorsJSON = await getFirebasePlaylistErrors.response.json()
@@ -354,6 +392,89 @@ export const getMyPlaylist = (firebasePlaylistId) => async (dispatch) => {
     }
 }
 
+export const getMyPlaylistBySpotifyId = (spotifyPlaylistId) => async (dispatch) => {
+    dispatch({
+        type: LOADING_PLAYLIST
+    })
+    let updatedTokens = await dispatch(updateTokens())
+    let spotifyAccessToken = store.getState().user.spotifyAccessToken
+
+    let playlist;
+    try {
+        let getPlaylistResponse = await api.get(`playlists/spotify/${spotifyPlaylistId}`).json()
+        // console.log('store.getState().user.spotifyAccessToken', store.getState().user.spotifyAccessToken)
+        playlist = {...getPlaylistResponse.playlistData}
+
+        /*check to see if user has access to the playlist
+        Playlist must be public or must belong to the user
+        */
+
+       let spotifyPlaylistResponse = await ky.get(`https://api.spotify.com/v1/playlists/${spotifyPlaylistId}`, {
+           headers: {
+               Authorization: `Bearer ${spotifyAccessToken}`
+           }
+       }).json()
+       spotifyPlaylistResponse.firebasePlaylistId = playlist.firebasePlaylistId
+       playlist = {
+           ...playlist,
+           ...spotifyPlaylistResponse
+       }
+       firebase.analytics().logEvent('getPlaylist', {
+           firebasePlaylistId: playlist.firebasePlaylistId ? playlist.firebasePlaylistId : null,
+           spotifyPlaylistId: spotifyPlaylistId ? spotifyPlaylistId : null
+        })
+        if (!playlist.spotifyPlaylistId) {
+            playlist.spotifyPlaylistId = spotifyPlaylistId
+        }
+
+        dispatch({
+            type: SET_PLAYLIST,
+            payload: playlist
+        })
+        console.log('playlist', playlist)
+        dispatch(getFollowPlaylistOnSpotify(store.getState().user.spotifyAccessToken, playlist))
+        dispatch(getFollowUserOnSpotify(store.getState().user.spotifyAccessToken, playlist.owner.id))
+        dispatch(getTrackAudioFeatures(store.getState().user.spotifyAccessToken, playlist))
+        
+        if (!store.getState().splits.selectedDistance && playlist.selectedDistance) {
+            dispatch({
+                type: SET_SELECTED_DISTANCE,
+                payload: playlist.selectedDistance
+            })
+        }
+        if (!store.getState().splits.selectedMeasurement && playlist.selectedMeasurement) {
+            dispatch({
+                type: SET_SELECTED_MEASUREMENT,
+                payload: playlist.selectedMeasurement
+            })
+        }
+        if (store.getState().splits.targetPace === null && playlist.targetPace) {
+            dispatch({
+                type: SET_TARGET_PACE,
+                payload: playlist.targetPace
+            })
+        }
+        if ((!store.getState().splits.splits || store.getState().splits.splits.length === 0) &&
+        playlist.selectedDistance && playlist.selectedMeasurement && playlist.targetPace) {
+            dispatch(calculateSplits(playlist.selectedDistance, playlist.targetPace))
+        }
+    } catch (getFirebasePlaylistErrors) {
+        console.log('getFirebasePlaylistErrors', getFirebasePlaylistErrors)
+        let getFirebasePlaylistErrorsJSON = ''
+        if (getFirebasePlaylistErrors.response) {
+            getFirebasePlaylistErrorsJSON = await getFirebasePlaylistErrors.response.json()
+        } else {
+            getFirebasePlaylistErrorsJSON = getFirebasePlaylistErrors
+        }
+        firebase.analytics().logEvent('error', {request: 'getMyPlaylist'})
+        dispatch({
+            type: SET_ERRORS,
+            payload: getFirebasePlaylistErrorsJSON
+        })
+    }
+
+
+ }
 export const addToMyPlaylists = (playlist) => async (dispatch) => {
     let spotifyRefreshToken = localStorage.spotifyRefreshToken
     let FBUser = await firebase.auth().currentUser
@@ -587,6 +708,7 @@ export const commentOnPlaylist = (firebasePlaylistId, commentBody) => async (dis
 }
 
 export const toggleCommentsDialog = (showCommentsDialog, firebasePlaylistId) => (dispatch) => {
+    console.log('showCommentsDialog', showCommentsDialog)
     dispatch({
         type: showCommentsDialog ? HIDE_COMMENT_DIALOG : SHOW_COMMENT_DIALOG
     })

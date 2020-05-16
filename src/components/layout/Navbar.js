@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import AppBar from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
 import Button from '@material-ui/core/Button'
-import AddIcon from '@material-ui/icons/Add'
 import HomeIcon from '@material-ui/icons/Home'
 import Notifications from './Notifications'
 
@@ -25,7 +24,7 @@ const Navbar = (props) => {
     return (
         <AppBar>
             <Toolbar className="nav-container">
-                <Button color="inherit" component={Link} to="/">My {window.innerWidth > 500 ? `Playlists` : `Lists`}</Button>
+    <Button color="inherit" component={Link} to="/">{window.innerWidth > 500 ? `My Playlists` : <HomeIcon />}</Button>
                 <Button color="inherit" component={Link} to="/Playlists">Browse {window.innerWidth > 500 ? `Playlists` : `All`}</Button>
                 {/* show Login button only if user is not authenticated */}
                 {!authenticated ? (

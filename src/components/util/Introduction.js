@@ -76,7 +76,7 @@ const Introduction = props => {
                         </ListItemText>
                     </ListItem>
                 </List>
-            <Button className={classes.spotifyLoginButton} variant="contained" color="primary" onClick={() => props.handleSpotifyLogin()}>
+            <Button className={classes.spotifyLoginButton} disabled={props.user.loading} variant="contained" color="primary" onClick={() => props.handleSpotifyLogin()}>
             {props.user.loading ? (
                     <CircularProgress size={30} className={classes.progress} />
                 ) : (

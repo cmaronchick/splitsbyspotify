@@ -12,6 +12,7 @@ import GridListTileBar from '@material-ui/core/GridListTileBar';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import AddCircle from '@material-ui/icons/AddCircle'
 import RemoveCircle from '@material-ui/icons/RemoveCircle'
+import AccountCircle from '@material-ui/icons/AccountCircle'
 import CircularProgress from '@material-ui/core/CircularProgress'
 
 import MyButton from '../util/MyButton'
@@ -27,7 +28,7 @@ import {
     followPlaylist,
     unfollowPlaylist
 } from '../redux/actions/spotifyActions'
-import { getOtherUserDetails } from '../redux/actions/userActions'
+import { getOtherUserDetails, handleSpotifyLogin } from '../redux/actions/userActions'
 import { connect } from 'react-redux'
 
 const styles = (theme) => ({
@@ -82,6 +83,7 @@ const Playlists = props => {
             const playlist = playlists[playlistId]
             console.log('playlist', playlist)
             const { firebasePlaylistId, playlistImage, playlistName } = playlist
+            console.log('FBUser, spotifyUser', FBUser, spotifyUser)
             return (
                 <GridListTile key={firebasePlaylistId}>
                 <img src={playlistImage} alt={playlistName} />
@@ -93,7 +95,8 @@ const Playlists = props => {
                     </Link>}
                 subtitle={showUser(playlist.spotifyUser, playlist.avgBPM)}
                 className={classes.subTitle}
-                actionIcon={spotifyUser && spotifyUser.id !== playlist.spotifyUser && (!playlist.firebaseFollowers || !playlist.firebaseFollowers[spotifyUser.id] ? (
+                actionIcon={spotifyUser && spotifyUser.id && FBUser && FBUser.credentials && FBUser.credentials.spotifyUser
+                    ? spotifyUser.id !== playlist.spotifyUser && (!playlist.firebaseFollowers || !playlist.firebaseFollowers[spotifyUser.id] ? (
                     <MyButton tip={`Add ${playlistName} to My Playlists`} onClick={() => props.followPlaylist(FBUser, playlist)}
                     tipPlacement='bottom' btnClassName={classes.followButton}>
                         <AddCircle />
@@ -103,7 +106,13 @@ const Playlists = props => {
                         tipPlacement='bottom' btnClassName={classes.followButton}>
                             <RemoveCircle />
                         </MyButton>
-                    ))}
+                    )) : (
+
+                        <MyButton tip={`Log in to Spotify`} onClick={() => props.handleSpotifyLogin()}
+                        tipPlacement='bottom' btnClassName={classes.followButton}>
+                            <AccountCircle />
+                        </MyButton>
+                    )}
                     />
                 </GridListTile>
             )
@@ -128,7 +137,8 @@ const mapActionsToProps = {
     unlikePlaylist,
     followPlaylist,
     unfollowPlaylist,
-    getOtherUserDetails
+    getOtherUserDetails,
+    handleSpotifyLogin
 }
 
 const mapStateToProps = (state) => ({

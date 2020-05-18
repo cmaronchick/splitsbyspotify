@@ -5,12 +5,14 @@ import Toolbar from '@material-ui/core/Toolbar'
 import Button from '@material-ui/core/Button'
 import HomeIcon from '@material-ui/icons/Home'
 import Notifications from './Notifications'
+import Logo from '../../images/favicon.png'
 
 import MyButton from '../../util/MyButton'
 
 // Redux 
 import { connect } from 'react-redux'
 import { withStyles } from '@material-ui/core'
+import { handleSpotifyLogin } from '../../redux/actions/userActions'
 
 const Link = require('react-router-dom').Link
 
@@ -24,7 +26,10 @@ const Navbar = (props) => {
     return (
         <AppBar>
             <Toolbar className="nav-container">
-    <Button color="inherit" component={Link} to="/">{window.innerWidth > 500 ? `My Playlists` : <HomeIcon />}</Button>
+                <Link to="/">
+                    <img src={Logo} alt="Splits by Spotify" style={{width: 50, height: 50}} />
+                </Link>
+                <Button color="inherit" component={Link} to="/">{window.innerWidth > 500 ? `My Playlists` : <HomeIcon />}</Button>
                 <Button color="inherit" component={Link} to="/Playlists">Browse {window.innerWidth > 500 ? `Playlists` : `All`}</Button>
                 {/* show Login button only if user is not authenticated */}
                 {!authenticated ? (
@@ -54,4 +59,8 @@ const mapStateToProps = (state) => ({
     authenticated: state.user.authenticated
 })
 
-export default connect(mapStateToProps)(withStyles(styles)(Navbar))
+const mapActionsToProps = {
+    handleSpotifyLogin
+}
+
+export default connect(mapStateToProps, mapActionsToProps)(withStyles(styles)(Navbar))

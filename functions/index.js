@@ -124,8 +124,8 @@ exports.createNotificationsOnFollow = functions.region('us-central1').firestore.
         console.log(change.after.data())
         if (!change.before.data().firebaseFollowers || (Object.keys(change.before.data().firebaseFollowers).length < Object.keys(change.after.data().firebaseFollowers).length)) {
             // Filter only new users
-            let oldFollowers = Object.keys(change.before.data().firebaseFollowers)
-            let newFollowers = Object.keys(change.after.data().firebaseFollowers)
+            let oldFollowers = change.before.data().firebaseFollowers ? Object.keys(change.before.data().firebaseFollowers) : []
+            let newFollowers = change.after.data().firebaseFollowers ? Object.keys(change.after.data().firebaseFollowers) : []
             console.log('oldFollowers, newFollowers', oldFollowers, newFollowers)
             let newFollowerKeys = newFollowers.filter(key => {
                 return !oldFollowers[key]

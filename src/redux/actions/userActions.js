@@ -146,6 +146,8 @@ export const handleSpotifyLogin = () => {
     let state = generateRandomString(16)
     let stateKey = 'spotify_auth_state'
     localStorage[stateKey] = state
+
+    localStorage['loggedInPage'] = window.location.href
     let currentOrigin = window.location.origin
     window.location.href = `https://accounts.spotify.com/authorize?response_type=code&client_id=${spotifyConfig.client_id}&scope=${spotifyConfig.scope}&redirect_uri=${currentOrigin}/spotifyCallback&state=${state}`
   }

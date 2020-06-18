@@ -27,4 +27,4 @@ firebase-debug.log*
 splitsbyspotify-firebase-adminsdk-xkg5z.json
 
 src/constants/spotifyConfig.js
-.firebase/hosting.YnVpbGQ.cache
+.firebase/*.cache

@@ -21,7 +21,7 @@ import Splits from '../splits/Splits'
 
 import { connect } from 'react-redux'
 
-import { reorderPlaylist, submitReorderedPlaylistToSpotify } from '../../redux/actions/spotifyActions'
+import { reorderPlaylist, reorderByBPM, submitReorderedPlaylistToSpotify } from '../../redux/actions/spotifyActions'
 
 const styles = {
     tracksContainer: {
@@ -152,6 +152,20 @@ const Tracks = props => {
                             <CircularProgress size={30} />
                         )}
                     </Button>
+                    <Button
+                        style={{flex: 1, marginBottom: 10}}
+                        color={props.playlist.updated ? 'primary' : 'secondary'}
+                        variant="contained"
+                        disabled={props.spotify.playlistUpdating}
+                        onClick={() => props.reorderByBPM(props.playlist)}>
+                        {!props.spotify.playlistUpdating ? (
+                            <Typography variant="body1">
+                                Order by BPM
+                            </Typography>
+                        ) : (
+                            <CircularProgress size={30} />
+                        )}
+                    </Button>
                 </div>
             )}
         <div style={{position: 'relative'}}>
@@ -247,6 +261,7 @@ const mapStateToProps = (state) => ({
 
 const mapActionsToProps = {
     reorderPlaylist,
+    reorderByBPM,
     submitReorderedPlaylistToSpotify
 }
 

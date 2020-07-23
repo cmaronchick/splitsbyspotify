@@ -28,6 +28,7 @@
     "redux-thunk": "^2.3.0"
   },
   "scripts": {
+    "dev": "concurrently \"cd functions && firebase serve\" \"yarn start\"",
     "start": "react-scripts start",
     "prod": "set NODE_ENV=production && react-scripts start",
     "build": "react-scripts build",
@@ -52,9 +53,10 @@
   "homepage": "https://splitsbyspotify.firebaseapp.com",
   "proxy": "https://us-central1-splitsbyspotify.cloudfunctions.net/api",
   "devDependencies": {
+    "concurrently": "^5.2.0",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",
-    "jest": "^26.0.1",
+    "jest": "^24.9.0",
     "jest-enzyme": "^7.1.2"
   }
 }

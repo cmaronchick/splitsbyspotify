@@ -857,6 +857,28 @@ export const reorderPlaylist = (reorderedTracks) => (dispatch) => {
     })
 }
 
+export const reorderByBPM = (playlist) => (dispatch) => {
+    firebase.analytics().logEvent('reorderedPlaylistByBPM', { submitted: false })
+    let reorderedTracks = [...playlist.tracks.items]
+    reorderedTracks.sort((a,b) => {
+        if (a.audioFeatures && b.audioFeatures) {
+            return a.audioFeatures.tempo - b.audioFeatures.tempo;
+        } else if (!a.audioFeatures && b.audioFeatures) {
+            return -1;
+        } else if (a.audioFeatures && !b.audioFeatures) {
+            return 1;
+        } else {
+            return 0;
+        }
+    })
+
+    dispatch({
+        type: REORDER_PLAYLIST,
+        payload: reorderedTracks
+    })
+
+}
+
 export const submitReorderedPlaylistToSpotify = (playlist) => async (dispatch) => {
     dispatch({
         type: UPDATING_PLAYLIST

@@ -86,12 +86,17 @@ const styles = {
 
 const Track = ({ classes, trackObj, playlist, index }) => {
     const height = trackObj.track.duration_ms / 10000
+    console.log('window.innerWidth', window.innerWidth)
     return (
         <Grid item className={classes.track}
         style={{
         height: height
-    }} data={`${trackObj.track.artists[0].name} - ${Math.floor((trackObj.track.duration_ms/1000)/60)}:${Math.round((trackObj.track.duration_ms/1000)%60) < 10 ? '0' : ''}${Math.round((trackObj.track.duration_ms/1000)%60)}`}>
-        <Typography variant="body2">{trackObj.track.name}</Typography>
+    }} data={`${window.innerWidth > 800 ? `${trackObj.track.artists[0].name} -` : ''} ${Math.floor((trackObj.track.duration_ms/1000)/60)}:${Math.round((trackObj.track.duration_ms/1000)%60) < 10 ? '0' : ''}${Math.round((trackObj.track.duration_ms/1000)%60)}`}>
+        <Typography variant="body2">{trackObj.track.name}
+        {window.innerWidth > 800 && (
+            <span> - {trackObj.track.artists[0].name}</span>
+        )}
+        </Typography>
         { trackObj.audioFeatures && (
             <Box className={classes.slider}>
             
@@ -196,8 +201,13 @@ const Tracks = props => {
                             <Grid item key={index} className={classes.track}
                             style={{
                             height: height
-                        }} data={`${trackObj.track.artists[0].name} - ${Math.floor((trackObj.track.duration_ms/1000)/60)}:${Math.round((trackObj.track.duration_ms/1000)%60) < 10 ? '0' : ''}${Math.round((trackObj.track.duration_ms/1000)%60)}`}>
-                            <Typography variant="body2">{trackObj.track.name}</Typography>
+                        }} data={`${window.innerWidth < 800 ? `${trackObj.track.artists[0].name} - `: ''} ${Math.floor((trackObj.track.duration_ms/1000)/60)}:${Math.round((trackObj.track.duration_ms/1000)%60) < 10 ? '0' : ''}${Math.round((trackObj.track.duration_ms/1000)%60)}`}>
+                            <Typography variant="body2">
+                                {trackObj.track.name}
+                                {window.innerWidth >= 800 && (
+                                    <span> - {trackObj.track.artists[0].name}</span>
+                                )}
+                            </Typography>
                             { trackObj.audioFeatures && (
                                 <Box className={classes.slider}>
                                 
